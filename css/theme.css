@@ -1,0 +1,192 @@
+/* =====================================================================
+   OnigiriDex — "Onigiri" theme (loaded after app.css)
+   Inspired by the game's windows: gold checker (ichimatsu) bands, washi paper,
+   black-red lacquer, teal buttons with gold rims, mincho headings.
+   Dark = night lacquer (default) · Light = washi paper
+   ===================================================================== */
+@font-face{font-family:"Shippori Mincho B1";font-weight:600;font-display:swap;src:url(../fonts/shippori-600-latin.woff2) format("woff2")}
+@font-face{font-family:"Shippori Mincho B1";font-weight:800;font-display:swap;src:url(../fonts/shippori-800-latin.woff2) format("woff2")}
+
+:root{
+  /* night lacquer */
+  --bg:#110c0d; --bg2:#1a1315; --card:#1d1517; --card2:#261b1d; --side:#0d0909; --line:#3a2a24; --line2:#4d3829;
+  --ink:#f3e9d6; --mute:#c2b29a; --faint:#8b7b68;
+  --accent:#d8432f; --accent2:#f07a52; --accent-soft:color-mix(in srgb,#d8432f 16%,transparent);
+  --gold:#e0b04e; --gold2:#a87420; --jade:#5bc79a; --sky:#6db2ff; --violet:#3fb7c2;
+  --teal:#2f7479; --teal2:#1d4d52;
+  --chk1:#e5b552; --chk2:#9c6a1c;
+  --head:"Shippori Mincho B1","Yu Mincho","游明朝","Hiragino Mincho ProN",serif;
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 .92  0 0 0 0 .8  0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  --waves:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'%3E%3Cg fill='none' stroke='%23e0b04e' stroke-opacity='.08' stroke-width='1.2'%3E%3Ccircle cx='24' cy='24' r='20'/%3E%3Ccircle cx='24' cy='24' r='14'/%3E%3Ccircle cx='24' cy='24' r='8'/%3E%3Ccircle cx='0' cy='12' r='20'/%3E%3Ccircle cx='0' cy='12' r='14'/%3E%3Ccircle cx='0' cy='12' r='8'/%3E%3Ccircle cx='48' cy='12' r='20'/%3E%3Ccircle cx='48' cy='12' r='14'/%3E%3Ccircle cx='48' cy='12' r='8'/%3E%3C/g%3E%3C/svg%3E");
+  --checker:repeating-conic-gradient(var(--chk1) 0 25%, var(--chk2) 0 50%) 0 0/8px 8px;
+  --rim:linear-gradient(180deg,#f3d27e,#b9842c);
+  --shadow:0 14px 34px rgba(0,0,0,.5); --shadow-s:0 3px 10px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  /* washi paper */
+  --bg:#e9dfc8; --bg2:#efe6d1; --card:#fbf6e9; --card2:#f4ecda; --side:#2a1b16; --line:#d6c39c; --line2:#c6ad7d;
+  --ink:#2a1e16; --mute:#5f4c3a; --faint:#8a7660;
+  --accent:#b8321f; --accent2:#b8321f; --accent-soft:color-mix(in srgb,#b8321f 13%,transparent);
+  --gold:#9a6a12; --gold2:#7d540c; --jade:#1d7d58; --sky:#2563b0; --violet:#11798a;
+  --teal:#2c6d72; --teal2:#1f5257;
+  --chk1:#e9bd5b; --chk2:#b07a24;
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55  0 0 0 0 .42  0 0 0 0 .25  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  --shadow:0 10px 26px rgba(70,45,15,.18); --shadow-s:0 2px 8px rgba(70,45,15,.14);
+  color-scheme:light;
+}
+
+/* ---------- page ground ---------- */
+html,body{background:var(--bg)}
+body{background-image:var(--paper), radial-gradient(1200px 600px at 70% -10%, color-mix(in srgb,var(--accent) 10%, transparent), transparent);background-attachment:fixed}
+h1,h2,h3,.ph h1,.hero h1,.sect,.pane-h,.sub-h,.gs-h,.eq8-lbl,.eqsh,.dr-h,.nav-sec,.esub{font-family:var(--head)}
+
+/* ---------- sidebar: black lacquer with seigaiha waves and a gold checker band ---------- */
+.sidebar{background:var(--waves), linear-gradient(180deg,#1b1011,#0b0707);border-right:1px solid #4a3220;color:#f3e9d6}
+.sidebar::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--checker);opacity:.9}
+.sidebar::after{content:"";position:absolute;top:0;bottom:0;right:-1px;width:2px;background:linear-gradient(180deg,#e7bf61,#7c5218 40%,transparent)}
+.brand{padding:10px 10px 16px;border-bottom:1px solid rgba(224,176,78,.22);margin-bottom:6px}
+.brand .mark{width:40px;height:40px;border-radius:10px;background:none;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.brand .mark img{width:40px;height:40px;display:block}
+.brand b{font-family:var(--head);font-weight:800;font-size:18px;letter-spacing:.4px;color:#f6e3b0;text-shadow:0 1px 0 #000}
+.brand small{color:#b59a6c}
+.sidebar .nav-sec{color:#b59a6c;letter-spacing:1.4px}
+.sidebar .nav a{color:#d9c8a8}
+.sidebar .nav a svg{opacity:.8}
+.sidebar .nav a:hover{background:rgba(224,176,78,.10);color:#fff3d4}
+.sidebar .nav a.on{background:linear-gradient(90deg,rgba(216,67,47,.45),rgba(216,67,47,.12));color:#fff;box-shadow:inset 0 0 0 1px rgba(224,176,78,.35)}
+.sidebar .nav a.on svg{color:#f6d37a}
+.sidebar .nav a.on::before{background:var(--rim)}
+.sidebar .nav-recent a{color:#cdbb98}
+.sidebar .nav-recent a:hover{background:rgba(224,176,78,.10);color:#fff}
+.sidebar .nav-recent a i,.sidebar .nav-recent .none{color:#8f7a5a}
+.sidebar .linkbtn{color:#a8916a} .sidebar .linkbtn:hover{background:rgba(224,176,78,.12);color:#f6d37a}
+.sidebar .side-foot .btn{background:rgba(255,255,255,.04);border-color:rgba(224,176,78,.35);color:#f3e9d6}
+.sidebar .side-foot .built{color:#8f7a5a}
+.sidebar .b-wip{background:rgba(224,176,78,.2);color:#f6d37a}
+
+/* ---------- top bar ---------- */
+.topbar{background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:2px;background:linear-gradient(90deg,transparent,var(--gold) 30%,var(--gold) 70%,transparent);opacity:.35}
+.search input{background:var(--card);border-color:var(--line2)}
+
+/* ---------- page header: mincho title on a checker band ---------- */
+.ph,.bp-top{border-bottom:0;position:relative;padding-bottom:18px}
+.ph::after,.bp-top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;border-radius:2px;background:var(--checker);opacity:.85;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.ph h1,.bp-title h1{font-weight:800;letter-spacing:.3px}
+.ph-k{color:var(--accent2);font-family:var(--head);letter-spacing:1.6px}
+
+/* ---------- surfaces: lacquer / washi panels with a fine gold rim ---------- */
+.card,.pnl,.panel,.toolbar,.tile,.stat,.dcard,.toolcard,.wrap,.rcp,.bcard,.eqc,.sm8,.bmini,.drow.on,.vs{border-color:color-mix(in srgb,var(--gold) 28%,var(--line))}
+.card,.pnl,.panel,.toolbar,.tile,.stat,.dcard,.toolcard,.wrap,.rcp,.bcard,.bmini{background-image:var(--paper);background-color:var(--card)}
+.pnl,.card,.panel,.wrap{box-shadow:inset 0 1px 0 rgba(255,236,190,.05),var(--shadow-s)}
+:root[data-theme="light"] .pnl,:root[data-theme="light"] .card,:root[data-theme="light"] .wrap{box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),var(--shadow-s)}
+.sect,.panel h3,.pane>.pane-h,.sub-h{color:var(--gold);letter-spacing:1px}
+:root[data-theme="light"] .sect,:root[data-theme="light"] .pane>.pane-h,:root[data-theme="light"] .sub-h{color:var(--gold2)}
+.tile.hl{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--card)),var(--card))}
+.tile .v,.stat .v,.sm8 b{font-family:var(--head);font-weight:800}
+
+/* ---------- buttons: teal lacquer with gold rim (like the game's Close button) ---------- */
+.btn{background:linear-gradient(180deg,var(--teal),var(--teal2));border:1px solid #c99a45;color:#f8f1df;text-shadow:0 1px 0 rgba(0,0,0,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+.btn:hover{border-color:#f0c96d;color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--teal) 85%,#fff),var(--teal2))}
+.btn.pri{background:linear-gradient(180deg,#e2563d,#a52817);border-color:#f0c96d;color:#fff}
+.btn.pri:hover{background:linear-gradient(180deg,#ee6a4f,#b22e1b)}
+.btn.ghost{background:transparent;color:var(--ink);text-shadow:none;border-color:var(--line2)}
+.btn:disabled{filter:grayscale(.6)}
+.seg{background:color-mix(in srgb,var(--bg2) 80%,transparent);border-color:color-mix(in srgb,var(--gold) 25%,var(--line))}
+.seg button.on{background:linear-gradient(180deg,var(--teal),var(--teal2));color:#fff;box-shadow:inset 0 0 0 1px #c99a45}
+.seg.diff button.on{color:#fff!important}
+.chip.x.on,.sets8 [data-set].on,.settabs [data-set].on{background:linear-gradient(180deg,#e2563d,#a52817);border-color:#f0c96d}
+input[type=number],input[type=text],select{background-color:var(--card);border-color:color-mix(in srgb,var(--gold) 25%,var(--line2))}
+
+/* ---------- tables: teal header band ---------- */
+.tbl th{background:linear-gradient(180deg,var(--teal),var(--teal2));color:#f6ecd2;border-bottom:1px solid #c99a45;letter-spacing:.8px}
+.tbl th.sorted,.tbl th.s:hover{color:#ffe08a}
+.tbl th.sorted:after{color:#ffe08a}
+.tbl th .tip{border-bottom-color:rgba(255,236,190,.5)}
+.tbl tbody tr:hover td{background:color-mix(in srgb,var(--gold) 7%,var(--card))}
+
+/* ---------- tabs ---------- */
+.tabs{border-bottom-color:color-mix(in srgb,var(--gold) 35%,var(--line))}
+.tabs .on{border-bottom-color:var(--gold);color:var(--ink)}
+.tabs a,.tabs button{font-family:var(--head);font-weight:600}
+.dtabs{background:linear-gradient(180deg,var(--teal),var(--teal2));border-bottom:1px solid #c99a45}
+.dtabs button{color:#e9dcc0;font-family:var(--head)}
+.dtabs button:hover{background:rgba(255,255,255,.08);color:#fff}
+.dtabs button.on{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px #c99a45}
+
+/* ---------- home hero ---------- */
+.hero{background-image:var(--paper),radial-gradient(900px 260px at 0% 0%,color-mix(in srgb,var(--accent) 24%,transparent),transparent),radial-gradient(700px 240px at 100% 100%,color-mix(in srgb,var(--gold) 14%,transparent),transparent);background-color:var(--card);border-color:color-mix(in srgb,var(--gold) 40%,var(--line))}
+.hero::before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:var(--checker);opacity:.9}
+.hero h1{font-weight:800;font-size:38px}
+.hero .kpis b{font-family:var(--head);color:var(--gold)}
+.toolcard .ti{background:linear-gradient(180deg,var(--teal),var(--teal2));color:#ffe3a0;box-shadow:inset 0 0 0 1px #c99a45}
+
+/* ---------- planner + simulator ---------- */
+.sum8{border-color:color-mix(in srgb,var(--gold) 35%,var(--line));position:relative}
+.sum8::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--checker);z-index:1}
+.sm8{background-image:var(--paper);background-color:var(--card)}
+.sm8.big{background-color:color-mix(in srgb,var(--accent) 16%,var(--card))}
+.eqsec.weapon,.eq8-lbl{color:inherit}
+.eqc{background-image:var(--paper);background-color:var(--card2)}
+.eqc.act{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 16%,var(--card2)),var(--card2));border-color:var(--gold)}
+.drawer,.sheet,.modal{background-image:var(--paper);background-color:var(--card);border-color:#a8782c}
+.dr-head,.modal-h{position:relative;background:linear-gradient(180deg,var(--teal),var(--teal2));border-bottom:1px solid #c99a45}
+.dr-head::before,.modal-h::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--checker)}
+.dr-head .ph-k,.modal-h b{color:#f6e3b0}
+.dr-head .xbtn,.modal-h .xbtn{background:rgba(0,0,0,.25);border-color:#c99a45;color:#f6e3b0}
+.fxh{background:linear-gradient(180deg,var(--teal),var(--teal2));color:#f6ecd2;box-shadow:inset 0 0 0 1px rgba(201,154,69,.6)}
+.fxh>span:last-child{color:#d8c9a8}
+.gs-h{color:#5ca9e6} .gs-col.el .gs-h{color:var(--accent2)}
+.vs{background-image:var(--paper)}
+
+/* ---------- bestiary ---------- */
+.bcard-art,.bd-art{background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--gold) 22%,var(--card2)),var(--bg2) 72%),var(--paper)}
+.bcard-b b{font-family:var(--head);font-weight:800}
+.blore{border-left-color:var(--accent);background-image:var(--paper);font-family:var(--head);font-weight:600}
+
+/* ---------- light theme fine tuning ---------- */
+:root[data-theme="light"] .topbar{background:color-mix(in srgb,var(--bg) 88%,transparent)}
+:root[data-theme="light"] .nav a.on{color:#fff}
+:root[data-theme="light"] .eqsec.weapon{background:color-mix(in srgb,#3d6f9f 10%,var(--bg2))}
+:root[data-theme="light"] .eqsec.acc{background:color-mix(in srgb,#c86a4a 10%,var(--bg2))}
+:root[data-theme="light"] .eqsec.mag{background:color-mix(in srgb,#5f8d4e 10%,var(--bg2))}
+:root[data-theme="light"] .tile.hl{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--card)),var(--card))}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--gold) 35%,var(--line2))}
+.dtabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.dtabs::-webkit-scrollbar{display:none}
+.dtabs button{font-size:12px;padding:6px 8px;white-space:nowrap;flex:none}
+
+/* game logo (鬼斬) */
+.brand .mark{width:48px;height:48px;border-radius:0;box-shadow:none;background:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.brand .mark img{width:48px;height:48px}
+.hero.has-logo{padding-right:300px;min-height:250px}
+.hero-logo{position:absolute;right:28px;top:50%;width:240px;height:240px;transform:translateY(-50%) rotate(-4deg);filter:drop-shadow(0 8px 22px rgba(0,0,0,.55));pointer-events:none}
+@media (max-width:1000px){.hero.has-logo{padding-right:30px}.hero-logo{position:static;transform:none;width:140px;height:140px;float:right;margin:-8px -6px 0 12px}}
+
+/* planner: succession + sake pickers */
+.xsel{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--mute);margin-top:10px}
+.xsel>span i{font-style:normal;color:var(--faint)}
+.xsel select{width:100%;padding:5px 8px;font-size:12.5px}
+.xopts .optl{margin:4px 0 0;font-size:12px}
+.xchips{margin-top:6px}
+/* audit fixes */
+.tbl td .jp.jp-under{display:block;margin:1px 0 0 32px}
+.quickpick{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:-18px}
+.quickpick .mute{font-size:12px;margin-right:4px}
+/* element colours were picked for dark backgrounds: darken them on washi */
+:root[data-theme="light"] .elb,:root[data-theme="light"] .at.neu[style],:root[data-theme="light"] .egrid .ecell span[style],:root[data-theme="light"] .ecell2 .elb{filter:brightness(.55) saturate(1.5)}
+:root[data-theme="light"] .lvpill b,:root[data-theme="light"] .chip.d0 b{filter:brightness(.8)}
+.mid{font-size:10.5px;color:var(--faint);font-weight:600;margin-left:2px}
+/* planner rows on narrow screens: skills drop below the name instead of covering it */
+@media (max-width:1450px){
+  .eqc-top.row{flex-wrap:wrap}
+  .eqc-top.row .eqc-sk{order:5;flex-basis:100%;justify-content:flex-start;margin:4px 0 0 46px;flex-wrap:wrap}
+  .eqc-top.row .eqc-prev{order:6;flex-basis:100%;justify-content:flex-start;margin:2px 0 0 46px}
+  .eqc-top.row .eqc-nm{flex:1 1 200px}
+}
+
+/* author credit */
+.hero .byline{margin:-4px 0 10px;font-size:13px;letter-spacing:.4px;color:var(--mute)}
+.hero .byline b{color:var(--gold);font-weight:700}
+.side-foot .built b{color:#e0b04e;font-weight:700}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Naoyuki">
+<meta name="theme-color" content="#110c0d">
+<meta name="description" content="OnigiriDex: dungeons, monsters, drops, build planner and boss simulator for Onigiri.">
+<title>OnigiriDex</title>
+<link rel="icon" type="image/png" href="img/logo-96.png">
+<script>document.write('<link rel="stylesheet" href="css/app.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/theme.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/sim.css?v=' + Date.now() + '">');</script>
+</head>
+<body>
+<a class="skip" href="#app">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#/"><span class="mark"><img src="img/logo-96.png" alt="" width="48" height="48"></span><div><b>OnigiriDex</b><small>Onigiri server database</small></div></a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#/" data-k="home" title="Alt+1" aria-keyshortcuts="Alt+1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home<kbd class="key">1</kbd></a>
+      <div class="nav-sec">Explore</div>
+      <a href="#/dungeons" data-k="dungeons" title="Alt+2" aria-keyshortcuts="Alt+2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6a3 3 0 0 1 6 0v6"/></svg>Dungeons<kbd class="key">2</kbd></a>
+      <a href="#/monsters" data-k="monsters" title="Alt+3" aria-keyshortcuts="Alt+3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20c0-6 3-10 7-10s7 4 7 10"/><circle cx="9.5" cy="14" r="1"/><circle cx="14.5" cy="14" r="1"/><path d="M8 7l-2-4M16 7l2-4"/></svg>Monsters<kbd class="key">3</kbd></a>
+      <a href="#/bestiary" data-k="bestiary" title="Alt+9" aria-keyshortcuts="Alt+9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6M9 12h4"/></svg>Bestiary<kbd class="key">9</kbd></a>
+      <a href="#/items" data-k="items" title="Alt+4" aria-keyshortcuts="Alt+4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>Items<kbd class="key">4</kbd></a>
+      <a href="#/fields" data-k="fields" title="Alt+5" aria-keyshortcuts="Alt+5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Field maps<kbd class="key">5</kbd></a>
+      <div class="nav-sec">Tools</div>
+      <a href="#/farm" data-k="farm" title="Alt+6" aria-keyshortcuts="Alt+6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg>Farm Finder<kbd class="key">6</kbd></a>
+      <a href="#/dissolve" data-k="dissolve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/><path d="M9 15l2 2 4-4"/></svg>Dissolution</a>
+      <a href="#/build" data-k="build" title="Alt+7" aria-keyshortcuts="Alt+7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Build Planner<kbd class="key">7</kbd></a>
+      <a href="#/sim" data-k="sim" title="Alt+8" aria-keyshortcuts="Alt+8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4"/><path d="M14 4h6v6"/><path d="M4 10l6 6"/><path d="M3 21l3-3"/></svg>Boss Simulator <span class="badge b-wip" title="Work in progress: numbers are still being tuned">WIP</span><kbd class="key">8</kbd></a>
+    </nav>
+    <div class="nav-sec nav-sec-row"><span>Recent</span><button class="linkbtn" id="recentClear" data-clear-recent title="Clear recent pages">Clear</button></div>
+    <div class="nav-recent" id="navRecent"></div>
+    <div class="side-foot">
+      <button class="btn ghost" id="theme" style="justify-content:flex-start"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>Light / dark</button>
+      <span class="built" id="builtAt"></span>
+    </div>
+  </aside>
+  <div class="content">
+    <header class="topbar">
+      <button class="iconbtn navtoggle" id="navToggle" title="Menu" aria-label="Open menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="crumbs" id="crumbs"></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search dungeons, monsters, items, skills…" aria-label="Search" autocomplete="off" spellcheck="false"><kbd>Ctrl K</kbd>
+        <div class="sugg" id="sugg"></div>
+      </div>
+    </header>
+    <main id="app" tabindex="-1"><div class="empty">Loading data…</div></main>
+  </div>
+</div>
+<script>
+/* always load the current files (the desktop app's browser otherwise keeps old copies in its cache) */
+(function(){ var v = Date.now(); ["icons.js","data.js","js/core/base.js","js/core/indexes.js","js/core/damage.js","js/core/render.js","js/core/farm.js","js/ui/components.js","js/pages/home.js","js/pages/dungeons.js","js/pages/monsters.js","js/pages/items.js","js/tools/farm.js","js/pages/fields.js","js/tools/simulator.js","js/pages/bestiary.js","js/tools/dissolve.js","js/tools/planner/calc.js","js/tools/planner/core.js","js/tools/planner/effects.js","js/tools/planner/view.js","js/ui/search.js","js/ui/shell.js","js/ui/a11y.js"].forEach(function(f){ document.write('<script src="' + f + '?v=' + v + '"><\/script>'); }); })();
+</script>
+</body>
+</html>
