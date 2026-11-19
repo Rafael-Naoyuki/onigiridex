@@ -53,7 +53,6 @@
 .hpbar.big .hseg i{border-radius:0}
 .hpbar.big .hseg em{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;font-style:normal;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (min-width:1300px){.mon-sum:has(.hppanel){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}
-@media (max-width:1700px){.tbl .rstrip{grid-template-columns:repeat(7,31px)}.tbl .rc{height:40px}.tbl .rc i{font-size:15px}.tbl .rc b{font-size:11px}}
 @media (max-width:700px){.rstrip{grid-template-columns:repeat(7,34px)}}
 /* every phase stays visible even when one is tiny (scripted 1 HP phases) */
 .hpbar .hseg{min-width:6px}
@@ -63,13 +62,12 @@
 :root[data-theme="light"] .rbest b{filter:brightness(.62) saturate(1.5)}
 
 /* narrow screens: drop the least useful columns so the table fits without side scroll */
-@media (max-width:1700px){.tbl .c-opt{display:none}}
-@media (max-width:1400px){.tbl .rstrip{grid-template-columns:repeat(7,29px);gap:2px}.wrap .tbl td,.wrap .tbl th{padding-left:8px;padding-right:8px}}
+@media (max-width:1450px){.tbl .c-opt{display:none}}
 
 /* English element name under the kanji (not everyone reads kanji) */
 .rc u{text-decoration:none;font-size:8.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;color:var(--mute);line-height:1}
 .rc{gap:1px}
-@media (max-width:1800px){.tbl .rstrip{grid-template-columns:repeat(7,44px)}.tbl .rc{height:52px}.tbl .rc i{font-size:15px}.tbl .rc b{font-size:11px}}
+@media (max-width:1650px){.tbl .rstrip{grid-template-columns:repeat(7,44px)}.tbl .rc{height:52px}.tbl .rc i{font-size:15px}.tbl .rc b{font-size:11px}}
 @media (max-width:1400px){.tbl .rstrip{grid-template-columns:repeat(7,37px);gap:2px}.tbl .rc u{font-size:7px;letter-spacing:0}.wrap .tbl td,.wrap .tbl th{padding-left:6px;padding-right:6px}}
 
 /* Covenant (聖約) monsters */

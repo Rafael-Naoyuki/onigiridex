@@ -111,15 +111,13 @@ function monTable(mons, opts={}){
   if (!mons.length) return `<div class="note">No monsters on this floor (cutscene, scripted boss or reward room).</div>`;
   const showExp = mons.some(m => m.v[6] > 0), showRyou = mons.some(m => m.v[7] > 0);
   return `<div class="wrap"><table class="tbl"><thead><tr>
-    <th>Monster</th><th class="r">Lv</th><th class="r">HP</th><th class="r">ATK</th><th class="r">DEF</th>
-    <th class="r"><span class="tip" title="Plain 100% hits to kill with My ATK">Hits</span></th>
+    <th>Monster</th><th class="r">Lv</th><th class="r">HP</th>
     <th><span class="tip" title="Damage you deal with each element. Color by the monster's resistance: green 30 or less, yellow 31-69, red 70+, ✕ immune">Elements</span></th><th class="r"><span class="tip" title="Multi-hit cut">MHC</span></th>${showExp ? `<th class="r c-opt">EXP</th>` : ""}${showRyou ? `<th class="r c-opt">Ryou</th>` : ""}<th class="r"><span class="tip" title="Units that actually spawn for this difficulty / party size">Spawns</span></th><th></th></tr></thead><tbody>
     ${mons.map(m => { const v = m.v, e = m.e;
       const badges = [m.boss?`<span class="badge b-boss">BOSS</span>`:"", m.elite?`<span class="badge b-elite">ELITE</span>`:"", m.metal?`<span class="badge b-metal" title="Rare spawn: ${(m.metal*100).toFixed(0)}% per floor">RARE ${(m.metal*100).toFixed(0)}%</span>`:"", (opts.field && m.repop)?`<span class="badge b-repop">RESPAWNS</span>`:""].join(" ");
       return `<tr><td class="name"><a href="#/monster/${m.eid}?v=${encodeURIComponent(m.vname)}"><b>${esc(e.n)}</b></a> ${badges}${v[18] ? " " + covBadge() : ""}<div class="jp">${esc(e.j)} · ${NATURES[e.na]?.[0]||""}</div></td>
       <td class="r num">${v[0]}</td><td class="r num hpc">${hpCell(v)}</td>
-      <td class="r num">${fmtM(v[2])}</td><td class="r num">${fmtM(v[3])}</td>
-      <td class="r">${hitsCell(v)}</td>
+
       <td>${resStrip(v[5], v[18])}</td><td class="r num">${v[16]||"—"}</td>${showExp ? `<td class="r num c-opt">${fmt(v[6])}</td>` : ""}${showRyou ? `<td class="r num c-opt">${fmt(v[7])}</td>` : ""}
       <td class="r num mute">${m.metal ? "≤"+m.places : (m.pops % 1 ? m.pops.toFixed(1) : m.pops)}</td>
       <td><button class="btn sm" data-sim="${m.eid}|${esc(m.vname)}" title="Simulate your build against this monster">Sim</button></td></tr>`; }).join("")}
