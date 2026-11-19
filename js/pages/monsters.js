@@ -60,7 +60,7 @@ function viewMonster(id, qs){
   app.innerHTML = `${ph({k:"Monster", title:esc(e.n), jp:e.j, chips:`<span class="chip">${natureTag(e)}</span><span class="chip">${SIZES[e.sz] || "?"}</span><span class="chip">ID <b>${id}</b></span>`,
       actions:`<span class="ctl">Version ${verSel}</span><button class="btn pri" data-sim="${id}|${esc(sel)}">Simulate my build</button>`})}
     <div class="tiles">
-      ${tile("Level", v[0], "", "hl")}${tile("HP", fmtM(v[1]), v[10] ? `${v[10].length} phases` : "")}${tile("ATK", fmtM(v[2]))}${tile("DEF", fmtM(v[3]))}
+      ${tile("Level", v[0], "", "hl")}${tile("HP", fmtM(v[1]), v[10] ? (v[10].length > 1 ? `${v[10].length} phases` : `${v[10][0].length} HP bars`) : "")}${tile("ATK", fmtM(v[2]))}${tile("DEF", fmtM(v[3]))}
       ${tile("Rec. ATK", atkCell(v), "2× defense")}${tile("Multi-hit cut", v[16] || 0)}${tile("Crit res.", v[17] || 0)}${v[15] ? tile("ATK cut", fmtM(v[15])) : ""}
       ${v[6] > 0 ? tile("EXP", fmt(v[6])) : ""}${v[7] > 0 ? tile("Ryou", fmt(v[7])) : ""}${v[8] > 0 ? tile("Stun", fmt(v[8])) : ""}
     </div>
