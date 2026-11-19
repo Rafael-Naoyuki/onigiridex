@@ -7,10 +7,27 @@ function dungeonCard(d){
   return `<a class="dcard" href="#/dungeon/${d.id}"><div class="t">${esc(d.n)} ${d.ara ? `<span class="badge b-ara">ARAMITAMA</span>` : ""}</div>
     <div class="jp">${esc(d.j)}</div>${bosses ? `<div class="boss">Boss · ${esc(bosses)}</div>` : ""}<div class="lvpills">${lvPills(d)}</div></a>`;
 }
-function viewDungeons(){
+// endgame tab: groups matched on the Japanese name (stable across translations)
+const ENDGAME = [
+  {id:"purg", title:"Purgatorium", jp:"獄", sub:"The -Purgatorium- versions of the raid bosses: Gargoyles, Dragon Arks, Lucifer, Dullahan and Cursect Princess.", test: d => /-獄-$/.test(d.j)},
+  {id:"lv150", title:"Lv 150+ raids", jp:"", sub:"The newest high-level dungeons.", test: d => /^狂乱の森 混迷$|^朧影鰐討伐$/.test(d.j)},
+];
+function viewEndgame(){
+  setCrumbs([["Dungeons", "#/dungeons"], ["Endgame"]]);
+  const groups = ENDGAME.map(g => ({...g, ds: DUN.filter(d => d.L.some(Boolean) && g.test(d)).sort((a, b) => a.id - b.id)})).filter(g => g.ds.length);
+  app.innerHTML = `${ph({title:"Dungeons", sub:"Purgatorium and the newest high-level raids, in one place."})}
+  ${dungeonTabs("endgame")}
+  ${groups.map(g => `<section class="region endgame"><div class="region-h"><h2>${esc(g.title)}</h2>${g.jp ? `<span class="jp">${esc(g.jp)}</span>` : ""}<span class="count mute" style="font-size:12px">${g.ds.length} dungeons</span></div>
+    <p class="mute endgame-sub">${esc(g.sub)}</p>
+    <div class="grid">${g.ds.map(dungeonCard).join("")}</div></section>`).join("") || emptyState("No endgame dungeons found", "")}`;
+}
+const dungeonTabs = active => `<nav class="tabs dtabs-page"><a href="#/dungeons" class="${active == "all" ? "on" : ""}">All dungeons</a><a href="#/dungeons/endgame" class="${active == "endgame" ? "on" : ""}">Endgame<span class="n">${DUN.filter(d => d.L.some(Boolean) && ENDGAME.some(g => g.test(d))).length}</span></a></nav>`;
+function viewDungeons(sub){
+  if (sub == "endgame") return viewEndgame();
   setCrumbs([["Dungeons"]]);
   const st = load("od2-dfilter", {q:"", ev:false, sort:"region", maxLv:""});
   app.innerHTML = `${ph({title:"Dungeons", sub:"Grouped by the town or field where the entrance is, ordered by level."})}
+  ${dungeonTabs("all")}
   <div class="toolbar">
     <input type="text" id="dq" placeholder="Filter by dungeon or region…" value="${esc(st.q)}">
     <label>Max level <input type="number" id="dlv" min="1" max="200" placeholder="any" value="${esc(st.maxLv)}" style="width:80px"></label>

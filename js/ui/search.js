@@ -7,7 +7,7 @@ Object.entries(E).forEach(([id, e]) => { if (e.used) SEARCH.push({g:"Monsters", 
 ITEMS.forEach((it, i) => SEARCH.push({g:"Items", n:it[0], j:it[1], h:`#/item/${i}`, s:(it[0] + " " + it[1]).toLowerCase(), t:KIND[it[2]] || "Item", i}));
 SKILLS.forEach(sk => SEARCH.push({g:"Skills", n:sk.n, j:sk.j, h:`#/skill/${sk.id}`, s:(sk.n + " " + sk.j).toLowerCase(), t:CATS[sk.c] || "Skill"}));
 D.fields.forEach(sid => SEARCH.push({g:"Field maps", n:ST[sid].n, j:ST[sid].j, h:`#/field/${sid}`, s:(ST[sid].n + " " + ST[sid].j).toLowerCase(), t:"Field"}));
-[["Home", "#/", "start dashboard"], ["Dungeons", "#/dungeons", "list regions"], ["Monsters", "#/monsters", "list enemies"], ["Bestiary", "#/bestiary", "monster guide cards"],
+[["Home", "#/", "start dashboard"], ["Dungeons", "#/dungeons", "list regions"], ["Endgame dungeons", "#/dungeons/endgame", "purgatorium raids dullahan cursect princess delirium gloomveil 獄"], ["Monsters", "#/monsters", "list enemies"], ["Bestiary", "#/bestiary", "monster guide cards"],
  ["Items", "#/items", "list"], ["Field maps", "#/fields", "fields"], ["Farm Finder", "#/farm", "farm drops best dungeon"], ["Dissolution", "#/dissolve", "magatama dissolve break up"],
  ["Build Planner", "#/build", "planner build equip status"], ["Boss Simulator", "#/sim", "simulator damage dps kill time"]]
   .forEach(([n, h, kw]) => SEARCH.push({g:"Pages", n, j:"", h, s:(n + " " + kw).toLowerCase(), t:"Page"}));

@@ -104,7 +104,7 @@ function viewSim(){
         <span><i>Multi-hit cut</i><b>${tg.mhc}</b></span><span><i>Crit res.</i><b>${tg.crc}</b></span>
         ${tg.atkCut ? `<span><i>ATK cut</i><b>${fmtM(tg.atkCut)}</b></span>` : ""}
       </div>
-      <div class="sim-res">${attrChips(tg.res, 13)}</div>
+      <div class="sim-res">${resStrip(tg.res)}</div>
       ${tg.rules && tg.rules.length ? `<div class="rules">${tg.rules.map(ruleText).filter(Boolean).join(" · ")}${tg.timeLimit ? ` · ${Math.round(tg.timeLimit/60)} min limit` : ""}</div>` : ""}
     </div>
     <div class="sim-vs-mid" aria-hidden="true">VS</div>

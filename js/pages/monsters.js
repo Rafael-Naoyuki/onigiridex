@@ -51,26 +51,22 @@ function viewMonster(id, qs){
   const verSel = `<select id="vsel">${[...groups.entries()].map(([b, ns]) => `<optgroup label="${esc(b)}">${ns.sort((x, y) => e.v[x][0] - e.v[y][0]).map(nm => `<option value="${esc(nm)}" ${nm == sel ? "selected" : ""}>Lv ${e.v[nm][0]} · ${esc(describeVar(nm))}</option>`).join("")}</optgroup>`).join("")}</select>`;
   const base = `#/monster/${id}?v=${encodeURIComponent(sel)}`;
   let body;
-  const mElements = () => `<div class="wrap"><table class="tbl"><thead><tr><th>Element</th><th class="r">Value</th><th>Your damage</th></tr></thead><tbody>
-      ${v[5].map((val, i) => i == 12 ? "" : `<tr><td><span style="color:${ATTR_COLORS[i]}">●</span> ${ATTRS[i][0]} <span class="jp">${ATTRS[i][1]}</span></td><td class="r num">${val}</td>
-        <td>${val < 0 ? `<span class="ok">+${-val}% damage</span>` : val > 0 ? `<span class="bad">−${Math.min(val, 100)}% damage</span>` : `<span class="mute">normal</span>`}</td></tr>`).join("")}</tbody></table></div>`;
   const mWhere = () => locs.length ? `<div class="grid">${locs.map(l => l.t == "d" ? `<a class="dcard" href="#/dungeon/${l.did}"><div class="t">${esc(DUNBY[l.did].n)} ${l.metal ? `<span class="badge b-metal">RARE</span>` : ""}</div><div class="boss">${esc(DUNBY[l.did].gn || "")}</div><div class="lvpills">${lvPills(DUNBY[l.did])}</div></a>`
       : `<a class="dcard" href="#/field/${l.sid}"><div class="t">${esc(ST[l.sid].n)} <span class="badge b-repop">FIELD</span></div><div class="jp">${esc(ST[l.sid].j)}</div></a>`).join("")}</div>` : emptyState("No known location", "Event, summon or unused monster.");
   const mDrops = () => dropList(v[9]);
   const wide = isWide();
-  if (wide) body = `<div class="panes m-panes">${pane("Drops", mDrops())}<div class="pane-col">${pane("Where to find", mWhere(), locs.length)}${pane("Elements", mElements())}</div></div>`;
-  else body = tab == "elements" ? `<div style="max-width:720px">${mElements()}</div>` : tab == "where" ? mWhere() : `<div style="max-width:820px">${mDrops()}</div>`;
+  if (wide) body = `<div class="panes m-panes">${pane("Drops", mDrops())}<div class="pane-col">${pane("Where to find", mWhere(), locs.length)}</div></div>`;
+  else body = tab == "where" ? mWhere() : `<div style="max-width:820px">${mDrops()}</div>`;
   app.innerHTML = `${ph({k:"Monster", title:esc(e.n), jp:e.j, chips:`<span class="chip">${natureTag(e)}</span><span class="chip">${SIZES[e.sz] || "?"}</span><span class="chip">ID <b>${id}</b></span>`,
       actions:`<span class="ctl">Version ${verSel}</span><button class="btn pri" data-sim="${id}|${esc(sel)}">Simulate my build</button>`})}
     <div class="tiles">
-      ${tile("Level", v[0], "", "hl")}${tile("HP", fmtM(v[1]), v[10] ? `${v[10].reduce((a, b) => a + b.length, 0)} HP bars` : "")}${tile("ATK", fmtM(v[2]))}${tile("DEF", fmtM(v[3]))}
+      ${tile("Level", v[0], "", "hl")}${tile("HP", fmtM(v[1]), v[10] ? `${v[10].length} phases` : "")}${tile("ATK", fmtM(v[2]))}${tile("DEF", fmtM(v[3]))}
       ${tile("Rec. ATK", atkCell(v), "2× defense")}${tile("Multi-hit cut", v[16] || 0)}${tile("Crit res.", v[17] || 0)}${v[15] ? tile("ATK cut", fmtM(v[15])) : ""}
-      ${tile("EXP", fmt(v[6]))}${tile("Ryou", fmt(v[7]))}${tile("Stun", fmt(v[8]))}
+      ${v[6] > 0 ? tile("EXP", fmt(v[6])) : ""}${v[7] > 0 ? tile("Ryou", fmt(v[7])) : ""}${v[8] > 0 ? tile("Stun", fmt(v[8])) : ""}
     </div>
-    <div style="margin:-4px 0 14px">${attrChips(v[5], 12)}</div>
+    <div class="mon-sum">${resPanel(v[5])}${hpPanel(v)}</div>
     ${(bc => bc ? `<a class="bmini" href="#/bestiary/${bc.id}">${bestArt(bc)}<div><span class="ph-k">Bestiary · No.${String(bc.id).padStart(3, "0")}</span><b>${esc(bc.n)}</b><p>${esc(loreSnippet(bc))}</p></div></a>` : "")(BEST_OF_ENEMY[id])}
-    ${v[10] ? `<div class="callout">HP bars: ${v[10].map((p, i) => `phase ${i + 1}: ${p.map(fmtM).join(" + ")}`).join(" · ")}</div>` : ""}
-    ${wide ? "" : tabsBar([{id:"drops", label:"Drops"}, {id:"elements", label:"Elements"}, {id:"where", label:"Where to find", n:locs.length}], tab, base)}
+    ${wide ? "" : tabsBar([{id:"drops", label:"Drops"}, {id:"where", label:"Where to find", n:locs.length}], tab, base)}
     ${body}`;
   $("#vsel").onchange = ev => { location.hash = `#/monster/${id}?v=${encodeURIComponent(ev.target.value)}&tab=${tab}`; };
 }

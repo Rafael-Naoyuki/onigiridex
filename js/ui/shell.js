@@ -21,7 +21,7 @@ function route(){
   const tb = document.querySelector(".topbar"); if (tb) document.documentElement.style.setProperty("--hdr", tb.offsetHeight + "px");
   try {
     if (k == "") viewHome();
-    else if (k == "dungeons") viewDungeons();
+    else if (k == "dungeons") viewDungeons(parts[1]);
     else if (k == "dungeon") viewDungeon(+parts[1], qs);
     else if (k == "monsters") viewMonsters();
     else if (k == "bestiary") parts[1] ? viewBestiaryCard(+parts[1]) : viewBestiary();

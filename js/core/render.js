@@ -19,6 +19,42 @@ function attrChips(res, max=4){
   const extra = out.length > max ? `<span class="at neu" title="${esc(out.slice(max).map(x => x.replace(/<[^>]+>/g,"")).join(", "))}">+${out.length-max}</span>` : "";
   return `<div class="attrs">${out.slice(0, max).join("")}${extra}</div>`;
 }
+// ---- element resistances: res > 0 = you deal less damage (100 = immune), res < 0 = weak (you deal more)
+const resEff = val => val >= 100 ? "imm" : val <= -10 ? "weak" : val >= 30 ? "res" : val < 0 ? "weak1" : val > 0 ? "res1" : "neu";
+const resLabel = val => val >= 100 ? "✕" : val < 0 ? "+" + (-val) : val > 0 ? "−" + val : "0";
+const resLong = val => val >= 100 ? "Immune" : val < 0 ? `+${-val}% damage` : val > 0 ? `−${val}% damage` : "Normal damage";
+// elements sorted from best to worst for the player
+const bestElems = (res, n = 3) => res.map((val, i) => [i, val]).sort((a, b) => a[1] - b[1]).slice(0, n);
+// compact strip for tables: every element, kanji + value
+function resStrip(res){
+  if (!res || !res.length) return `<span class="mute">—</span>`;
+  const tip = res.map((val, i) => `${ATTRS[i][0]}: ${resLong(val)}`).join("\n");
+  return `<div class="rstrip" title="Damage you deal with each element\n${esc(tip)}">${res.map((val, i) =>
+    `<span class="rc ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><b>${resLabel(val)}</b></span>`).join("")}</div>`;
+}
+// large version for monster / boss pages
+function resPanel(res){
+  if (!res || !res.length) return "";
+  const best = bestElems(res).filter(([, val]) => val < 100);
+  return `<div class="rpanel">
+    <div class="rpanel-h"><span class="ph-k">Elements · your damage</span>${best.length ? `<span class="rbest">Best: ${best.map(([i, val]) => `<b style="color:${ATTR_COLORS[i]}">${ATTRS[i][0]}</b> <span class="${val < 0 ? "ok" : "mute"}">${resLabel(val)}%</span>`).join(" · ")}</span>` : ""}</div>
+    <div class="rgrid">${res.map((val, i) => `<div class="rcell ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}" title="${esc(ATTRS[i][0])}: ${resLong(val)}">
+      <i>${ATTRS[i][1]}</i><span>${ATTRS[i][0]}</span><b>${val >= 100 ? "Immune" : resLabel(val) + "%"}</b><em style="--w:${Math.min(100, Math.abs(val))}%"></em></div>`).join("")}</div>
+  </div>`;
+}
+// ---- HP with boss phases (v[10] = phases, each a list of HP bars; total = v[1])
+function hpPhases(v){
+  const ph = v[10]; if (!ph || !ph.length) return "";
+  const tot = ph.reduce((a, p) => a + p.reduce((x, y) => x + y, 0), 0) || 1;
+  return `<div class="hpbar" title="${esc(ph.map((p, i) => `Phase ${i + 1}: ${p.map(fmtM).join(" + ")}`).join("\n"))}">${ph.map(p => `<span class="hseg" style="flex-grow:${p.reduce((a, b) => a + b, 0) / tot * 1000}">${p.map(h => `<i style="flex-grow:${h}"></i>`).join("")}</span>`).join("")}</div>`;
+}
+const hpCell = v => `<b>${fmtM(v[1])}</b>${v[10] ? `<span class="hpn mute">${v[10].length} phases</span>${hpPhases(v)}` : ""}`;
+function hpPanel(v){
+  const ph = v[10]; if (!ph || !ph.length) return "";
+  const tot = v[1] || 1;
+  return `<div class="hppanel"><div class="rpanel-h"><span class="ph-k">HP · ${ph.length} phases</span><b>${fmt(v[1])}</b></div>
+    <div class="hpbar big">${ph.map((p, i) => `<span class="hseg" style="flex-grow:${p.reduce((a, b) => a + b, 0) / tot * 1000}">${p.map(h => `<i style="flex-grow:${h}"></i>`).join("")}<em>Phase ${i + 1} · ${p.map(fmtM).join(" + ")}</em></span>`).join("")}</div></div>`;
+}
 function skillAttrChips(a){ return `<div class="attrs">${a.map(([i, r]) => `<span class="at neu" style="color:${ATTR_COLORS[i]}">${r}% ${ATTRS[i][0]}</span>`).join("")}</div>`; }
 function natureTag(e){ const n = NATURES[e.na]; return n ? `${n[0]} <span class="jp">${n[1]}</span>` : "—"; }
 function describeVar(nm){ const m = nm.match(/^(.*)_(\d)_(\d)$/); return m ? `${DIFFS[m[2]]||m[2]} · ${m[3]}P` : nm; }
@@ -57,18 +93,19 @@ function dropList(ti){
 
 function monTable(mons, opts={}){
   if (!mons.length) return `<div class="note">No monsters on this floor (cutscene, scripted boss or reward room).</div>`;
+  const showExp = mons.some(m => m.v[6] > 0), showRyou = mons.some(m => m.v[7] > 0);
   return `<div class="wrap"><table class="tbl"><thead><tr>
     <th>Monster</th><th class="r">Lv</th><th class="r">HP</th><th class="r">ATK</th><th class="r">DEF</th>
     <th class="r"><span class="tip" title="Recommended ATK (2× defense)">Rec. ATK</span></th>
     <th class="r"><span class="tip" title="Plain 100% hits to kill with My ATK">Hits</span></th>
-    <th>Weak / Resist</th><th class="r"><span class="tip" title="Multi-hit cut">MHC</span></th><th class="r">EXP</th><th class="r">Ryou</th><th class="r"><span class="tip" title="Units that actually spawn for this difficulty / party size">Spawns</span></th><th></th></tr></thead><tbody>
+    <th><span class="tip" title="Damage you deal with each element: green = weak, red = resists, ✕ = immune">Elements</span></th><th class="r"><span class="tip" title="Multi-hit cut">MHC</span></th>${showExp ? `<th class="r">EXP</th>` : ""}${showRyou ? `<th class="r">Ryou</th>` : ""}<th class="r"><span class="tip" title="Units that actually spawn for this difficulty / party size">Spawns</span></th><th></th></tr></thead><tbody>
     ${mons.map(m => { const v = m.v, e = m.e;
       const badges = [m.boss?`<span class="badge b-boss">BOSS</span>`:"", m.elite?`<span class="badge b-elite">ELITE</span>`:"", m.metal?`<span class="badge b-metal" title="Rare spawn: ${(m.metal*100).toFixed(0)}% per floor">RARE ${(m.metal*100).toFixed(0)}%</span>`:"", (opts.field && m.repop)?`<span class="badge b-repop">RESPAWNS</span>`:""].join(" ");
       return `<tr><td class="name"><a href="#/monster/${m.eid}?v=${encodeURIComponent(m.vname)}"><b>${esc(e.n)}</b></a> ${badges}<div class="jp">${esc(e.j)} · ${NATURES[e.na]?.[0]||""}</div></td>
-      <td class="r num">${v[0]}</td><td class="r num">${fmtM(v[1])}${v[10]?` <span class="mute" title="HP bars">(${v[10].reduce((a,b)=>a+b.length,0)}×)</span>`:""}</td>
+      <td class="r num">${v[0]}</td><td class="r num hpc">${hpCell(v)}</td>
       <td class="r num">${fmtM(v[2])}</td><td class="r num">${fmtM(v[3])}</td>
       <td class="r num">${atkCell(v)}</td><td class="r">${hitsCell(v)}</td>
-      <td>${attrChips(v[5])}</td><td class="r num">${v[16]||"—"}</td><td class="r num">${fmt(v[6])}</td><td class="r num">${fmt(v[7])}</td>
+      <td>${resStrip(v[5])}</td><td class="r num">${v[16]||"—"}</td>${showExp ? `<td class="r num">${fmt(v[6])}</td>` : ""}${showRyou ? `<td class="r num">${fmt(v[7])}</td>` : ""}
       <td class="r num mute">${m.metal ? "≤"+m.places : (m.pops % 1 ? m.pops.toFixed(1) : m.pops)}</td>
       <td><button class="btn sm" data-sim="${m.eid}|${esc(m.vname)}" title="Simulate your build against this monster">Sim</button></td></tr>`; }).join("")}
   </tbody></table></div>`;

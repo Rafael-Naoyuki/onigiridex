@@ -190,3 +190,12 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 .hero .byline{margin:-4px 0 10px;font-size:13px;letter-spacing:.4px;color:var(--mute)}
 .hero .byline b{color:var(--gold);font-weight:700}
 .side-foot .built b{color:#e0b04e;font-weight:700}
+
+/* dungeons: All / Endgame tabs */
+.dtabs-page{margin:0 0 14px;overflow:visible}
+.endgame{margin-bottom:22px}
+.endgame-sub{margin:-4px 0 10px;font-size:13px}
+
+/* tabs: horizontal scroll only (the -1px underline overlap made a 1px vertical scrollbar) */
+.tabs{overflow-y:hidden;scrollbar-width:thin}
+.tabs a,.tabs button{margin-bottom:0}
