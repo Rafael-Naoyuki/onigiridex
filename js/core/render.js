@@ -29,6 +29,8 @@ function elemChange(val, cov, i){
   const eff = Math.max(1 - val / 100, 0.005) * covF;
   return Math.round(eff * 100 - 100);
 }
+// color band by the monster's raw resistance: 70+ red, 31-69 yellow, 30 or less green, 100 immune
+const resBand = val => val >= 100 ? "imm" : val >= 70 ? "res" : val > 30 ? "mid" : "weak";
 const chgEff = c => c == null ? "imm" : c >= 10 ? "weak" : c <= -30 ? "res" : c > 0 ? "weak1" : c < 0 ? "res1" : "neu";
 const chgLabel = c => c == null ? "✕" : c > 0 ? "+" + c : c < 0 ? "−" + (-c) : "0";
 const chgLong = c => c == null ? "Immune" : c > 0 ? `+${c}% damage` : c < 0 ? `−${-c}% damage` : "Normal damage";
@@ -42,7 +44,7 @@ function resStrip(res, cov){
   const ch = res.map((val, i) => elemChange(val, cov, i));
   const tip = res.map((val, i) => `${ATTRS[i][0]}: ${chgLong(ch[i])}`).join("\n");
   return `<div class="rstrip ${cov ? "cov" : ""}" title="${cov ? esc(COV_TEXT) + "\n\n" : ""}Damage you deal with each element\n${esc(tip)}">${res.map((val, i) =>
-    `<span class="rc ${chgEff(ch[i])}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><u>${ATTRS[i][0]}</u><b>${chgLabel(ch[i])}</b></span>`).join("")}</div>`;
+    `<span class="rc ${resBand(val)}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><u>${ATTRS[i][0]}</u><b>${chgLabel(ch[i])}</b></span>`).join("")}</div>`;
 }
 const covBadge = () => `<span class="badge b-cov" title="${esc(COV_TEXT)}">COVENANT</span>`;
 // large version for monster / boss pages
@@ -50,9 +52,9 @@ function resPanel(res, cov){
   if (!res || !res.length) return "";
   const best = bestElems(res, cov);
   return `<div class="rpanel ${cov ? "cov" : ""}">
-    <div class="rpanel-h"><span class="ph-k">Elements · your damage</span>${cov ? covBadge() : ""}${best.length ? `<span class="rbest">Best: ${best.map(([i, c]) => `<b style="color:${ATTR_COLORS[i]}">${ATTRS[i][0]}</b> <span class="${c > 0 ? "ok" : "mute"}">${chgLabel(c)}%</span>`).join(" · ")}</span>` : ""}</div>
+    <div class="rpanel-h"><span class="ph-k">Elements · your damage</span>${cov ? covBadge() : ""}${best.length ? `<span class="rbest">Best: ${best.map(([i, c]) => `<b style="color:${ATTR_COLORS[i]}">${ATTRS[i][0]}</b> <span class="band-${resBand(res[i])}">${chgLabel(c)}%</span>`).join(" · ")}</span>` : ""}</div>
     ${cov ? `<div class="covnote"><b>Covenant monster.</b> Hits with only one element (Slash, Strike and Pierce don't count) deal <b>10%</b>. Use skills with <b>2+ elements</b>: values below already include the Covenant multiplier. On-hit bonus damage doesn't work.</div>` : ""}
-    <div class="rgrid">${res.map((val, i) => { const c = elemChange(val, cov, i); return `<div class="rcell ${chgEff(c)}" style="--ec:${ATTR_COLORS[i]}" title="${esc(ATTRS[i][0])}: ${chgLong(c)} (resistance ${val})">
+    <div class="rgrid">${res.map((val, i) => { const c = elemChange(val, cov, i); return `<div class="rcell ${resBand(val)}" style="--ec:${ATTR_COLORS[i]}" title="${esc(ATTRS[i][0])}: ${chgLong(c)} (resistance ${val})">
       <i>${ATTRS[i][1]}</i><span>${ATTRS[i][0]}</span><b>${c == null ? "Immune" : chgLabel(c) + "%"}</b><em style="--w:${Math.min(100, Math.abs(c == null ? 100 : c))}%"></em></div>`; }).join("")}</div>
   </div>`;
 }
