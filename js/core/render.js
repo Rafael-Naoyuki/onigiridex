@@ -30,7 +30,7 @@ function resStrip(res){
   if (!res || !res.length) return `<span class="mute">—</span>`;
   const tip = res.map((val, i) => `${ATTRS[i][0]}: ${resLong(val)}`).join("\n");
   return `<div class="rstrip" title="Damage you deal with each element\n${esc(tip)}">${res.map((val, i) =>
-    `<span class="rc ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><b>${resLabel(val)}</b></span>`).join("")}</div>`;
+    `<span class="rc ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><u>${ATTRS[i][0]}</u><b>${resLabel(val)}</b></span>`).join("")}</div>`;
 }
 // large version for monster / boss pages
 function resPanel(res){

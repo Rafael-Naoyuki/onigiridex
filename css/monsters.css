@@ -3,8 +3,8 @@
 :root[data-theme="light"]{--weak:#1d8a5a;--resc:#b8321f}
 
 /* compact strip (tables, simulator) */
-.rstrip{display:inline-grid;grid-template-columns:repeat(13,38px);gap:3px;vertical-align:middle}
-.rc{display:flex;flex-direction:column;align-items:center;justify-content:center;height:46px;border-radius:7px;background:color-mix(in srgb,var(--bg2) 80%,transparent);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);line-height:1.1;gap:2px}
+.rstrip{display:inline-grid;grid-template-columns:repeat(13,46px);gap:3px;vertical-align:middle}
+.rc{display:flex;flex-direction:column;align-items:center;justify-content:center;height:56px;border-radius:7px;background:color-mix(in srgb,var(--bg2) 80%,transparent);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);line-height:1.1;gap:2px}
 .rc i{font-style:normal;font-size:17px;font-weight:700;color:var(--ec)}
 .rc b{font-size:11.5px;font-weight:700;color:var(--faint);font-variant-numeric:tabular-nums}
 .rc.weak{background:color-mix(in srgb,var(--weak) 22%,transparent);border-color:color-mix(in srgb,var(--weak) 55%,transparent)}
@@ -63,5 +63,11 @@
 :root[data-theme="light"] .rbest b{filter:brightness(.62) saturate(1.5)}
 
 /* narrow screens: drop the least useful columns so the table fits without side scroll */
-@media (max-width:1400px){.tbl .c-opt{display:none}}
+@media (max-width:1700px){.tbl .c-opt{display:none}}
 @media (max-width:1400px){.tbl .rstrip{grid-template-columns:repeat(7,29px);gap:2px}.wrap .tbl td,.wrap .tbl th{padding-left:8px;padding-right:8px}}
+
+/* English element name under the kanji (not everyone reads kanji) */
+.rc u{text-decoration:none;font-size:8.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;color:var(--mute);line-height:1}
+.rc{gap:1px}
+@media (max-width:1800px){.tbl .rstrip{grid-template-columns:repeat(7,44px)}.tbl .rc{height:52px}.tbl .rc i{font-size:15px}.tbl .rc b{font-size:11px}}
+@media (max-width:1400px){.tbl .rstrip{grid-template-columns:repeat(7,37px);gap:2px}.tbl .rc u{font-size:7px;letter-spacing:0}.wrap .tbl td,.wrap .tbl th{padding-left:6px;padding-right:6px}}
