@@ -10,6 +10,25 @@ function cutAttack(val, atkCut, mhc, mhcr, count){
   const w = Math.min(Math.max(mhcr * 0.01, 0), 1);
   return Math.floor(val + (v2 - val) * w);
 }
+// ---- Covenant (聖約) monsters: DamageCalculator.calcCovenantDamage, applied after crit and before the damage cap
+const PHYS_ATTRS = [0, 1, 2];   // Slash, Strike, Pierce
+function covMul(def){            // multiplier for one elemental attribute by the monster's resistance
+  if (def >= 100) return 0; if (def >= 90) return 0.1; if (def >= 60) return 0.1 + (90 - def) * 0.03;
+  if (def >= 40) return 1.3 + (50 - def) * 0.02; if (def >= -20) return 1.7 + (30 - def) * 0.01;
+  if (def >= -60) return 2.25 + (-30 - def) * 0.005; return 2.425 + (-70 - def) * 0.0025;
+}
+// whole-hit factor for a skill's attribute list [[attr, ratio%], ...]
+function covenantFactor(attrs, res){
+  const elems = attrs.filter(([a]) => !PHYS_ATTRS.includes(a) && (res[a] || 0) < 100).length;
+  if (elems <= 1) return 0.1;     // one (or no) usable element: only 10%
+  let f = 0;
+  for (const [a, ratio] of attrs){
+    const def = res[a] || 0; if (def >= 100) continue;
+    const r = PHYS_ATTRS.includes(a) ? (Math.min(10, Math.max(-10, 0.002 * (ratio - def))) + 20) * 0.01 : covMul(def);
+    f += ratio / 100 * r;
+  }
+  return f;
+}
 function targetStats(){
   const t = SIM.tgt;
   if (t.t == "enemy"){
@@ -18,7 +37,7 @@ function targetStats(){
       const d = t.did != null ? DUNBY[t.did] : null, L = d && t.diff != null ? d.L[t.diff] : null;
       const fix = {}; (L?.rules || []).forEach(o => { if (o.p == "SecondaryStatusFixed") fix[o.statusType] = o.fixedValue; });
       const sub = d ? `${d.n} · ${DIFFS[t.diff]} · Lv ${v[0]}` : `${describeVar(t.vname)} · Lv ${v[0]}`;
-      return {name:e.n, sub, hp:v[1], def:v[3], res:v[5], cav:v[14]||0, atkCut:v[15]||0, mhc:v[16]||0, crc:v[17]||0, phases:v[10], eid:t.eid, vname:t.vname,
+      return {name:e.n, sub, hp:v[1], def:v[3], res:v[5], cov:!!v[18], cav:v[14]||0, atkCut:v[15]||0, mhc:v[16]||0, crc:v[17]||0, phases:v[10], eid:t.eid, vname:t.vname,
         did:t.did, diff:t.diff, fix, rules:L?.rules || [], timeLimit:L ? (L.tl || d.tl || 0) : 0};
     }
   }
@@ -42,6 +61,7 @@ function calcSkill(sk, tg, b, capBuff){
     mix += ratio / 100 * Math.max(1 + (+b.el[a]||0) / 100, 0.1) * Math.max(1 - def / 100, 0.005);
   }
   if (allImmune) mix = 0;
+  const covF = tg.cov ? covenantFactor(sk.a, tg.res) : 1;
   // critical (DamageCalculator.checkCriticalHit + crit cut)
   const FX = tg.fix || {};
   const cri = Math.min(1, Math.max(0, (FX[12] != null ? FX[12] : (+b.cri||0)) / 100 * (1 - (tg.cav||0) / 100)));
@@ -58,10 +78,10 @@ function calcSkill(sk, tg, b, capBuff){
     // critical hits add the DEX bonus to the attack before the cuts (StageCharaModel dexcarryupdamage)
     const ac = cutAttack(atk + dexCrit, tg.atkCut||0, tg.mhc||0, sk.mh ?? 50, i);
     const baseC = Math.floor(ac * atten(ac, tg.def)) * hr * power * mix;
-    let nc = Math.min(base, cap), cr = Math.min(baseC * critF, cap);
-    nc += bonusOnHit(nc); cr += bonusOnHit(cr);
+    let nc = Math.min(base * covF, cap), cr = Math.min(baseC * critF * covF, cap);
+    if (!tg.cov){ nc += bonusOnHit(nc); cr += bonusOnHit(cr); }   // covenant monsters ignore on-hit bonus damage
     let dmg = cri * cr + (1 - cri) * nc;
-    if (b.bdaP && b.bdaL) dmg += (+b.bdaP / 100) * Math.min(dmg, +b.bdaL);
+    if (!tg.cov && b.bdaP && b.bdaL) dmg += (+b.bdaP / 100) * Math.min(dmg, +b.bdaL);
     hits.push({rate:hr, atk:a, att, dmg});
     total += dmg;
   });
@@ -71,7 +91,7 @@ function calcSkill(sk, tg, b, capBuff){
   const time = sk.x?.time || null;
   const cd = (sk.ct / 1000) * (1 - Math.min(+b.cdc||0, 95) / 100);
   const castT = time || +SIM.defaultTime || 1.5;
-  return {total, hits, measured:!!measured, time, castT, cd, mix, critF, cri, power, sf, vsRate,
+  return {total, hits, measured:!!measured, time, castT, cd, mix, covF, critF, cri, power, sf, vsRate,
     burst: total / castT, sustained: total / Math.max(castT, cd), casts: total > 0 ? Math.ceil(tg.hp / total) : Infinity};
 }
 // greedy rotation: always cast the ready skill with the best damage per second of cast time

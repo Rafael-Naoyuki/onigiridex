@@ -104,7 +104,7 @@ function viewSim(){
         <span><i>Multi-hit cut</i><b>${tg.mhc}</b></span><span><i>Crit res.</i><b>${tg.crc}</b></span>
         ${tg.atkCut ? `<span><i>ATK cut</i><b>${fmtM(tg.atkCut)}</b></span>` : ""}
       </div>
-      <div class="sim-res">${resStrip(tg.res)}</div>
+      <div class="sim-res">${resStrip(tg.res, tg.cov)}</div>${tg.cov ? `<div class="covnote">${covBadge()} Only skills with <b>2+ elements</b> do full damage here; one element = 10%. Already included in the numbers below.</div>` : ""}
       ${tg.rules && tg.rules.length ? `<div class="rules">${tg.rules.map(ruleText).filter(Boolean).join(" · ")}${tg.timeLimit ? ` · ${Math.round(tg.timeLimit/60)} min limit` : ""}</div>` : ""}
     </div>
     <div class="sim-vs-mid" aria-hidden="true">VS</div>
@@ -227,7 +227,7 @@ function drawSimResults(){
       ${sortTh("bdps", "Burst DPS", "Damage ÷ cast time (spamming with no cooldown)")}${sortTh("sdps", "Sustained", "Damage ÷ max(cast time, cooldown) — if you only used this skill")}<th class="r"><span class="tip" title="Casts of this skill alone to kill the target">Casts</span></th></tr></thead><tbody>
       ${list.slice(0, 200).map(({sk, r}) => { const inRot = loadout.includes(sk.id); return `<tr class="${inRot ? "picked" : ""}" ${inRot ? `style="--c:${colorOf.get(sk.id)}"` : ""}>
         <td class="c"><button class="addbtn ${inRot ? "on" : ""}" data-pick="${sk.id}" ${!inRot && full ? "disabled" : ""} aria-pressed="${inRot}" title="${inRot ? "Remove from rotation" : full ? "Rotation is full" : "Add to rotation"}">${inRot ? "✓" : "+ Add"}</button></td>
-        <td class="name"><a href="#/skill/${sk.id}"><b>${esc(sk.n)}</b></a> ${sk.o?`<span class="badge b-ougi">${sk.o==2?"SKILL/OUGI":"OUGI"}</span>`:""} ${r.measured?"":`<span class="badge b-est" title="No hit data in the spreadsheet: assumed 1 hit at 100% and ${SIM.defaultTime}s cast">≈</span>`}${sk.x?.rDmg?` <span class="chip" title="Community damage rating">${esc(sk.x.rDmg)}</span>`:""}<div class="jp">${esc(sk.j)}</div></td>
+        <td class="name"><a href="#/skill/${sk.id}"><b>${esc(sk.n)}</b></a> ${sk.o?`<span class="badge b-ougi">${sk.o==2?"SKILL/OUGI":"OUGI"}</span>`:""} ${tg.cov && r.covF <= 0.1 ? `<span class="badge b-cov1" title="Covenant: this skill has one usable element, so it deals only 10%">×0.1</span> ` : ""}${r.measured?"":`<span class="badge b-est" title="No hit data in the spreadsheet: assumed 1 hit at 100% and ${SIM.defaultTime}s cast">≈</span>`}${sk.x?.rDmg?` <span class="chip" title="Community damage rating">${esc(sk.x.rDmg)}</span>`:""}<div class="jp">${esc(sk.j)}</div></td>
         <td>${skillAttrChips(sk.a)}</td><td class="r num">${r.hits.length}</td><td class="r num"><b>${fmtM(r.total)}</b></td>
         <td class="r num">${r.time ? r.time.toFixed(2)+"s" : `<span class="mute">${(+SIM.defaultTime).toFixed(1)}s?</span>`}</td><td class="r num">${r.cd.toFixed(1)}s</td>
         <td class="r num">${fmtM(r.burst)}</td><td class="r sim-sus"><b class="num">${fmtM(r.sustained)}</b><div class="bar"><i style="width:${(r.sustained/maxS*100).toFixed(1)}%"></i></div></td>

@@ -57,14 +57,14 @@ function viewMonster(id, qs){
   const wide = isWide();
   if (wide) body = `<div class="panes m-panes">${pane("Drops", mDrops())}<div class="pane-col">${pane("Where to find", mWhere(), locs.length)}</div></div>`;
   else body = tab == "where" ? mWhere() : `<div style="max-width:820px">${mDrops()}</div>`;
-  app.innerHTML = `${ph({k:"Monster", title:esc(e.n), jp:e.j, chips:`<span class="chip">${natureTag(e)}</span><span class="chip">${SIZES[e.sz] || "?"}</span><span class="chip">ID <b>${id}</b></span>`,
+  app.innerHTML = `${ph({k:"Monster", title:esc(e.n), jp:e.j, chips:`<span class="chip">${natureTag(e)}</span><span class="chip">${SIZES[e.sz] || "?"}</span><span class="chip">ID <b>${id}</b></span>${v[18] ? covBadge() : ""}`,
       actions:`<span class="ctl">Version ${verSel}</span><button class="btn pri" data-sim="${id}|${esc(sel)}">Simulate my build</button>`})}
     <div class="tiles">
       ${tile("Level", v[0], "", "hl")}${tile("HP", fmtM(v[1]), v[10] ? (v[10].length > 1 ? `${v[10].length} phases` : `${v[10][0].length} HP bars`) : "")}${tile("ATK", fmtM(v[2]))}${tile("DEF", fmtM(v[3]))}
       ${tile("Rec. ATK", atkCell(v), "2× defense")}${tile("Multi-hit cut", v[16] || 0)}${tile("Crit res.", v[17] || 0)}${v[15] ? tile("ATK cut", fmtM(v[15])) : ""}
       ${v[6] > 0 ? tile("EXP", fmt(v[6])) : ""}${v[7] > 0 ? tile("Ryou", fmt(v[7])) : ""}${v[8] > 0 ? tile("Stun", fmt(v[8])) : ""}
     </div>
-    <div class="mon-sum">${resPanel(v[5])}${hpPanel(v)}</div>
+    <div class="mon-sum">${resPanel(v[5], v[18])}${hpPanel(v)}</div>
     ${(bc => bc ? `<a class="bmini" href="#/bestiary/${bc.id}">${bestArt(bc)}<div><span class="ph-k">Bestiary · No.${String(bc.id).padStart(3, "0")}</span><b>${esc(bc.n)}</b><p>${esc(loreSnippet(bc))}</p></div></a>` : "")(BEST_OF_ENEMY[id])}
     ${wide ? "" : tabsBar([{id:"drops", label:"Drops"}, {id:"where", label:"Where to find", n:locs.length}], tab, base)}
     ${body}`;

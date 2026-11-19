@@ -20,26 +20,40 @@ function attrChips(res, max=4){
   return `<div class="attrs">${out.slice(0, max).join("")}${extra}</div>`;
 }
 // ---- element resistances: res > 0 = you deal less damage (100 = immune), res < 0 = weak (you deal more)
-const resEff = val => val >= 100 ? "imm" : val <= -10 ? "weak" : val >= 30 ? "res" : val < 0 ? "weak1" : val > 0 ? "res1" : "neu";
-const resLabel = val => val >= 100 ? "✕" : val < 0 ? "+" + (-val) : val > 0 ? "−" + val : "0";
-const resLong = val => val >= 100 ? "Immune" : val < 0 ? `+${-val}% damage` : val > 0 ? `−${val}% damage` : "Normal damage";
-// elements sorted from best to worst for the player
-const bestElems = (res, n = 3) => res.map((val, i) => [i, val]).sort((a, b) => a[1] - b[1]).slice(0, n);
-// compact strip for tables: every element, kanji + value
-function resStrip(res){
-  if (!res || !res.length) return `<span class="mute">—</span>`;
-  const tip = res.map((val, i) => `${ATTRS[i][0]}: ${resLong(val)}`).join("\n");
-  return `<div class="rstrip" title="Damage you deal with each element\n${esc(tip)}">${res.map((val, i) =>
-    `<span class="rc ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><u>${ATTRS[i][0]}</u><b>${resLabel(val)}</b></span>`).join("")}</div>`;
+// Each element is shown as the change in YOUR damage. On Covenant (聖約) monsters the game multiplies again
+// by covMul(res) (DamageCalculator.calcCovenantDamage), so the shown change is (1 - res/100) * covMul(res) - 1.
+function elemChange(val, cov, i){
+  if (val >= 100) return null;                                   // immune
+  // physical attributes on Covenant monsters: (clamp(0.002 * (ratio - res), ±10) + 20)% with a 100% ratio ≈ ×0.2
+  const covF = !cov ? 1 : PHYS_ATTRS.includes(i) ? (Math.min(10, Math.max(-10, 0.002 * (100 - val))) + 20) * 0.01 : covMul(val);
+  const eff = Math.max(1 - val / 100, 0.005) * covF;
+  return Math.round(eff * 100 - 100);
 }
+const chgEff = c => c == null ? "imm" : c >= 10 ? "weak" : c <= -30 ? "res" : c > 0 ? "weak1" : c < 0 ? "res1" : "neu";
+const chgLabel = c => c == null ? "✕" : c > 0 ? "+" + c : c < 0 ? "−" + (-c) : "0";
+const chgLong = c => c == null ? "Immune" : c > 0 ? `+${c}% damage` : c < 0 ? `−${-c}% damage` : "Normal damage";
+// elements sorted from best to worst for the player (physical ones excluded on Covenant monsters)
+const bestElems = (res, cov, n = 3) => res.map((val, i) => [i, elemChange(val, cov, i)])
+  .filter(([i, c]) => c != null && !(cov && PHYS_ATTRS.includes(i))).sort((a, b) => b[1] - a[1]).slice(0, n);
+const COV_TEXT = "Covenant (聖約): a hit with only one element (Slash / Strike / Pierce don't count) deals just 10%. Use skills with 2+ elements — low-resist elements get boosted, high-resist ones cut further. On-hit bonus damage doesn't work.";
+// compact strip for tables: every element, kanji + English name + change
+function resStrip(res, cov){
+  if (!res || !res.length) return `<span class="mute">—</span>`;
+  const ch = res.map((val, i) => elemChange(val, cov, i));
+  const tip = res.map((val, i) => `${ATTRS[i][0]}: ${chgLong(ch[i])}`).join("\n");
+  return `<div class="rstrip ${cov ? "cov" : ""}" title="${cov ? esc(COV_TEXT) + "\n\n" : ""}Damage you deal with each element\n${esc(tip)}">${res.map((val, i) =>
+    `<span class="rc ${chgEff(ch[i])}" style="--ec:${ATTR_COLORS[i]}"><i>${ATTRS[i][1]}</i><u>${ATTRS[i][0]}</u><b>${chgLabel(ch[i])}</b></span>`).join("")}</div>`;
+}
+const covBadge = () => `<span class="badge b-cov" title="${esc(COV_TEXT)}">COVENANT</span>`;
 // large version for monster / boss pages
-function resPanel(res){
+function resPanel(res, cov){
   if (!res || !res.length) return "";
-  const best = bestElems(res).filter(([, val]) => val < 100);
-  return `<div class="rpanel">
-    <div class="rpanel-h"><span class="ph-k">Elements · your damage</span>${best.length ? `<span class="rbest">Best: ${best.map(([i, val]) => `<b style="color:${ATTR_COLORS[i]}">${ATTRS[i][0]}</b> <span class="${val < 0 ? "ok" : "mute"}">${resLabel(val)}%</span>`).join(" · ")}</span>` : ""}</div>
-    <div class="rgrid">${res.map((val, i) => `<div class="rcell ${resEff(val)}" style="--ec:${ATTR_COLORS[i]}" title="${esc(ATTRS[i][0])}: ${resLong(val)}">
-      <i>${ATTRS[i][1]}</i><span>${ATTRS[i][0]}</span><b>${val >= 100 ? "Immune" : resLabel(val) + "%"}</b><em style="--w:${Math.min(100, Math.abs(val))}%"></em></div>`).join("")}</div>
+  const best = bestElems(res, cov);
+  return `<div class="rpanel ${cov ? "cov" : ""}">
+    <div class="rpanel-h"><span class="ph-k">Elements · your damage</span>${cov ? covBadge() : ""}${best.length ? `<span class="rbest">Best: ${best.map(([i, c]) => `<b style="color:${ATTR_COLORS[i]}">${ATTRS[i][0]}</b> <span class="${c > 0 ? "ok" : "mute"}">${chgLabel(c)}%</span>`).join(" · ")}</span>` : ""}</div>
+    ${cov ? `<div class="covnote"><b>Covenant monster.</b> Hits with only one element (Slash, Strike and Pierce don't count) deal <b>10%</b>. Use skills with <b>2+ elements</b>: values below already include the Covenant multiplier. On-hit bonus damage doesn't work.</div>` : ""}
+    <div class="rgrid">${res.map((val, i) => { const c = elemChange(val, cov, i); return `<div class="rcell ${chgEff(c)}" style="--ec:${ATTR_COLORS[i]}" title="${esc(ATTRS[i][0])}: ${chgLong(c)} (resistance ${val})">
+      <i>${ATTRS[i][1]}</i><span>${ATTRS[i][0]}</span><b>${c == null ? "Immune" : chgLabel(c) + "%"}</b><em style="--w:${Math.min(100, Math.abs(c == null ? 100 : c))}%"></em></div>`; }).join("")}</div>
   </div>`;
 }
 // ---- HP with boss phases (v[10] = phases, each a list of HP bars; total = v[1])
@@ -101,11 +115,11 @@ function monTable(mons, opts={}){
     <th><span class="tip" title="Damage you deal with each element: green = weak, red = resists, ✕ = immune">Elements</span></th><th class="r"><span class="tip" title="Multi-hit cut">MHC</span></th>${showExp ? `<th class="r c-opt">EXP</th>` : ""}${showRyou ? `<th class="r c-opt">Ryou</th>` : ""}<th class="r"><span class="tip" title="Units that actually spawn for this difficulty / party size">Spawns</span></th><th></th></tr></thead><tbody>
     ${mons.map(m => { const v = m.v, e = m.e;
       const badges = [m.boss?`<span class="badge b-boss">BOSS</span>`:"", m.elite?`<span class="badge b-elite">ELITE</span>`:"", m.metal?`<span class="badge b-metal" title="Rare spawn: ${(m.metal*100).toFixed(0)}% per floor">RARE ${(m.metal*100).toFixed(0)}%</span>`:"", (opts.field && m.repop)?`<span class="badge b-repop">RESPAWNS</span>`:""].join(" ");
-      return `<tr><td class="name"><a href="#/monster/${m.eid}?v=${encodeURIComponent(m.vname)}"><b>${esc(e.n)}</b></a> ${badges}<div class="jp">${esc(e.j)} · ${NATURES[e.na]?.[0]||""}</div></td>
+      return `<tr><td class="name"><a href="#/monster/${m.eid}?v=${encodeURIComponent(m.vname)}"><b>${esc(e.n)}</b></a> ${badges}${v[18] ? " " + covBadge() : ""}<div class="jp">${esc(e.j)} · ${NATURES[e.na]?.[0]||""}</div></td>
       <td class="r num">${v[0]}</td><td class="r num hpc">${hpCell(v)}</td>
       <td class="r num">${fmtM(v[2])}</td><td class="r num">${fmtM(v[3])}</td>
       <td class="r num">${atkCell(v)}</td><td class="r">${hitsCell(v)}</td>
-      <td>${resStrip(v[5])}</td><td class="r num">${v[16]||"—"}</td>${showExp ? `<td class="r num c-opt">${fmt(v[6])}</td>` : ""}${showRyou ? `<td class="r num c-opt">${fmt(v[7])}</td>` : ""}
+      <td>${resStrip(v[5], v[18])}</td><td class="r num">${v[16]||"—"}</td>${showExp ? `<td class="r num c-opt">${fmt(v[6])}</td>` : ""}${showRyou ? `<td class="r num c-opt">${fmt(v[7])}</td>` : ""}
       <td class="r num mute">${m.metal ? "≤"+m.places : (m.pops % 1 ? m.pops.toFixed(1) : m.pops)}</td>
       <td><button class="btn sm" data-sim="${m.eid}|${esc(m.vname)}" title="Simulate your build against this monster">Sim</button></td></tr>`; }).join("")}
   </tbody></table></div>`;
