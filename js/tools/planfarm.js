@@ -11,7 +11,7 @@ function planAdd(i, q = 1){
 // crafting tree with a shared "already have" pool, so an item you own is only counted once
 function planCompute(){
   const pool = Object.assign({}, PLAN.own);
-  const raw = new Map(), recipes = new Map(), gross = new Map();
+  const raw = new Map(), recipes = new Map(), gross = new Map(), choices = new Map();
   let crafts = 0, ryou = 0, nodes = 0;
   const visit = (i, qty, depth, seen) => {
     nodes++;
@@ -21,6 +21,7 @@ function planCompute(){
     const craft = n.canCraft && !PLAN.nocraft[i] && !seen.has(i) && depth < 14 && nodes < 6000;
     if (rest > 0 && craft){
       const rk = list[recipeSel(i)], r = RECIPES[rk];
+      if (list.length > 1) choices.set(i, (choices.get(i) || 0) + Math.ceil(rest / (r.n || 1)));
       n.crafting = true; n.rk = rk; n.crafts = Math.ceil(rest / (r.n || 1)); n.ryou = n.crafts * (r.p || 0);
       crafts += n.crafts; ryou += n.ryou;
       if (r.r != null) recipes.set(r.r, (recipes.get(r.r) || 0) + n.crafts);
@@ -34,7 +35,7 @@ function planCompute(){
     return n;
   };
   const roots = PLAN.targets.filter(t => ITEMS[t.i]).map(t => visit(t.i, Math.max(1, t.q | 0), 0, new Set()));
-  return {roots, raw, gross, recipes, crafts, ryou};
+  return {roots, raw, gross, recipes, crafts, ryou, choices};
 }
 
 // short description of a recipe, so two recipes of the same item can be told apart
@@ -44,6 +45,25 @@ function recipeLabel(rk, long = false){
   return `${ITEMS[m[0][0]][0]} ×${fmt(m[0][1])}${m.length > 1 ? ` +${m.length - 1}` : ""}${r.r != null ? " · scroll" : ""}`;
 }
 const recipeSel = i => (PLAN.rsel[i] || 0) % (RCP_MAKE[i] || [1]).length;
+
+// ---- items of the plan that can be made in more than one way: shown first so you pick before reading the tree
+function planChoices(choices){
+  if (!choices.size) return "";
+  const src = itemSources(S.party);
+  const mat = ([m, n]) => { const b = bestAny(src, m); return `<li>${itemLink(m)}<span class="q">×${fmt(n)}</span>${b ? `<span class="pc-src">${pct(b.p)}</span>` : RCP_MAKE[m] ? `<span class="pc-src faint">craft</span>` : ""}</li>`; };
+  const undecided = [...choices.keys()].filter(i => PLAN.rsel[i] == null).length;
+  return `<details class="card plan-choose" id="pchoose" ${PLAN.showChoose !== false ? "open" : ""}>
+    <summary class="sim-head"><h3>Choose a recipe <span class="mute">${choices.size} item${choices.size > 1 ? "s" : ""} in your plan can be made in more than one way${undecided ? ` · <b class="pc-und">${undecided} still on the default</b>` : " · all chosen ✓"}</span></h3><span class="plan-rec-t">${PLAN.showChoose !== false ? "Hide" : "Show"}</span></summary>
+    <div class="pc-list">${[...choices.keys()].map(i => `<div class="pc-item">
+      <div class="pc-name">${itemLink(i)}<span class="mute">${PLAN.rsel[i] != null ? `<span class="ok">✓ chosen</span>` : "default: recipe 1"}</span></div>
+      <div class="pc-opts">${RCP_MAKE[i].map((rk, k) => { const r = RECIPES[rk], on = recipeSel(i) == k;
+        return `<div class="pc-opt ${on ? "on" : ""}" data-rpick="${i}|${k}" role="button" tabindex="0" aria-pressed="${on}">
+          <div class="pc-oh"><b>Recipe ${k + 1}</b>${on ? `<span class="pc-use">✓ in use</span>` : `<span class="pc-use off">use this</span>`}</div>
+          <ul>${r.m.map(mat).join("")}</ul>
+          <div class="pc-meta"><span>${fmtM(r.p)} ryou</span>${r.r != null ? `<span>needs ${esc(ITEMS[r.r][0])}</span>` : `<span>no scroll needed</span>`}</div>
+        </div>`; }).join("")}</div></div>`).join("")}</div>
+  </details>`;
+}
 
 // ---- list view (indented rows)
 const PLAN_OPEN = new Map();   // tree path -> open, kept while re-rendering
@@ -219,6 +239,7 @@ function viewPlan(){
     <div class="sim-kpi"><span>Crafting cost</span><b>${fmtM(res.ryou)} <small>ryou</small></b></div>
     <div class="sim-kpi"><span>Recipes needed</span><b>${fmt(recList.length)}</b></div>
   </div>
+  ${planChoices(res.choices)}
   <div class="plan-main ${dia ? "dia" : ""}">
     <section class="card plan-tree">
       <div class="sim-head"><h3>Crafting tree</h3><div class="sim-head-ctl">
@@ -298,7 +319,8 @@ function bindPlan(farmable){
   // diagram view
   $$("[data-pview]").forEach(b => b.onclick = () => { PLAN.view = b.dataset.pview; re(); planCenterTree(); });
   $$("[data-pdir]").forEach(b => b.onclick = () => { PLAN.dir = b.dataset.pdir; re(); planCenterTree(); });
-  $$("[data-rpick]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const [i, k] = b.dataset.rpick.split("|").map(Number); PLAN.rsel[i] = k; re(); });
+  $$("[data-rpick]").forEach(b => b.onkeydown = e => { if (e.key == "Enter" || e.key == " "){ e.preventDefault(); b.click(); } });
+  $$("[data-rpick]").forEach(b => b.onclick = e => { if (e.target.closest("a")) return; e.preventDefault(); e.stopPropagation(); const [i, k] = b.dataset.rpick.split("|").map(Number); PLAN.rsel[i] = k; re(); });
   $$("[data-rcycle]").forEach(b => b.onclick = e => { e.preventDefault(); const i = b.dataset.rcycle; PLAN.rsel[i] = (recipeSel(i) + 1) % RCP_MAKE[i].length; re(); });
   $$("[data-dtog]").forEach(b => b.onclick = e => { e.preventDefault(); const p = b.dataset.dtog; PLAN_DOPEN.set(p, b.getAttribute("aria-expanded") != "true"); re(); });
   if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
@@ -306,5 +328,6 @@ function bindPlan(farmable){
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
   $$("[data-pgrp]").forEach(b => b.onclick = () => { PLAN.grp = b.dataset.pgrp; re(); });
   $$("[data-pfgo]").forEach(b => b.onclick = () => farmGo(b.dataset.pfgo.split(",").map(Number)));
+  if ($("#pchoose")) $("#pchoose").ontoggle = e => { PLAN.showChoose = e.target.open; savePlan(); const t = $("#pchoose .plan-rec-t"); if (t) t.textContent = PLAN.showChoose ? "Hide" : "Show"; };
   if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };
 }
