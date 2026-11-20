@@ -90,6 +90,65 @@ function planGroups(gross){
   }).join("");
 }
 
+// ---- "What to farm" grouped by place: a dungeon that drops several of your materials becomes one card
+function planPlaces(gross){
+  const need = [...gross.entries()].filter(([, g]) => g.rest > 0).map(([i, g]) => ({i, rest: g.rest, need: g.need}));
+  const done = [...gross.entries()].filter(([, g]) => g.rest == 0).map(([i, g]) => ({i, need: g.need}));
+  if (!need.length && !done.length) return emptyState("Nothing to farm", "Everything in this plan is crafted from items you already have.");
+  const items = need.map(x => x.i);
+  const rows = items.length ? farmRows(items, S.party) : [];
+  // best chance per full clear for each material, and the places that are "good enough" (>= half of its best)
+  const bestIn = list => items.map((_, k) => Math.max(0, ...list.map(r => 1 - r.per[k].none)));
+  const bestNormal = bestIn(rows.filter(r => !r.d.ara)), bestAll = bestIn(rows);
+  const ok = (r, k) => { const ref = !r.d.ara && bestNormal[k] > 0 ? bestNormal[k] : bestAll[k];
+    return r.per[k].exp > 0 && ref > 0 && (1 - r.per[k].none) >= ref * 0.5; };
+  const left = new Set(items.map((_, k) => k)), groups = [];
+  // normal dungeons first; Aramitama (random monsters) only for what drops nowhere else
+  for (const pool of [rows.filter(r => !r.d.ara), rows]) while (true){
+    let pick = null, pickN = 0, pickS = 0;
+    for (const r of pool){
+      let n = 0, s = 0;
+      for (const k of left) if (ok(r, k)){ n++; s += 1 - r.per[k].none; }
+      if (n > pickN || (n == pickN && n && s > pickS)){ pick = r; pickN = n; pickS = s; }
+    }
+    if (!pick) break;
+    const ks = [...left].filter(k => ok(pick, k));
+    ks.forEach(k => left.delete(k));
+    groups.push({r: pick, ks});
+  }
+  // what does not drop in dungeons: fields, shops, boxes, appraise, events
+  const other = new Map();
+  for (const k of left){
+    const i = items[k], src = gearSources(i);
+    const f = (itemSources(S.party)[i] || []).filter(r => r.t == "f").sort((a, b) => b.p - a.p)[0];
+    const key = f ? "f:" + f.sid : src.find(s => s.k == "reward") ? "reward" : src.find(s => s.label == "Appraise") ? "appraise" : src.find(s => s.k == "shop") ? "shop" : src.find(s => s.k == "box") ? "box" : "none";
+    (other.get(key) || other.set(key, []).get(key)).push(k);
+  }
+  const haveIn = i => `<input class="pl-have" type="number" min="0" data-own="${i}" value="${PLAN.own[i] || ""}" placeholder="0" aria-label="Have">`;
+  const runsTxt = (rest, exp) => exp > 0 ? Math.ceil(rest / exp) : Infinity;
+  const card = (title, sub, cls, body, extra = "") => `<div class="pf-card ${cls}"><div class="pf-h"><div class="pf-t">${title}</div>${extra}</div>${sub ? `<div class="pf-sub">${sub}</div>` : ""}${body}</div>`;
+  let html = groups.map(({r, ks}) => {
+    const runs = Math.max(...ks.map(k => runsTxt(need[k].rest, r.per[k].exp)));
+    const body = `<table class="pf-tbl"><thead><tr><th>Item</th><th class="r">Missing</th><th class="r"><span class="tip" title="Chance to get at least one in one full clear">Per run</span></th><th class="r"><span class="tip" title="Average runs to collect what is missing">Runs</span></th><th class="r">Have</th></tr></thead><tbody>
+      ${ks.sort((a, b) => runsTxt(need[b].rest, r.per[b].exp) - runsTxt(need[a].rest, r.per[a].exp)).map(k => { const x = need[k], p = r.per[k], rn = runsTxt(x.rest, p.exp);
+        return `<tr><td class="name">${itemLink(x.i)}${p.best?.eid != null ? `<div class="pf-mob">${esc(E[p.best.eid]?.n || "")}${p.best.boss ? " · boss" : ""}</div>` : p.best?.rank ? `<div class="pf-mob">clear reward</div>` : ""}</td>
+          <td class="r num"><b>${fmt(x.rest)}</b></td><td class="r">${pct(1 - p.none)}</td><td class="r num">${isFinite(rn) ? "~" + fmt(rn) : "—"}</td><td class="r">${haveIn(x.i)}</td></tr>`; }).join("")}</tbody></table>`;
+    return card(`${dunLink(r.d.id)} <span class="chip d${r.diff}"><b>${DIFFS[r.diff]}</b></span>`, [r.d.gn ? esc(r.d.gn) : "", r.L.lv > 0 ? `Lv ${r.L.lv}` : "", `<b>${ks.length}</b> item${ks.length > 1 ? "s" : ""} here`, isFinite(runs) ? `~${fmt(runs)} runs for all` : ""].filter(Boolean).join(" · "), "dun", body,
+      `<button class="btn sm" data-pfgo="${ks.map(k => items[k]).join(",")}" title="Compare with other dungeons in the Farm Finder">Farm Finder</button>`);
+  }).join("");
+  const OTHER_T = {reward: ["Clear rewards", "From finishing a dungeon with a given rank"], appraise: ["Appraise unidentified weapons", "Comes from appraising ??? weapons"], shop: ["Shops & exchanges", "Buy or trade for it"], box: ["Lucky boxes", "Comes out of lucky boxes"], none: ["Events, quests or cash shop", "No drop, shop or box found in the game data"]};
+  const order = k => k.startsWith("f:") ? 0 : ["reward", "appraise", "shop", "box", "none"].indexOf(k) + 1;
+  html += [...other.entries()].sort((a, b) => order(a[0]) - order(b[0])).map(([key, ks]) => {
+    const t = key.startsWith("f:") ? [`<a href="#/field/${key.slice(2)}">${esc(ST[key.slice(2)]?.n || "Field")}</a> <span class="chip">FIELD</span>`, "Respawning field monsters"] : OTHER_T[key];
+    const body = `<table class="pf-tbl"><thead><tr><th>Item</th><th class="r">Missing</th><th>How to get</th><th class="r">Have</th></tr></thead><tbody>
+      ${ks.map(k => { const x = need[k]; return `<tr><td class="name">${itemLink(x.i)}</td><td class="r num"><b>${fmt(x.rest)}</b></td><td>${gearChips(x.i, gearSources(x.i))}</td><td class="r">${haveIn(x.i)}</td></tr>`; }).join("")}</tbody></table>`;
+    return card(t[0], t[1] + ` · <b>${ks.length}</b> item${ks.length > 1 ? "s" : ""}`, key.startsWith("f:") ? "field" : key, body);
+  }).join("");
+  if (done.length) html += `<details class="pf-card done"><summary class="pf-h"><div class="pf-t">Already have <span class="ok">✓</span></div><span class="mute">${done.length} item${done.length > 1 ? "s" : ""}</span></summary>
+    <table class="pf-tbl"><tbody>${done.map(x => `<tr><td class="name">${itemLink(x.i)}</td><td class="r num">${fmt(x.need)}</td><td class="r">${haveIn(x.i)}</td></tr>`).join("")}</tbody></table></details>`;
+  return `<div class="pf-grid">${html}</div>`;
+}
+
 // ---- browse every weapon / magatama / accessory
 const PLAN_BROWSE = [{id:"weapons", label:"Weapons", kind:8}, {id:"magatama", label:"Magatama", kind:9}, {id:"accessories", label:"Accessories", kind:26}];
 const PB = {q:"", cat:-1, craft:true, limit:60};
@@ -162,10 +221,12 @@ function viewPlan(){
         <div class="pn-root">${res.roots.map((n, x) => planNode(n, 0, n.i + ":" + x)).join("")}</div>`}
     </section>
     <section class="card plan-list">
-      <div class="sim-head"><h3>What to farm</h3><div class="sim-head-ctl">${farmable.length ? `<button class="btn pri sm" id="pfarm" title="Best dungeons for every raw material that drops">Open ${farmable.length} in Farm Finder</button>` : ""}</div></div>
-      <div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
+      <div class="sim-head"><h3>What to farm</h3><div class="sim-head-ctl">
+        <div class="seg" role="group" aria-label="Group by"><button data-pgrp="place" class="${PLAN.group == "type" ? "" : "on"}" title="One card per dungeon: everything you can get there together">By place</button><button data-pgrp="type" class="${PLAN.group == "type" ? "on" : ""}" title="One table grouped by item type">By type</button></div>
+        ${farmable.length ? `<button class="btn pri sm" id="pfarm" title="Best dungeons for every raw material that drops">Open ${farmable.length} in Farm Finder</button>` : ""}</div></div>
+      ${PLAN.group == "type" ? `<div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
         ${planGroups(res.gross)}
-      </tbody></table></div>
+      </tbody></table></div>` : `<div class="hint">Materials are grouped by the dungeon where you get the most of them at once (party of ${S.party}). “Runs” is the average number of full clears to collect what is missing.</div>${planPlaces(res.gross)}`}
       ${recList.length ? `<details class="plan-rec" id="precs" ${PLAN.showRec ? "open" : ""}><summary><h3 class="plan-sub">Recipes needed <span class="mute">${recList.length}</span></h3><span class="plan-rec-t">${PLAN.showRec ? "Hide" : "Show"}</span></summary>
       <div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Recipe</th><th class="r">Crafts</th><th>How to get</th></tr></thead><tbody>
         ${recList.map(([i, c]) => `<tr><td class="name">${itemLink(i)}</td><td class="r num">${fmt(c)}</td><td>${gearChips(i, gearSources(i))}</td></tr>`).join("")}
@@ -231,5 +292,7 @@ function bindPlan(farmable){
   if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
   if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
+  $$("[data-pgrp]").forEach(b => b.onclick = () => { PLAN.group = b.dataset.pgrp; re(); });
+  $$("[data-pfgo]").forEach(b => b.onclick = () => farmGo(b.dataset.pfgo.split(",").map(Number)));
   if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };
 }
