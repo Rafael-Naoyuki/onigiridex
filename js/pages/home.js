@@ -13,6 +13,7 @@ function viewHome(){
     ["#/dissolve","item","Dissolution","What each magatama gives back when dissolved, with the chance of every amount."],
     ["#/dungeons","dungeon","Dungeons","Every dungeon by region with level, bosses and drops."],
     ["#/items","item","Items","Drops, shops, lucky boxes, recipes and dissolution for every item."],
+    ["#/plan","item","Farm Planner","Pick what to make: the full crafting tree and every raw material to farm."],
     ["#/gear","item","Equipment","Weapons, magatama and accessories with how to craft or get each one."],
     ["#/monsters","monster","Monsters","Stats, weaknesses, multi-hit cut and drops of every version."],
     ["#/bestiary","monster","Bestiary","The game's monster guide: art, lore, weaknesses and card rewards."],

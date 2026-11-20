@@ -8,7 +8,7 @@
 <meta name="description" content="OnigiriDex: dungeons, monsters, drops, build planner and boss simulator for Onigiri.">
 <title>OnigiriDex</title>
 <link rel="icon" type="image/png" href="img/logo-96.png">
-<script>document.write('<link rel="stylesheet" href="css/app.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/theme.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/sim.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/monsters.css?v=' + Date.now() + '">');</script>
+<script>document.write('<link rel="stylesheet" href="css/app.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/theme.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/sim.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/monsters.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/plan.css?v=' + Date.now() + '">');</script>
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
@@ -26,6 +26,7 @@
       <a href="#/fields" data-k="fields" title="Alt+5" aria-keyshortcuts="Alt+5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Field maps<kbd class="key">5</kbd></a>
       <div class="nav-sec">Tools</div>
       <a href="#/farm" data-k="farm" title="Alt+6" aria-keyshortcuts="Alt+6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg>Farm Finder<kbd class="key">6</kbd></a>
+      <a href="#/plan" data-k="plan" title="Plan what to craft and farm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11M9 12h11M9 19h11"/><path d="M4 5h.01M4 12h.01M4 19h.01"/></svg>Farm Planner</a>
       <a href="#/dissolve" data-k="dissolve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/><path d="M9 15l2 2 4-4"/></svg>Dissolution</a>
       <a href="#/build" data-k="build" title="Alt+7" aria-keyshortcuts="Alt+7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Build Planner<kbd class="key">7</kbd></a>
       <a href="#/sim" data-k="sim" title="Alt+8" aria-keyshortcuts="Alt+8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4"/><path d="M14 4h6v6"/><path d="M4 10l6 6"/><path d="M3 21l3-3"/></svg>Boss Simulator <span class="badge b-wip" title="Work in progress: numbers are still being tuned">WIP</span><kbd class="key">8</kbd></a>
@@ -52,7 +53,7 @@
 </div>
 <script>
 /* always load the current files (the desktop app's browser otherwise keeps old copies in its cache) */
-(function(){ var v = Date.now(); ["icons.js","data.js","js/core/base.js","js/core/indexes.js","js/core/damage.js","js/core/render.js","js/core/farm.js","js/ui/components.js","js/pages/home.js","js/pages/dungeons.js","js/pages/monsters.js","js/pages/items.js","js/pages/gear.js","js/tools/farm.js","js/pages/fields.js","js/tools/simulator.js","js/pages/bestiary.js","js/tools/dissolve.js","js/tools/planner/calc.js","js/tools/planner/core.js","js/tools/planner/effects.js","js/tools/planner/view.js","js/ui/search.js","js/ui/shell.js","js/ui/a11y.js"].forEach(function(f){ document.write('<script src="' + f + '?v=' + v + '"><\/script>'); }); })();
+(function(){ var v = Date.now(); ["icons.js","data.js","js/core/base.js","js/core/indexes.js","js/core/damage.js","js/core/render.js","js/core/farm.js","js/ui/components.js","js/pages/home.js","js/pages/dungeons.js","js/pages/monsters.js","js/pages/items.js","js/pages/gear.js","js/tools/farm.js","js/tools/planfarm.js","js/pages/fields.js","js/tools/simulator.js","js/pages/bestiary.js","js/tools/dissolve.js","js/tools/planner/calc.js","js/tools/planner/core.js","js/tools/planner/effects.js","js/tools/planner/view.js","js/ui/search.js","js/ui/shell.js","js/ui/a11y.js"].forEach(function(f){ document.write('<script src="' + f + '?v=' + v + '"><\/script>'); }); })();
 </script>
 </body>
 </html>

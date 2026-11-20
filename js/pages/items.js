@@ -197,7 +197,7 @@ function viewItem(i, qs){
   }
   app.innerHTML = `${ph({k: esc(KIND[it[2]] || "Item"), icon: icon(it), title: `<span class="rk-${it[4]}"><span class="nm">${esc(it[0])}</span></span>`, jp: it[1],
       chips: `${it[4] >= 0 ? `<span class="chip">Rank <b>${"CBAS"[it[4]]}</b></span>` : ""}${it[6] > 1 ? `<span class="chip">Req. Lv <b>${it[6]}</b></span>` : ""}${[[groups.size, "dungeon"], [fields.length, "field map"], [ranks.length, "clear reward"], [sells.length, "shop"], [fromBox.length, "box", "es"], [disFrom.length, "dissolution", "s"], [makes.length, "recipe"]].filter(([n]) => n).map(([n, w, pl]) => `<span class="chip"><b>${n}</b> ${w}${n > 1 ? (pl || "s") : ""}</span>`).join("") || `<span class="chip">no known source</span>`}`,
-      actions: src.length ? `${partySeg()}<button class="btn pri" id="farmThis">Open in Farm Finder</button>` : ""})}
+      actions: `${src.length ? `${partySeg()}<button class="btn pri" id="farmThis">Open in Farm Finder</button>` : ""}${RCP_MAKE[i] ? `<button class="btn" id="planThis" title="Add to the Farm Planner">+ Farm Planner</button>` : ""}`})}
     ${it[7] && !/^[A-Za-z]+\[/.test(it[7]) ? `<div class="note" style="white-space:pre-line;margin:0 0 14px">${esc(it[7])}</div>` : ""}
     ${best.length ? `<h2 style="margin-top:0">Best places to farm <span class="count">one full clear · party of ${S.party}</span></h2>
       <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-bottom:6px">${best.map(r => { const p = 1 - r.per[0].none; const runs = p >= 1 ? 1 : Math.ceil(Math.log(0.1) / Math.log(1 - p));
@@ -211,6 +211,7 @@ function viewItem(i, qs){
     ${tabsBar(tabs, tab, base)}
     ${body}`;
   if ($("#farmThis")) $("#farmThis").onclick = () => farmGo([i]);
+  if ($("#planThis")) $("#planThis").onclick = () => { planAdd(i); location.hash = "#/plan"; };
   $$("#idlv button").forEach(b => b.onclick = () => { DUI.lv = +b.dataset.l; store("od2-dis", DUI); route(); });
   $$("[data-dsel]").forEach(a => a.addEventListener("click", () => { DUI.sel = +a.dataset.dsel; store("od2-dis", DUI); }));
   $$("[data-mobs]").forEach(b => b.onclick = () => { const row = document.querySelector(`[data-mobrow="${b.dataset.mobs}"]`); if (!row) return;

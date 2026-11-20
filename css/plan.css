@@ -1,0 +1,50 @@
+/* OnigiriDex — Farm Planner */
+.plan-pick{margin-bottom:14px}
+.plan-pick .picker input{width:100%}
+.plan-targets{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.pt{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--gold) 8%,var(--bg2))}
+.pt-q{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.pt-q button{width:24px;height:26px;border:0;background:var(--card);color:var(--ink);cursor:pointer;font-weight:700}
+.pt-q button:hover{color:var(--gold)}
+.pt-q input{width:46px;height:26px;border:0;border-inline:1px solid var(--line);border-radius:0;text-align:center;padding:0}
+.pt-x{border:0;background:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 4px}
+.pt-x:hover{color:var(--accent2)}
+.plan-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:0 0 14px}
+.plan-kpis small{font-size:12px;color:var(--mute);font-weight:600}
+.plan-main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1300px){.plan-main{grid-template-columns:1fr}}
+.plan-tree .hint{margin:0 0 10px}
+.plan-list{position:sticky;top:calc(var(--hdr,58px) + 12px);max-height:calc(100vh - var(--hdr,58px) - 24px);overflow:auto}
+@media (max-width:1300px){.plan-list{position:static;max-height:none}}
+.plan-sub{margin:18px 0 8px}
+.plan-tbl td{vertical-align:middle}
+.pl-have{width:64px;height:28px;padding:0 6px;text-align:right;font-size:12.5px}
+.plan-tbl tr.pl-grp td{background:color-mix(in srgb,var(--gold) 9%,var(--bg2));font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--gold);padding-top:7px;padding-bottom:7px}
+.plan-tbl tr.pl-grp span{float:right;text-transform:none;letter-spacing:0;font-weight:600;color:var(--mute)}
+.plan-tbl tr.pl-done td{opacity:.55}
+.plan-tbl .gsrc{max-width:330px}
+
+/* tree */
+.pn-root{display:flex;flex-direction:column;gap:6px}
+.pn{border-left:2px solid color-mix(in srgb,var(--gold) 30%,var(--line));padding-left:8px}
+.pn-root>.pn{border-left-color:var(--gold)}
+details.pn>summary{list-style:none;cursor:pointer}
+details.pn>summary::-webkit-details-marker{display:none}
+.pn-row{display:flex;align-items:center;gap:8px;min-height:36px;padding:3px 6px;border-radius:7px;flex-wrap:wrap}
+.pn-row:hover{background:color-mix(in srgb,var(--gold) 6%,transparent)}
+details.pn>summary .pn-row::before{content:"▸";color:var(--faint);width:10px;transition:transform .15s}
+details.pn[open]>summary .pn-row::before{transform:rotate(90deg)}
+.pn.leaf>.pn-row{padding-left:24px}
+.pn-q{min-width:52px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold)}
+.pn-kind{font-size:11px;color:var(--faint)}
+.pn-sp{flex:1}
+.pn-kids{margin:2px 0 4px 18px;display:flex;flex-direction:column;gap:2px}
+.pn-craft{font-size:12px;font-weight:700;color:var(--gold)}
+.pn-need{font-size:12px;font-weight:700;color:var(--jade)}
+.pn-ok{font-size:12px;font-weight:700;color:var(--jade)}
+.pn-row.done{opacity:.6}
+.pn-tog{border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:6px;font:inherit;font-size:11px;font-weight:700;padding:2px 7px;cursor:pointer}
+.pn-tog.on{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));color:var(--gold)}
+.pn-row select{font-size:11.5px;padding:2px 4px}
+.pn-have{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--faint);cursor:text}
+.pn-have input{width:58px;height:24px;font-size:12px;text-align:right;padding:0 5px}

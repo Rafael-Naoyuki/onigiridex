@@ -30,6 +30,7 @@ function route(){
     else if (k == "item") viewItem(+parts[1], qs);
     else if (k == "gear") viewGear(parts[1]);
     else if (k == "farm") viewFarm();
+    else if (k == "plan") viewPlan();
     else if (k == "dissolve") viewDissolve();
     else if (k == "sim"){ setCrumbs([["Tools"], ["Boss Simulator"]]); viewSim(); }
     else if (k == "build"){ setCrumbs([["Tools"], ["Build Planner"]]); viewBuild(); }
