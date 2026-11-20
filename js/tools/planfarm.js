@@ -232,9 +232,9 @@ function viewPlan(){
     </section>
     <section class="card plan-list">
       <div class="sim-head"><h3>What to farm</h3><div class="sim-head-ctl">
-        <div class="seg" role="group" aria-label="Group by"><button data-pgrp="place" class="${PLAN.group == "type" ? "" : "on"}" title="One card per dungeon: everything you can get there together">By place</button><button data-pgrp="type" class="${PLAN.group == "type" ? "on" : ""}" title="One table grouped by item type">By type</button></div>
+        <div class="seg" role="group" aria-label="Group by"><button data-pgrp="type" class="${PLAN.grp == "place" ? "" : "on"}" title="One table grouped by item type">By type</button><button data-pgrp="place" class="${PLAN.grp == "place" ? "on" : ""}" title="One card per dungeon: everything you can get there together">By place</button></div>
         ${farmable.length ? `<button class="btn pri sm" id="pfarm" title="Best dungeons for every raw material that drops">Open ${farmable.length} in Farm Finder</button>` : ""}</div></div>
-      ${PLAN.group == "type" ? `<div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
+      ${PLAN.grp != "place" ? `<div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
         ${planGroups(res.gross)}
       </tbody></table></div>` : `<div class="hint">Materials are grouped by the dungeon where you get the most of them at once (party of ${S.party}). “Runs” is the average number of full clears to collect what is missing.</div>${planPlaces(res.gross)}`}
       ${recList.length ? `<details class="plan-rec" id="precs" ${PLAN.showRec ? "open" : ""}><summary><h3 class="plan-sub">Recipes needed <span class="mute">${recList.length}</span></h3><span class="plan-rec-t">${PLAN.showRec ? "Hide" : "Show"}</span></summary>
@@ -304,7 +304,7 @@ function bindPlan(farmable){
   if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
   if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
-  $$("[data-pgrp]").forEach(b => b.onclick = () => { PLAN.group = b.dataset.pgrp; re(); });
+  $$("[data-pgrp]").forEach(b => b.onclick = () => { PLAN.grp = b.dataset.pgrp; re(); });
   $$("[data-pfgo]").forEach(b => b.onclick = () => farmGo(b.dataset.pfgo.split(",").map(Number)));
   if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };
 }
