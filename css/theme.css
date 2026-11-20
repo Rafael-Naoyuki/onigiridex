@@ -199,3 +199,33 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 /* tabs: horizontal scroll only (the -1px underline overlap made a 1px vertical scrollbar) */
 .tabs{overflow-y:hidden;scrollbar-width:thin}
 .tabs a,.tabs button{margin-bottom:0}
+
+/* Equipment page */
+.gear-cats{display:flex;flex-wrap:wrap;margin:-4px 0 12px}
+.gear-cats button{display:inline-flex;align-items:center;gap:5px}
+.gear-cats .ico{transform:scale(.8)}
+.gear-tbl td{vertical-align:middle}
+.gear-tbl td.name{min-width:220px}
+.gcat{white-space:nowrap}
+.gcat .ico{vertical-align:middle;margin-right:4px}
+.gel{display:inline-flex;gap:2px;margin-left:4px;vertical-align:middle}
+.gfx{display:flex;flex-direction:column;gap:1px;font-size:12px;color:var(--mute);max-width:320px}
+.gfx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gfx em{font-style:normal;color:var(--faint);font-size:11px}
+.gsrc{display:flex;flex-wrap:wrap;gap:4px;max-width:420px}
+.gs{display:inline-flex;flex-direction:column;padding:3px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg2);font-size:11.5px;line-height:1.25;text-decoration:none;color:var(--ink)}
+.gs b{font-weight:700}
+.gs span{font-size:10.5px;color:var(--mute);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gs:hover{border-color:var(--gold)}
+.gs-craft{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));background:color-mix(in srgb,var(--gold) 12%,var(--bg2))}
+.gs-craft b{color:var(--gold)}
+.gs-drop{border-color:color-mix(in srgb,var(--jade) 50%,var(--line));background:color-mix(in srgb,var(--jade) 10%,var(--bg2))}
+.gs-drop b{color:var(--jade)}
+.gs-reward{border-color:color-mix(in srgb,var(--violet) 50%,var(--line));background:color-mix(in srgb,var(--violet) 10%,var(--bg2))}
+.gs-reward b{color:var(--violet)}
+.gs-shop{border-color:color-mix(in srgb,var(--sky) 50%,var(--line));background:color-mix(in srgb,var(--sky) 10%,var(--bg2))}
+.gs-shop b{color:var(--sky)}
+.gs-box{border-color:color-mix(in srgb,#b48cff 50%,var(--line));background:color-mix(in srgb,#b48cff 10%,var(--bg2))}
+.gs-box b{color:#b48cff}
+:root[data-theme="light"] .gs-box b{color:#6b3fa0}
+.gsrc{align-items:flex-start}

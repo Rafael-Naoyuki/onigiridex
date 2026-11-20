@@ -28,6 +28,7 @@ function route(){
     else if (k == "monster") viewMonster(+parts[1], qs);
     else if (k == "items") viewItems();
     else if (k == "item") viewItem(+parts[1], qs);
+    else if (k == "gear") viewGear(parts[1]);
     else if (k == "farm") viewFarm();
     else if (k == "dissolve") viewDissolve();
     else if (k == "sim"){ setCrumbs([["Tools"], ["Boss Simulator"]]); viewSim(); }
