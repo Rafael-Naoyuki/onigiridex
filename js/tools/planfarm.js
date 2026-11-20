@@ -108,12 +108,12 @@ function planGroups(gross){
   if (!kinds.length) return `<tr><td colspan="5">${emptyState("Nothing to farm", "Everything in this plan is crafted from items you already have.")}</td></tr>`;
   return kinds.map(k => {
     const rows = byKind.get(k).sort((a, b) => (a[1].rest == 0) - (b[1].rest == 0) || b[1].rest - a[1].rest || ITEMS[a[0]][0].localeCompare(ITEMS[b[0]][0]));
-    const left = rows.filter(r => r[1].rest > 0).length;
-    return `<tr class="pl-grp"><td colspan="5">${esc(KIND[k] || "Other")}<span>${left ? `${left} to get` : "all done ✓"}</span></td></tr>` +
-      rows.map(([i, g]) => `<tr class="${g.rest == 0 ? "pl-done" : ""}"><td class="name">${itemLink(i)}</td><td class="r num">${fmt(g.need)}</td>
+    const left = rows.filter(r => r[1].rest > 0).length, hidden = !!(PLAN.hideKind || {})[k];
+    return `<tr class="pl-grp ${hidden ? "shut" : ""}" data-hkind="${k}" tabindex="0" role="button" aria-expanded="${!hidden}" title="Click to ${hidden ? "show" : "hide"} this group"><td colspan="5"><i class="pl-arr">${hidden ? "▸" : "▾"}</i>${esc(KIND[k] || "Other")} <em>${rows.length}</em><span>${left ? `${left} to get` : "all done ✓"}${hidden ? " · hidden" : ""}</span></td></tr>` +
+      (hidden ? "" : rows.map(([i, g]) => `<tr class="${g.rest == 0 ? "pl-done" : ""}"><td class="name">${itemLink(i)}</td><td class="r num">${fmt(g.need)}</td>
         <td class="r"><input class="pl-have" type="number" min="0" data-own="${i}" value="${PLAN.own[i] || ""}" placeholder="0" aria-label="Have"></td>
         <td class="r num">${g.rest ? `<b>${fmt(g.rest)}</b>` : `<span class="ok">✓</span>`}</td>
-        <td>${g.rest ? gearChips(i, gearSources(i)) : ""}</td></tr>`).join("");
+        <td>${g.rest ? gearChips(i, gearSources(i)) : ""}</td></tr>`).join(""));
   }).join("");
 }
 
@@ -153,14 +153,16 @@ function planPlaces(gross){
   }
   const haveIn = i => `<input class="pl-have" type="number" min="0" data-own="${i}" value="${PLAN.own[i] || ""}" placeholder="0" aria-label="Have">`;
   const runsTxt = (rest, exp) => exp > 0 ? Math.ceil(rest / exp) : Infinity;
-  const card = (title, sub, cls, body, extra = "") => `<div class="pf-card ${cls}"><div class="pf-h"><div class="pf-t">${title}</div>${extra}</div>${sub ? `<div class="pf-sub">${sub}</div>` : ""}${body}</div>`;
+  // every card can be folded (click its header); folded cards keep their title and summary line
+  const card = (key, title, sub, cls, body, extra = "") => { const hidden = !!(PLAN.hidePlace || {})[key];
+    return `<div class="pf-card ${cls} ${hidden ? "shut" : ""}"><div class="pf-h" data-hplace="${esc(key)}" role="button" tabindex="0" aria-expanded="${!hidden}" title="Click to ${hidden ? "show" : "hide"}"><i class="pl-arr">${hidden ? "▸" : "▾"}</i><div class="pf-t">${title}</div>${extra}</div>${sub ? `<div class="pf-sub">${sub}</div>` : ""}${hidden ? "" : body}</div>`; };
   let html = groups.map(({r, ks}) => {
     const runs = Math.max(...ks.map(k => runsTxt(need[k].rest, r.per[k].exp)));
     const body = `<table class="pf-tbl"><thead><tr><th>Item</th><th class="r">Missing</th><th class="r"><span class="tip" title="Chance to get at least one in one full clear">Per run</span></th><th class="r"><span class="tip" title="Average runs to collect what is missing">Runs</span></th><th class="r">Have</th></tr></thead><tbody>
       ${ks.sort((a, b) => runsTxt(need[b].rest, r.per[b].exp) - runsTxt(need[a].rest, r.per[a].exp)).map(k => { const x = need[k], p = r.per[k], rn = runsTxt(x.rest, p.exp);
         return `<tr><td class="name">${itemLink(x.i)}${p.best?.eid != null ? `<div class="pf-mob">${esc(E[p.best.eid]?.n || "")}${p.best.boss ? " · boss" : ""}</div>` : p.best?.rank ? `<div class="pf-mob">clear reward</div>` : ""}</td>
           <td class="r num"><b>${fmt(x.rest)}</b></td><td class="r">${pct(1 - p.none)}</td><td class="r num">${isFinite(rn) ? "~" + fmt(rn) : "—"}</td><td class="r">${haveIn(x.i)}</td></tr>`; }).join("")}</tbody></table>`;
-    return card(`${dunLink(r.d.id)} <span class="chip d${r.diff}"><b>${DIFFS[r.diff]}</b></span>`, [r.d.gn ? esc(r.d.gn) : "", r.L.lv > 0 ? `Lv ${r.L.lv}` : "", `<b>${ks.length}</b> item${ks.length > 1 ? "s" : ""} here`, isFinite(runs) ? `~${fmt(runs)} runs for all` : ""].filter(Boolean).join(" · "), "dun", body,
+    return card(`d:${r.d.id}:${r.diff}`, `${dunLink(r.d.id)} <span class="chip d${r.diff}"><b>${DIFFS[r.diff]}</b></span>`, [r.d.gn ? esc(r.d.gn) : "", r.L.lv > 0 ? `Lv ${r.L.lv}` : "", `<b>${ks.length}</b> item${ks.length > 1 ? "s" : ""} here`, isFinite(runs) ? `~${fmt(runs)} runs for all` : ""].filter(Boolean).join(" · "), "dun", body,
       `<button class="btn sm" data-pfgo="${ks.map(k => items[k]).join(",")}" title="Compare with other dungeons in the Farm Finder">Farm Finder</button>`);
   }).join("");
   const OTHER_T = {reward: ["Clear rewards", "From finishing a dungeon with a given rank"], appraise: ["Appraise unidentified weapons", "Comes from appraising ??? weapons"], shop: ["Shops & exchanges", "Buy or trade for it"], box: ["Lucky boxes", "Comes out of lucky boxes"], none: ["Events, quests or cash shop", "No drop, shop or box found in the game data"]};
@@ -169,7 +171,7 @@ function planPlaces(gross){
     const t = key.startsWith("f:") ? [`<a href="#/field/${key.slice(2)}">${esc(ST[key.slice(2)]?.n || "Field")}</a> <span class="chip">FIELD</span>`, "Respawning field monsters"] : OTHER_T[key];
     const body = `<table class="pf-tbl"><thead><tr><th>Item</th><th class="r">Missing</th><th>How to get</th><th class="r">Have</th></tr></thead><tbody>
       ${ks.map(k => { const x = need[k]; return `<tr><td class="name">${itemLink(x.i)}</td><td class="r num"><b>${fmt(x.rest)}</b></td><td>${gearChips(x.i, gearSources(x.i))}</td><td class="r">${haveIn(x.i)}</td></tr>`; }).join("")}</tbody></table>`;
-    return card(t[0], t[1] + ` · <b>${ks.length}</b> item${ks.length > 1 ? "s" : ""}`, key.startsWith("f:") ? "field" : key, body);
+    return card(key, t[0], t[1] +` · <b>${ks.length}</b> item${ks.length > 1 ? "s" : ""}`, key.startsWith("f:") ? "field" : key, body);
   }).join("");
   if (done.length) html += `<details class="pf-card done"><summary class="pf-h"><div class="pf-t">Already have <span class="ok">✓</span></div><span class="mute">${done.length} item${done.length > 1 ? "s" : ""}</span></summary>
     <table class="pf-tbl"><tbody>${done.map(x => `<tr><td class="name">${itemLink(x.i)}</td><td class="r num">${fmt(x.need)}</td><td class="r">${haveIn(x.i)}</td></tr>`).join("")}</tbody></table></details>`;
@@ -251,6 +253,7 @@ function viewPlan(){
     <section class="card plan-list">
       <div class="sim-head"><h3>What to farm</h3><div class="sim-head-ctl">
         <div class="seg" role="group" aria-label="Group by"><button data-pgrp="type" class="${PLAN.grp == "place" ? "" : "on"}" title="One table grouped by item type">By type</button><button data-pgrp="place" class="${PLAN.grp == "place" ? "on" : ""}" title="One card per dungeon: everything you can get there together">By place</button></div>
+        <span class="pf-folds"><button class="linkbtn" id="pfold" title="Fold every group">Hide all</button><button class="linkbtn" id="punfold" title="Unfold every group">Show all</button></span>
         ${farmable.length ? `<button class="btn pri sm" id="pfarm" title="Best dungeons for every raw material that drops">Open ${farmable.length} in Farm Finder</button>` : ""}</div></div>
       ${PLAN.grp != "place" ? `<div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
         ${planGroups(res.gross)}
@@ -324,6 +327,18 @@ function bindPlan(farmable){
   if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
   $$("[data-pgrp]").forEach(b => b.onclick = () => { PLAN.grp = b.dataset.pgrp; re(); });
+  // fold / unfold groups of "What to farm" (by type: item kind, by place: dungeon card)
+  const foldKind = k => { PLAN.hideKind = Object.assign({}, PLAN.hideKind); if (PLAN.hideKind[k]) delete PLAN.hideKind[k]; else PLAN.hideKind[k] = 1; re(); };
+  const foldPlace = k => { PLAN.hidePlace = Object.assign({}, PLAN.hidePlace); if (PLAN.hidePlace[k]) delete PLAN.hidePlace[k]; else PLAN.hidePlace[k] = 1; re(); };
+  $$("[data-hkind]").forEach(h => { h.onclick = e => { if (e.target.closest("a, button, input")) return; foldKind(h.dataset.hkind); };
+    h.onkeydown = e => { if (e.key == "Enter" || e.key == " "){ e.preventDefault(); foldKind(h.dataset.hkind); } }; });
+  $$("[data-hplace]").forEach(h => { h.onclick = e => { if (e.target.closest("a, button, input")) return; foldPlace(h.dataset.hplace); };
+    h.onkeydown = e => { if (e.target == h && (e.key == "Enter" || e.key == " ")){ e.preventDefault(); foldPlace(h.dataset.hplace); } }; });
+  if ($("#pfold")) $("#pfold").onclick = () => {
+    if (PLAN.grp == "place") PLAN.hidePlace = Object.fromEntries($$("[data-hplace]").map(h => [h.dataset.hplace, 1]));
+    else PLAN.hideKind = Object.fromEntries($$("[data-hkind]").map(h => [h.dataset.hkind, 1]));
+    re(); };
+  if ($("#punfold")) $("#punfold").onclick = () => { if (PLAN.grp == "place") PLAN.hidePlace = {}; else PLAN.hideKind = {}; re(); };
   $$("[data-pfgo]").forEach(b => b.onclick = () => farmGo(b.dataset.pfgo.split(",").map(Number)));
   if ($("#pchoose")) $("#pchoose").ontoggle = e => { PLAN.showChoose = e.target.open; savePlan(); const t = $("#pchoose .plan-rec-t"); if (t) t.textContent = PLAN.showChoose ? "Hide" : "Show"; };
   if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };

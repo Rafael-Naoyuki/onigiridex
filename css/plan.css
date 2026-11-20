@@ -197,3 +197,17 @@ details.pn[open]>summary .pn-row::before{transform:rotate(90deg)}
 .pn-have{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--faint);cursor:text}
 .pn-have input{width:58px;height:24px;font-size:12px;text-align:right;padding:0 5px}
 .pn-rb b{flex:none}
+/* foldable groups in "What to farm" */
+.plan-tbl tr.pl-grp{cursor:pointer;user-select:none}
+.plan-tbl tr.pl-grp:hover td{background:color-mix(in srgb,var(--gold) 16%,var(--bg2))}
+.plan-tbl tr.pl-grp:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.plan-tbl tr.pl-grp em{font-style:normal;color:var(--faint);font-weight:600;margin-left:4px}
+.plan-tbl tr.pl-grp.shut td{opacity:.8}
+.pl-arr{font-style:normal;display:inline-block;width:14px;color:var(--faint)}
+.pf-h[data-hplace]{cursor:pointer;user-select:none;border-radius:7px;margin:-4px -6px 0;padding:4px 6px}
+.pf-h[data-hplace]:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.pf-h[data-hplace]:focus-visible{outline:2px solid var(--gold)}
+.pf-card.shut{padding-bottom:8px}
+.pf-card.shut .pf-sub{margin-bottom:0}
+.pf-folds{display:inline-flex;gap:2px;margin-right:4px}
+.pl-arr{font-size:13px;color:var(--gold);width:16px}
