@@ -235,3 +235,11 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 .gear-tabs .ico{transform:scale(1.25);margin:0 4px 0 2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
 .gear-tabs a:not(.on) .ico{opacity:.7}
 .gear-tabs a:hover .ico{opacity:1}
+
+/* item page: stats panel */
+.istats{margin:4px 0 26px}
+.istats-h{margin:0 0 10px}
+.istats .tiles{margin-bottom:14px}
+.istats-fx{margin-top:4px}
+.istats-fx .optl{columns:2 420px;column-gap:28px}
+.istats-fx .optl li{break-inside:avoid}

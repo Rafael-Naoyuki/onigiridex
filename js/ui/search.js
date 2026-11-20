@@ -4,7 +4,7 @@
 const SEARCH = [];
 DUN.forEach(d => { if (d.L.some(Boolean)) SEARCH.push({g:"Dungeons", n:d.n, j:d.j, h:`#/dungeon/${d.id}`, s:(d.n + " " + d.j).toLowerCase(), t:d.gn || "Dungeon"}); });
 Object.entries(E).forEach(([id, e]) => { if (e.used) SEARCH.push({g:"Monsters", n:e.n, j:e.j, h:`#/monster/${id}`, s:(e.n + " " + e.j).toLowerCase(), t:NATURES[e.na]?.[0] || "Monster"}); });
-ITEMS.forEach((it, i) => SEARCH.push({g:"Items", n:it[0], j:it[1], h:`#/item/${i}`, s:(it[0] + " " + it[1]).toLowerCase(), t:KIND[it[2]] || "Item", i}));
+ITEMS.forEach((it, i) => it && !isGhostItem(it) && SEARCH.push({g:"Items", n:it[0], j:it[1], h:`#/item/${i}`, s:(it[0] + " " + it[1]).toLowerCase(), t:KIND[it[2]] || "Item", i}));
 SKILLS.forEach(sk => SEARCH.push({g:"Skills", n:sk.n, j:sk.j, h:`#/skill/${sk.id}`, s:(sk.n + " " + sk.j).toLowerCase(), t:CATS[sk.c] || "Skill"}));
 D.fields.forEach(sid => SEARCH.push({g:"Field maps", n:ST[sid].n, j:ST[sid].j, h:`#/field/${sid}`, s:(ST[sid].n + " " + ST[sid].j).toLowerCase(), t:"Field"}));
 [["Home", "#/", "start dashboard"], ["Dungeons", "#/dungeons", "list regions"], ["Endgame dungeons", "#/dungeons/endgame", "purgatorium raids dullahan cursect princess delirium gloomveil 獄"], ["Monsters", "#/monsters", "list enemies"], ["Bestiary", "#/bestiary", "monster guide cards"],

@@ -6,7 +6,10 @@ const GEAR_TABS = [
   {id:"accessories", label:"Accessories", kind:26, ic:"acce_yellow"},
 ];
 const GEAR_SRC = [["any", "Any known source"], ["craft", "Craft"], ["drop", "Drop"], ["reward", "Clear reward"], ["shop", "Shop"], ["box", "Lucky box"], ["all", "Everything (incl. unknown)"]];
-const isTestItem = it => /test|alpha|beta|debug/i.test(it[0]) || /テスト|デバッグ/.test(it[1]);
+const isTestItem = it => /\b(test|alpha|beta|debug)\b/i.test(it[0]) || /テスト|デバッグ/.test(it[1]);
+// placeholders left by old drop tables for items the game no longer has
+const isGhostItem = it => /^(Item |#)\d+:\d+$/.test(it[0]);
+const isRealGear = (it, kind) => it && it[2] == kind && !isTestItem(it) && !isGhostItem(it);
 // build-planner record of an equipment item (weapon stats, magatama cost / defense / effects)
 function gearRec(i){
   const it = ITEMS[i];
@@ -47,11 +50,11 @@ function viewGear(tabId){
   setCrumbs([["Equipment", "#/gear"], [tab.label]]);
   const st = load("od2-gear2-" + tab.id, {q:"", src:"any", cat:-1, sort: tab.kind == 8 ? "atk" : tab.kind == 9 ? "lv" : "n"});
   // candidates: real equipment items with planner data
-  const all = ITEMS.map((it, i) => i).filter(i => ITEMS[i][2] == tab.kind && !isTestItem(ITEMS[i]) && gearRec(i));
+  const all = ITEMS.map((it, i) => i).filter(i => isRealGear(ITEMS[i], tab.kind));
   const srcOf = new Map(all.map(i => [i, gearSources(i)]));
-  const counts = Object.fromEntries(GEAR_TABS.map(t => [t.id, ITEMS.filter((it, i) => it[2] == t.kind && !isTestItem(it) && gearRec(i)).length]));
+  const counts = Object.fromEntries(GEAR_TABS.map(t => [t.id, ITEMS.filter(it => isRealGear(it, t.kind)).length]));
   const smeltN = BDB.smelt.length;
-  const atkOf = new Map(tab.kind == 8 ? all.map(i => { const w = gearRec(i); return [i, BuildCalc.weaponAttack(w, 100, w.enh ? BuildCalc.enhanceCap(w, smeltN) : 0, w.enh ? smeltN : 0, BDB.smelt).max]; }) : []);
+  const atkOf = new Map(tab.kind == 8 ? all.filter(i => gearRec(i)).map(i => { const w = gearRec(i); return [i, BuildCalc.weaponAttack(w, 100, w.enh ? BuildCalc.enhanceCap(w, smeltN) : 0, w.enh ? smeltN : 0, BDB.smelt).max]; }) : []);
 
   app.innerHTML = `${ph({title:"Equipment", sub:"Weapons, magatama and accessories with every way to craft or get them."})}
   <nav class="tabs gear-tabs">${GEAR_TABS.map(t => `<a href="#/gear/${t.id}" class="${t.id == tab.id ? "on" : ""}">${iconOf(t.ic)}<span>${t.label}</span><span class="n">${counts[t.id]}</span></a>`).join("")}</nav>
@@ -74,18 +77,19 @@ function viewGear(tabId){
     let list = all.filter(i => {
       const it = ITEMS[i], s = srcOf.get(i);
       if (q && !(it[0] + " " + it[1]).toLowerCase().includes(q)) return false;
-      if (tab.kind == 8 && st.cat >= 0 && gearRec(i).c != st.cat) return false;
+      if (tab.kind == 8 && st.cat >= 0 && gearRec(i)?.c != st.cat) return false;
       if (st.src == "any") return s.length > 0;
       if (st.src == "all") return true;
       return s.some(x => x.k == st.src);
     });
-    const lvOf = i => gearRec(i).lv || ITEMS[i][6] || 0;
+    const lvOf = i => gearRec(i)?.lv || ITEMS[i][6] || 0;
     list.sort(st.sort == "n" ? (a, b) => ITEMS[a][0].localeCompare(ITEMS[b][0])
       : st.sort == "atk" ? (a, b) => (atkOf.get(b) || 0) - (atkOf.get(a) || 0)
       : (a, b) => lvOf(b) - lvOf(a) || ITEMS[b][4] - ITEMS[a][4] || ITEMS[a][0].localeCompare(ITEMS[b][0]));
     $("#gcount").textContent = `${fmt(list.length)} of ${fmt(all.length)} ${tab.label.toLowerCase()}`;
     $("#gbody").innerHTML = list.slice(0, limit).map(i => {
       const it = ITEMS[i], x = gearRec(i), name = `<td class="name">${itemLink(i)}<div class="jp jp-under">${esc(it[1])}</div></td>`, how = `<td>${gearChips(i, srcOf.get(i))}</td>`;
+      if (!x) return `<tr>${name}${tab.kind == 8 ? `<td class="faint">—</td><td class="r num">${it[6] || "—"}</td><td class="r faint">—</td><td class="faint">no stats in the game data</td>` : tab.kind == 9 ? `<td class="r num">${it[6] || "—"}</td><td class="r faint">—</td><td class="r faint">—</td><td class="r faint">—</td><td class="faint">no stats in the game data</td>` : `<td class="r num">${it[6] || "—"}</td><td class="faint">no stats in the game data</td>`}${how}</tr>`;
       if (tab.kind == 8) return `<tr>${name}<td class="gcat">${catIcon(x.c) ? iconOf(catIcon(x.c)) : ""}${esc(CATS[x.c] || "")} <span class="gel">${elemBadge(x)}</span></td><td class="r num">${x.lv}</td><td class="r num">${atkOf.get(i) > 0 ? `<b title="Grade 100 with smelt and refine at max">${fmt(atkOf.get(i))}</b>` : `<span class="faint">—</span>`}</td><td>${gearFx(x, 2)}</td>${how}</tr>`;
       if (tab.kind == 9) return `<tr>${name}<td class="r num">${x.lv}</td><td class="r num">${x.cost}</td><td class="r num">${fmt(x.pd)} / ${fmt(x.md)}</td><td class="r num">${x.sl}</td><td>${gearFx(x)}</td>${how}</tr>`;
       return `<tr>${name}<td class="r num">${x.lv}</td><td>${gearFx(x)}</td>${how}</tr>`;

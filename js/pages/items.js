@@ -3,32 +3,39 @@
 // ---------------------------------------------------------------- items
 function viewItems(){
   setCrumbs([["Items"]]);
-  const st = load("od2-ifilter", {q:"", kind:0, onlyDrop:true});
-  app.innerHTML = `${ph({title:"Items", sub:"Every item with its best drop chance. Press Farm to find the best place to get it."})}
+  const st = load("od2-ifilter2", {q:"", kind:0, src:"any"});
+  const src = itemSources(S.party);
+  // real items only: no placeholders left by old drop tables, no test items
+  const real = i => ITEMS[i] && !/^Item \d+:\d+$/.test(ITEMS[i][0]) && !/^#\d+:\d+$/.test(ITEMS[i][0]) && !isTestItem(ITEMS[i]);
+  const known = i => src[i] || SHOP_SELL[i] || BOX_FROM[i] || RCP_MAKE[i];
+  const kinds = [...new Set(ITEMS.map((it, i) => real(i) ? it[2] : null).filter(k => k != null))].sort((a, b) => a - b);
+  app.innerHTML = `${ph({title:"Items", sub:"Every item and how to get it: drops, crafting, shops and lucky boxes. Press Farm to find the best place to farm it."})}
   <div class="toolbar">
-    <input type="text" id="iq" placeholder="Item name (English or Japanese)…" value="${esc(st.q)}">
-    <select id="ik"><option value="0">All types</option>${[...new Set(ITEMS.map(i => i[2]))].sort((a, b) => a - b).map(k => `<option value="${k}" ${st.kind == k ? "selected" : ""}>${esc(KIND[k] || k)}</option>`).join("")}</select>
-    <label><input type="checkbox" id="io" ${st.onlyDrop ? "checked" : ""}> only items that drop</label>
-    <span class="sp"></span>${partySeg()}
+    <input type="text" id="iq" placeholder="Item name (English or Japanese)…" value="${esc(st.q)}" aria-label="Item name">
+    <select id="ik" aria-label="Type"><option value="0">All types</option>${kinds.map(k => `<option value="${k}" ${st.kind == k ? "selected" : ""}>${esc(KIND[k] || k)}</option>`).join("")}</select>
+    <select id="isrc" aria-label="Source"><option value="any" ${st.src == "any" ? "selected" : ""}>Any known source</option><option value="drop" ${st.src == "drop" ? "selected" : ""}>Drops only</option><option value="craft" ${st.src == "craft" ? "selected" : ""}>Craftable</option><option value="all" ${st.src == "all" ? "selected" : ""}>Every item</option></select>
+    <span class="sp"></span><span class="mute" id="icount"></span>${partySeg()}
   </div>
-  <div class="wrap"><table class="tbl" id="it"><thead><tr><th>Item</th><th>Type</th><th class="r">Req. Lv</th><th class="r">Sources</th><th class="r">Best chance</th><th></th></tr></thead><tbody></tbody></table></div>
+  <div class="wrap"><table class="tbl" id="it"><thead><tr><th>Item</th><th>Type</th><th class="r">Req. Lv</th><th class="r">Best drop</th><th>How to get</th><th></th></tr></thead><tbody></tbody></table></div>
   <button class="more" id="imore">Show more</button>`;
   let limit = PAGE;
-  const src = itemSources(S.party);
   const draw = () => {
     const q = st.q.trim().toLowerCase();
-    const list = ITEMS.map((it, i) => i).filter(i => (!st.kind || ITEMS[i][2] == st.kind) && (!st.onlyDrop || src[i]) && (!q || (ITEMS[i][0] + " " + ITEMS[i][1]).toLowerCase().includes(q)));
+    const list = ITEMS.map((it, i) => i).filter(i => real(i) && (!st.kind || ITEMS[i][2] == st.kind)
+      && (st.src == "all" || (st.src == "drop" ? src[i] : st.src == "craft" ? RCP_MAKE[i] : known(i)))
+      && (!q || (ITEMS[i][0] + " " + ITEMS[i][1]).toLowerCase().includes(q)));
     list.sort((a, b) => (ITEMS[b][4] - ITEMS[a][4]) || ITEMS[a][0].localeCompare(ITEMS[b][0]));
+    $("#icount").textContent = `${fmt(list.length)} items`;
     $("#it tbody").innerHTML = list.slice(0, limit).map(i => { const it = ITEMS[i]; const b = bestAny(src, i);
       return `<tr><td>${itemLink(i)}<div class="jp jp-under">${esc(it[1])}</div></td><td class="mute">${esc(KIND[it[2]] || "")}</td><td class="r num">${it[6] > 1 ? it[6] : ""}</td>
-        <td class="r num">${src[i]?.length || "—"}</td><td class="r">${b ? pct(b.p) : "—"}</td><td class="r">${src[i] ? `<button class="btn sm" data-farm="${i}">Farm</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="6">${emptyState("No items match")}</td></tr>`;
+        <td class="r">${b ? pct(b.p) : "—"}</td><td>${gearChips(i, gearSources(i))}</td><td class="r">${src[i] ? `<button class="btn sm" data-farm="${i}">Farm</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="6">${emptyState("No items match")}</td></tr>`;
     $("#imore").style.display = list.length > limit ? "" : "none";
     $$("[data-farm]").forEach(b => b.onclick = () => farmGo([+b.dataset.farm]));
-    store("od2-ifilter", st);
+    store("od2-ifilter2", st);
   };
   $("#iq").oninput = e => { st.q = e.target.value; limit = PAGE; draw(); };
   $("#ik").onchange = e => { st.kind = +e.target.value; draw(); };
-  $("#io").onchange = e => { st.onlyDrop = e.target.checked; draw(); };
+  $("#isrc").onchange = e => { st.src = e.target.value; limit = PAGE; draw(); };
   $("#imore").onclick = () => { limit += 100; draw(); };
   draw();
 }
@@ -99,6 +106,38 @@ function recipeCard(k, opts = {}){
     ${r.r != null ? `<div class="rcp-need">Needs ${itemLink(r.r)} ${srcTxt(r.r)}</div>` : `<div class="rcp-need mute">No recipe item needed</div>`}
     <ul class="rcp-mats">${r.m.map(([i, n]) => `<li><span class="q">×${fmt(n)}</span>${itemLink(i)}${srcTxt(i)}</li>`).join("")}</ul>
   </div>`;
+}
+
+// stats panel for equipment (weapon / magatama / accessory) and sake, from the planner data
+function itemStatsPanel(i){
+  const it = ITEMS[i];
+  if (typeof gearRec != "function") return "";
+  if (it[2] == 12){
+    const sk = typeof SAKE_BY != "undefined" ? SAKE_BY[it[3]] : null;
+    return sk && sk.o.length ? `<section class="istats"><h2 class="istats-h">Effects when you drink it</h2>${optList(sk.o)}</section>` : "";
+  }
+  if (![8, 9, 26].includes(it[2])) return "";
+  const x = gearRec(i); if (!x) return "";
+  const tiles = [];
+  if (it[2] == 8){
+    const n = BDB.smelt.length, a = BuildCalc.weaponAttack(x, 100, x.enh ? BuildCalc.enhanceCap(x, n) : 0, x.enh ? n : 0, BDB.smelt), a0 = BuildCalc.weaponAttack(x, 100, 0, 0, BDB.smelt);
+    tiles.push(tile("Type", `${catIcon(x.c) ? iconOf(catIcon(x.c)) : ""} ${esc(CATS[x.c] || "")}`, elemBadge(x) || ""));
+    tiles.push(tile("Level", x.lv, "", "hl"));
+    if (a.max > 0) tiles.push(tile("ATK (max)", fmt(a.max), `${fmt(a.min)} – ${fmt(a.max)} · smelt & refine max`));
+    if (a0.max > 0) tiles.push(tile("ATK (base)", fmt(a0.max), `${fmt(a0.min)} – ${fmt(a0.max)} · grade 100`));
+  } else {
+    tiles.push(tile("Level", x.lv, "", "hl"));
+    tiles.push(tile("Cost", x.cost));
+    tiles.push(tile("P.DEF", fmt(x.pd))); tiles.push(tile("M.DEF", fmt(x.md)));
+    tiles.push(tile("Slots", x.sl, "ornament slots"));
+  }
+  const skills = it[2] == 8 ? [...(x.sk || []), ...(x.ek || [])].filter(id => SKBY[id]) : [];
+  return `<section class="istats">
+    <h2 class="istats-h">Stats <span class="count">${it[2] == 8 ? "grade 100" : "as listed in the game"}</span></h2>
+    <div class="tiles">${tiles.join("")}</div>
+    <div class="istats-fx"><h3 class="sub-h">Effects <span class="count">${(x.o || []).length}</span></h3>${optList(x.o || [])}</div>
+    ${skills.length ? `<div class="istats-fx"><h3 class="sub-h">Skills on this weapon</h3><div class="chips">${skills.map(id => `<a class="chip" href="#/skill/${id}">${esc(SKBY[id].n)}</a>`).join("")}</div></div>` : ""}
+  </section>`;
 }
 
 function viewItem(i, qs){
@@ -199,6 +238,7 @@ function viewItem(i, qs){
       chips: `${it[4] >= 0 ? `<span class="chip">Rank <b>${"CBAS"[it[4]]}</b></span>` : ""}${it[6] > 1 ? `<span class="chip">Req. Lv <b>${it[6]}</b></span>` : ""}${[[groups.size, "dungeon"], [fields.length, "field map"], [ranks.length, "clear reward"], [sells.length, "shop"], [fromBox.length, "box", "es"], [disFrom.length, "dissolution", "s"], [makes.length, "recipe"]].filter(([n]) => n).map(([n, w, pl]) => `<span class="chip"><b>${n}</b> ${w}${n > 1 ? (pl || "s") : ""}</span>`).join("") || `<span class="chip">no known source</span>`}`,
       actions: `${src.length ? `${partySeg()}<button class="btn pri" id="farmThis">Open in Farm Finder</button>` : ""}${RCP_MAKE[i] ? `<button class="btn" id="planThis" title="Add to the Farm Planner">+ Farm Planner</button>` : ""}`})}
     ${it[7] && !/^[A-Za-z]+\[/.test(it[7]) ? `<div class="note" style="white-space:pre-line;margin:0 0 14px">${esc(it[7])}</div>` : ""}
+    ${itemStatsPanel(i)}
     ${best.length ? `<h2 style="margin-top:0">Best places to farm <span class="count">one full clear · party of ${S.party}</span></h2>
       <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-bottom:6px">${best.map(r => { const p = 1 - r.per[0].none; const runs = p >= 1 ? 1 : Math.ceil(Math.log(0.1) / Math.log(1 - p));
         return `<a class="dcard" href="#/dungeon/${r.d.id}" data-godiff="${r.diff}"><div class="t">${esc(r.d.n)}</div><div class="boss">${esc(r.d.gn || "")}</div>
