@@ -1,6 +1,6 @@
 "use strict";
 /* OnigiriDex — Farm Planner: pick items to make, see the whole crafting tree and the raw materials to farm */
-const PLAN = load("od2-plan", {targets: [], own: {}, nocraft: {}, rsel: {}});
+const PLAN = load("od2-plan", {targets: [], own: {}, nocraft: {}, rsel: {}, view: "list"});
 const savePlan = () => store("od2-plan", PLAN);
 function planAdd(i, q = 1){
   const t = PLAN.targets.find(x => x.i == i);
@@ -37,7 +37,7 @@ function planCompute(){
   return {roots, raw, gross, recipes, crafts, ryou};
 }
 
-// ---- view
+// ---- list view (indented rows)
 const PLAN_OPEN = new Map();   // tree path -> open, kept while re-rendering
 function planNode(n, depth, path){
   const it = ITEMS[n.i];
@@ -52,6 +52,23 @@ function planNode(n, depth, path){
   if (!n.kids.length) return `<div class="pn leaf">${head}</div>`;
   const open = PLAN_OPEN.has(path) ? PLAN_OPEN.get(path) : depth < 1;
   return `<details class="pn" data-path="${path}" ${open ? "open" : ""}><summary>${head}</summary><div class="pn-kids">${n.kids.map((k, x) => planNode(k, depth + 1, path + "." + x)).join("")}</div></details>`;
+}
+
+// ---- tree diagram (boxes joined by lines, left to right)
+const PLAN_DOPEN = new Map();  // diagram path -> open
+let PLAN_DDEF = null;          // null = default depth, true / false after "expand / collapse all"
+function diaNode(n, depth, path){
+  const has = n.kids.length > 0;
+  const open = has && (PLAN_DOPEN.has(path) ? PLAN_DOPEN.get(path) : PLAN_DDEF != null ? PLAN_DDEF : depth < 1);
+  const cls = n.rest == 0 ? "ok" : n.crafting ? "craft" : "get";
+  let info;
+  if (n.rest == 0) info = `<b>✓ have ${fmt(n.have)}</b>`;
+  else if (n.crafting) info = `<b>Craft ×${fmt(n.crafts)}</b>${n.ryou ? `<span>${fmtM(n.ryou)} ryou</span>` : ""}`;
+  else { const s = gearSources(n.i)[0]; info = `<b>Get ×${fmt(n.rest)}</b>${s ? `<span class="gs-${s.k}">${esc(s.label)}</span>` : `<span class="faint">event / quest</span>`}`; }
+  return `<li><div class="tgn ${cls}" title="${esc(ITEMS[n.i][0])}${n.have ? ` · you have ${n.have}` : ""}">
+      <div class="tgn-top"><span class="tgq">×${fmt(n.qty)}</span>${itemLink(n.i)}</div>
+      <div class="tgn-i">${info}${has ? `<button class="tgt" data-dtog="${path}" aria-expanded="${open}" title="${open ? "Hide" : "Show"} its ${n.kids.length} materials">${open ? "−" : "+" + n.kids.length}</button>` : ""}</div>
+    </div>${open ? `<ul>${n.kids.map((k, x) => diaNode(k, depth + 1, path + "." + x)).join("")}</ul>` : ""}</li>`;
 }
 
 // raw materials grouped by type (weapons first, then magatama, materials, gems...); finished rows go to the end of each group
@@ -73,19 +90,58 @@ function planGroups(gross){
   }).join("");
 }
 
+// ---- browse every weapon / magatama / accessory
+const PLAN_BROWSE = [{id:"weapons", label:"Weapons", kind:8}, {id:"magatama", label:"Magatama", kind:9}, {id:"accessories", label:"Accessories", kind:26}];
+const PB = {q:"", cat:-1, craft:true, limit:60};
+function browseList(){
+  const b = PLAN_BROWSE.find(x => x.id == PLAN.browse); if (!b) return [];
+  const q = PB.q.trim().toLowerCase();
+  const lvOf = i => gearRec(i)?.lv || ITEMS[i][6] || 0;
+  return ITEMS.map((it, i) => i).filter(i => {
+    const it = ITEMS[i];
+    if (!it || it[2] != b.kind || isTestItem(it)) return false;
+    if (PB.craft && !RCP_MAKE[i]) return false;
+    if (b.kind == 8 && PB.cat >= 0 && gearRec(i)?.c != PB.cat) return false;
+    return !q || (it[0] + " " + it[1]).toLowerCase().includes(q);
+  }).sort((a, b2) => lvOf(b2) - lvOf(a) || ITEMS[a][0].localeCompare(ITEMS[b2][0]));
+}
+function drawBrowse(){
+  const box = $("#pblist"); if (!box) return;
+  const list = browseList(), inPlan = new Map(PLAN.targets.map(t => [t.i, t.q]));
+  $("#pbcount").textContent = `${fmt(list.length)} ${PB.craft ? "craftable" : ""}`;
+  box.innerHTML = list.slice(0, PB.limit).map(i => { const x = gearRec(i), q = inPlan.get(i);
+    return `<div class="pb-row">${itemLink(i)}<span class="pb-meta">${x?.c != null && ITEMS[i][2] == 8 ? esc(CATS[x.c]) + " · " : ""}Lv ${x?.lv || ITEMS[i][6] || "—"}${RCP_MAKE[i] ? "" : ` · <span class="faint">no recipe</span>`}</span>
+      <button class="addbtn ${q ? "on" : ""}" data-padd="${i}" title="Add one to the plan">${q ? `✓ ×${q}` : "+ Add"}</button></div>`; }).join("")
+    + (list.length > PB.limit ? `<button class="more" id="pbmore">Show more (${fmt(list.length - PB.limit)})</button>` : "")
+    || emptyState("Nothing matches", "");
+  box.querySelectorAll("[data-padd]").forEach(a => a.onclick = () => { planAdd(+a.dataset.padd); planRerender(); });
+  const m = $("#pbmore"); if (m) m.onclick = () => { PB.limit += 60; drawBrowse(); };
+}
+
 function viewPlan(){
   setCrumbs([["Tools"], ["Farm Planner"]]);
   const res = planCompute();
   const rawList = [...res.raw.entries()].sort((a, b) => ITEMS[a[0]][0].localeCompare(ITEMS[b[0]][0]));
   const farmable = rawList.filter(([i]) => (itemSources(S.party)[i] || []).length).map(([i]) => i);
   const recList = [...res.recipes.entries()];
+  const dia = PLAN.view == "tree";
+  const br = PLAN_BROWSE.find(x => x.id == PLAN.browse);
   app.innerHTML = `${ph({title:"Farm Planner", sub:"Pick what you want to make: see every sub-item down to the raw materials, and what to farm."})}
   <section class="card plan-pick">
-    <div class="picker"><input type="text" id="pq" placeholder="Add an item to make (e.g. Revolt, Sin, magatama)…" aria-label="Add an item" autocomplete="off"><div class="sugg" id="psugg"></div></div>
+    <div class="plan-pick-row">
+      <div class="picker"><input type="text" id="pq" placeholder="Search an item to make (e.g. Revolt, Sin, magatama)…" aria-label="Add an item" autocomplete="off"><div class="sugg" id="psugg"></div></div>
+      <div class="seg plan-browse-btns" role="group" aria-label="Browse"><span class="mute">or browse</span>${PLAN_BROWSE.map(b => `<button data-pbrowse="${b.id}" class="${PLAN.browse == b.id ? "on" : ""}" aria-pressed="${PLAN.browse == b.id}">${b.label}</button>`).join("")}</div>
+    </div>
+    ${br ? `<div class="plan-browse">
+      <div class="toolbar pb-tb"><input type="text" id="pbq" placeholder="Filter ${br.label.toLowerCase()}…" value="${esc(PB.q)}" aria-label="Filter">
+        <label class="chk"><input type="checkbox" id="pbcraft" ${PB.craft ? "checked" : ""}> only craftable</label><span class="sp"></span><span class="mute" id="pbcount"></span>
+        <button class="linkbtn" id="pbclose">Close</button></div>
+      ${br.kind == 8 ? `<div class="seg gear-cats" id="pbcat">${[["-1", "All"], ...Object.entries(CATS)].map(([k, n]) => `<button data-c="${k}" class="${PB.cat == +k ? "on" : ""}">${+k >= 0 && catIcon(+k) ? iconOf(catIcon(+k)) : ""}${esc(n)}</button>`).join("")}</div>` : ""}
+      <div class="pb-list" id="pblist"></div></div>` : ""}
     ${PLAN.targets.length ? `<div class="plan-targets">${PLAN.targets.map((t, k) => ITEMS[t.i] ? `<div class="pt">
       ${itemLink(t.i)}<div class="pt-q"><button data-tq="${k}|-1" aria-label="One less">−</button><input type="number" min="1" data-tqv="${k}" value="${t.q}" aria-label="Quantity"><button data-tq="${k}|1" aria-label="One more">+</button></div>
       <button class="pt-x" data-tdel="${k}" aria-label="Remove ${esc(ITEMS[t.i][0])}">✕</button></div>` : "").join("")}
-      <button class="linkbtn" id="pclear">Clear all</button></div>` : `<div class="hint">Search an item above. Items with a recipe come first.</div>`}
+      <button class="linkbtn" id="pclear">Clear all</button></div>` : `<div class="hint">Search an item or browse the lists. Items with a recipe come first.</div>`}
   </section>
   ${PLAN.targets.length ? `
   <div class="plan-kpis">
@@ -94,11 +150,15 @@ function viewPlan(){
     <div class="sim-kpi"><span>Crafting cost</span><b>${fmtM(res.ryou)} <small>ryou</small></b></div>
     <div class="sim-kpi"><span>Recipes needed</span><b>${fmt(recList.length)}</b></div>
   </div>
-  <div class="plan-main">
+  <div class="plan-main ${dia ? "dia" : ""}">
     <section class="card plan-tree">
-      <div class="sim-head"><h3>Crafting tree</h3><div class="sim-head-ctl"><button class="btn sm" id="pexp">Expand all</button><button class="btn sm" id="pcol">Collapse</button></div></div>
-      <div class="hint">“Craft it” breaks an item into its materials. Switch to “Get it” if you'd rather farm or buy it ready-made. “have” is subtracted everywhere.</div>
-      <div class="pn-root">${res.roots.map((n, x) => planNode(n, 0, n.i + ":" + x)).join("")}</div>
+      <div class="sim-head"><h3>Crafting tree</h3><div class="sim-head-ctl">
+        <div class="seg" role="group" aria-label="View"><button data-pview="list" class="${dia ? "" : "on"}">List</button><button data-pview="tree" class="${dia ? "on" : ""}">Tree</button></div>
+        <button class="btn sm" id="pexp">Expand all</button><button class="btn sm" id="pcol">Collapse</button></div></div>
+      ${dia ? `<div class="hint">Each box shows how many you need. Gold = craft it, green = farm / get it, faded = you already have it. Use the + / − buttons to open a branch.</div>
+        <div class="tg" id="tg"><ul class="tg-root">${res.roots.map((n, x) => diaNode(n, 0, n.i + ":" + x)).join("")}</ul></div>`
+      : `<div class="hint">“Craft it” breaks an item into its materials. Switch to “Get it” if you'd rather farm or buy it ready-made. “have” is subtracted everywhere.</div>
+        <div class="pn-root">${res.roots.map((n, x) => planNode(n, 0, n.i + ":" + x)).join("")}</div>`}
     </section>
     <section class="card plan-list">
       <div class="sim-head"><h3>What to farm</h3><div class="sim-head-ctl">${farmable.length ? `<button class="btn pri sm" id="pfarm" title="Best dungeons for every raw material that drops">Open ${farmable.length} in Farm Finder</button>` : ""}</div></div>
@@ -112,10 +172,20 @@ function viewPlan(){
     </section>
   </div>` : ""}`;
   bindPlan(farmable);
+  drawBrowse();
+}
+
+// re-render keeping the page and the diagram scrolled where they were
+function planRerender(){
+  savePlan();
+  const y = window.scrollY, tg = $("#tg"), tl = tg ? tg.scrollLeft : 0, tt = tg ? tg.scrollTop : 0;
+  viewPlan();
+  window.scrollTo(0, y);
+  const t2 = $("#tg"); if (t2){ t2.scrollLeft = tl; t2.scrollTop = tt; }
 }
 
 function bindPlan(farmable){
-  const re = () => { savePlan(); const y = window.scrollY; viewPlan(); window.scrollTo(0, y); };
+  const re = planRerender;
   // item search: craftable items first
   const pq = $("#pq"), box = $("#psugg");
   pq.oninput = () => {
@@ -128,17 +198,28 @@ function bindPlan(farmable){
     box.classList.add("show");
     box.querySelectorAll("[data-padd]").forEach(a => a.onclick = () => { planAdd(+a.dataset.padd); re(); setTimeout(() => $("#pq")?.focus(), 0); });
   };
+  // browse panel
+  $$("[data-pbrowse]").forEach(b => b.onclick = () => { PLAN.browse = PLAN.browse == b.dataset.pbrowse ? null : b.dataset.pbrowse; PB.limit = 60; PB.cat = -1; re(); });
+  if ($("#pbclose")) $("#pbclose").onclick = () => { PLAN.browse = null; re(); };
+  if ($("#pbq")) $("#pbq").oninput = e => { PB.q = e.target.value; PB.limit = 60; drawBrowse(); };
+  if ($("#pbcraft")) $("#pbcraft").onchange = e => { PB.craft = e.target.checked; PB.limit = 60; drawBrowse(); };
+  $$("#pbcat button").forEach(b => b.onclick = () => { PB.cat = +b.dataset.c; $$("#pbcat button").forEach(x => x.classList.toggle("on", x == b)); PB.limit = 60; drawBrowse(); });
+  // targets
   $$("[data-tq]").forEach(b => b.onclick = () => { const [k, d] = b.dataset.tq.split("|").map(Number); PLAN.targets[k].q = Math.max(1, PLAN.targets[k].q + d); re(); });
   $$("[data-tqv]").forEach(inp => inp.onchange = () => { PLAN.targets[+inp.dataset.tqv].q = Math.max(1, +inp.value || 1); re(); });
   $$("[data-tdel]").forEach(b => b.onclick = () => { PLAN.targets.splice(+b.dataset.tdel, 1); re(); });
   if ($("#pclear")) $("#pclear").onclick = () => { PLAN.targets = []; re(); };
+  // list view
   $$(".plan-tree details").forEach(d => d.ontoggle = () => PLAN_OPEN.set(d.dataset.path, d.open));
   $$(".pn-have").forEach(l => l.onclick = e => { e.preventDefault(); e.stopPropagation(); l.querySelector("input").focus(); });
   $$("[data-own]").forEach(inp => { inp.onclick = e => e.stopPropagation(); inp.onchange = () => { const v = Math.max(0, +inp.value || 0); if (v) PLAN.own[inp.dataset.own] = v; else delete PLAN.own[inp.dataset.own]; re(); }; });
   $$("[data-nocraft]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const i = b.dataset.nocraft; if (PLAN.nocraft[i]) delete PLAN.nocraft[i]; else PLAN.nocraft[i] = 1; re(); });
   $$("[data-rsel]").forEach(s => { s.onclick = e => { e.preventDefault(); e.stopPropagation(); }; s.onchange = () => { PLAN.rsel[s.dataset.rsel] = +s.value; re(); }; });
-  if ($("#pexp")) $("#pexp").onclick = () => $$(".plan-tree details").forEach(d => d.open = true);
-  if ($("#pcol")) $("#pcol").onclick = () => $$(".plan-tree details").forEach(d => d.open = false);
+  // diagram view
+  $$("[data-pview]").forEach(b => b.onclick = () => { PLAN.view = b.dataset.pview; re(); });
+  $$("[data-dtog]").forEach(b => b.onclick = e => { e.preventDefault(); const p = b.dataset.dtog; PLAN_DOPEN.set(p, b.getAttribute("aria-expanded") != "true"); re(); });
+  if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
+  if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
   if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };
 }
