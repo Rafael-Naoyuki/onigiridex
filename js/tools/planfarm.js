@@ -154,9 +154,10 @@ function viewPlan(){
     <section class="card plan-tree">
       <div class="sim-head"><h3>Crafting tree</h3><div class="sim-head-ctl">
         <div class="seg" role="group" aria-label="View"><button data-pview="list" class="${dia ? "" : "on"}">List</button><button data-pview="tree" class="${dia ? "on" : ""}">Tree</button></div>
+        ${dia ? `<div class="seg" role="group" aria-label="Tree direction"><button data-pdir="v" class="${PLAN.dir == "h" ? "" : "on"}" title="Top to bottom">↓</button><button data-pdir="h" class="${PLAN.dir == "h" ? "on" : ""}" title="Left to right">→</button></div>` : ""}
         <button class="btn sm" id="pexp">Expand all</button><button class="btn sm" id="pcol">Collapse</button></div></div>
       ${dia ? `<div class="hint">Each box shows how many you need. Gold = craft it, green = farm / get it, faded = you already have it. Use the + / − buttons to open a branch.</div>
-        <div class="tg" id="tg"><ul class="tg-root">${res.roots.map((n, x) => diaNode(n, 0, n.i + ":" + x)).join("")}</ul></div>`
+        <div class="tg ${PLAN.dir == "h" ? "h" : "v"}" id="tg"><ul class="tg-root">${res.roots.map((n, x) => diaNode(n, 0, n.i + ":" + x)).join("")}</ul></div>`
       : `<div class="hint">“Craft it” breaks an item into its materials. Switch to “Get it” if you'd rather farm or buy it ready-made. “have” is subtracted everywhere.</div>
         <div class="pn-root">${res.roots.map((n, x) => planNode(n, 0, n.i + ":" + x)).join("")}</div>`}
     </section>
@@ -173,13 +174,21 @@ function viewPlan(){
   </div>` : ""}`;
   bindPlan(farmable);
   drawBrowse();
+  if (!planRerender.busy) planCenterTree();
 }
 
+// top-to-bottom tree: start scrolled so the main item is in the middle
+function planCenterTree(){
+  const tg = $("#tg"); if (!tg || PLAN.dir == "h") return;
+  const root = tg.querySelector(".tg-root > li > .tgn"); if (!root) return;
+  const r = root.getBoundingClientRect(), t = tg.getBoundingClientRect();
+  tg.scrollLeft = Math.max(0, tg.scrollLeft + (r.left + r.width / 2) - (t.left + tg.clientWidth / 2));
+}
 // re-render keeping the page and the diagram scrolled where they were
 function planRerender(){
   savePlan();
   const y = window.scrollY, tg = $("#tg"), tl = tg ? tg.scrollLeft : 0, tt = tg ? tg.scrollTop : 0;
-  viewPlan();
+  planRerender.busy = true; viewPlan(); planRerender.busy = false;
   window.scrollTo(0, y);
   const t2 = $("#tg"); if (t2){ t2.scrollLeft = tl; t2.scrollTop = tt; }
 }
@@ -216,7 +225,8 @@ function bindPlan(farmable){
   $$("[data-nocraft]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const i = b.dataset.nocraft; if (PLAN.nocraft[i]) delete PLAN.nocraft[i]; else PLAN.nocraft[i] = 1; re(); });
   $$("[data-rsel]").forEach(s => { s.onclick = e => { e.preventDefault(); e.stopPropagation(); }; s.onchange = () => { PLAN.rsel[s.dataset.rsel] = +s.value; re(); }; });
   // diagram view
-  $$("[data-pview]").forEach(b => b.onclick = () => { PLAN.view = b.dataset.pview; re(); });
+  $$("[data-pview]").forEach(b => b.onclick = () => { PLAN.view = b.dataset.pview; re(); planCenterTree(); });
+  $$("[data-pdir]").forEach(b => b.onclick = () => { PLAN.dir = b.dataset.pdir; re(); planCenterTree(); });
   $$("[data-dtog]").forEach(b => b.onclick = e => { e.preventDefault(); const p = b.dataset.dtog; PLAN_DOPEN.set(p, b.getAttribute("aria-expanded") != "true"); re(); });
   if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
   if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };

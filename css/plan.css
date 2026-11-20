@@ -17,27 +17,47 @@
 .pb-meta{font-size:11px;color:var(--faint);white-space:nowrap}
 .pb-list .more{grid-column:1/-1}
 
-/* tree diagram: boxes joined by lines, left to right */
-.plan-main.dia{grid-template-columns:1fr}
+/* tree diagram: boxes joined by lines (.v = top to bottom, .h = left to right) */
+.plan-main.dia{grid-template-columns:minmax(0,1fr)}
+.plan-main>section{min-width:0}
 .plan-main.dia .plan-list{position:static;max-height:none}
-.tg{overflow:auto;max-height:78vh;padding:6px 4px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
-.tg ul{list-style:none;margin:0;padding:0 0 0 30px;position:relative;display:flex;flex-direction:column}
-.tg ul.tg-root{padding-left:0;width:max-content}
-/* every box is anchored at the top of its branch: lines meet at --cy (box centre) */
-.tg{--cy:34px}
-.tg li{position:relative;display:flex;align-items:flex-start;padding:5px 0 5px 22px}
-.tg ul.tg-root>li{padding-left:0}
-.tg li::before{content:"";position:absolute;left:0;top:var(--cy);width:22px;border-top:2px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
-.tg li::after{content:"";position:absolute;left:0;top:0;bottom:0;border-left:2px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
-.tg li:first-child::after{top:var(--cy)}
-.tg li:last-child::after{bottom:auto;height:var(--cy)}
-.tg li:first-child:last-child::after{display:none}
-.tg ul.tg-root>li::before,.tg ul.tg-root>li::after{display:none}
-.tg li>ul::before{content:"";position:absolute;left:0;top:var(--cy);width:30px;border-top:2px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
-.tg li>ul{margin-top:-5px}   /* children block starts level with the parent box (li has 5px top padding) */
+.tg{--ln:2px solid color-mix(in srgb,var(--gold) 45%,var(--line));overflow:auto;max-height:78vh;padding:10px 6px 16px;border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
+.tg ul{list-style:none;margin:0;padding:0;position:relative;display:flex}
+.tg ul.tg-root{width:max-content;min-width:100%}
+.tg li{position:relative;display:flex}
 .tgn{height:58px;box-sizing:border-box;justify-content:center}
-.tg li>ul{padding-left:30px}
-.tg li>ul>li:only-child::before{width:22px}
+
+/* top to bottom (org chart) */
+.tg.v ul{flex-direction:row;justify-content:center;padding-top:22px}
+.tg.v ul.tg-root{padding-top:0}
+.tg.v li{flex-direction:column;align-items:center;padding:22px 5px 0}
+.tg.v ul.tg-root>li{padding-top:0}
+.tg.v li::before,.tg.v li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:22px;border-top:var(--ln)}
+.tg.v li::after{right:auto;left:50%;border-left:var(--ln)}
+.tg.v li:first-child::before,.tg.v li:last-child::after{border:0 none}
+.tg.v li:last-child::before{border-right:var(--ln);border-radius:0 8px 0 0}
+.tg.v li:first-child::after{border-radius:8px 0 0 0}
+.tg.v li:only-child::before{display:none}
+.tg.v li:only-child::after{border-radius:0;border-top:0;left:50%;width:0;margin-left:-1px}
+.tg.v ul.tg-root>li::before,.tg.v ul.tg-root>li::after{display:none}
+.tg.v li>ul::before{content:"";position:absolute;top:0;left:50%;height:22px;border-left:var(--ln);margin-left:-1px}
+.tg.v .tgn{width:196px;border-left-width:1px;border-top:4px solid var(--line)}
+.tg.v .tgn.craft{border-top-color:var(--gold)} .tg.v .tgn.get,.tg.v .tgn.ok{border-top-color:var(--jade)}
+
+/* left to right: every box is anchored at the top of its branch, lines meet at --cy (box centre) */
+.tg.h{--cy:34px}
+.tg.h ul{flex-direction:column;padding-left:30px}
+.tg.h ul.tg-root{padding-left:0}
+.tg.h li{align-items:flex-start;padding:5px 0 5px 22px}
+.tg.h ul.tg-root>li{padding-left:0}
+.tg.h li::before{content:"";position:absolute;left:0;top:var(--cy);width:22px;border-top:var(--ln)}
+.tg.h li::after{content:"";position:absolute;left:0;top:0;bottom:0;border-left:var(--ln)}
+.tg.h li:first-child::after{top:var(--cy)}
+.tg.h li:last-child::after{bottom:auto;height:var(--cy)}
+.tg.h li:first-child:last-child::after{display:none}
+.tg.h ul.tg-root>li::before,.tg.h ul.tg-root>li::after{display:none}
+.tg.h li>ul::before{content:"";position:absolute;left:0;top:var(--cy);width:30px;border-top:var(--ln)}
+.tg.h li>ul{margin-top:-5px}   /* children block starts level with the parent box (li has 5px top padding) */
 .tgn{width:236px;flex:none;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:9px;background:var(--card);padding:6px 8px;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 0 rgba(0,0,0,.25)}
 .tgn.craft{border-left-color:var(--gold)}
 .tgn.get{border-left-color:var(--jade)}
