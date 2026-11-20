@@ -102,7 +102,7 @@ function recipeCard(k, opts = {}){
   const srcTxt = i => { const b = bestAny(src, i); return b ? `<span class="mute">best ${pct(b.p)}</span>` : (RCP_MAKE[i] ? `<span class="mute">craftable</span>` : `<span class="faint">no drop</span>`); };
   return `<div class="rcp">
     <div class="rcp-h">${opts.showProduct ? `${itemLink(r.i)}${r.n > 1 ? ` <b>×${r.n}</b>` : ""}` : `<b>Recipe${opts.idx != null ? " " + (opts.idx + 1) : ""}</b>`}
-      <span class="rcp-meta"><span class="chip" title="Crafting cost">${fmt(r.p)} ryou</span><span class="chip" title="Required crafting level">Craft Lv <b>${r.lv}</b></span></span></div>
+      <span class="rcp-meta"><span class="chip" title="Crafting cost">${fmt(r.p)} ryou</span><span class="chip" title="Required crafting level">Craft Lv <b>${r.lv}</b></span>${opts.idx != null ? `<button class="btn sm" data-rplan="${r.i}|${opts.idx}" title="Add to the Farm Planner using this recipe">Use this recipe</button>` : ""}</span></div>
     ${r.r != null ? `<div class="rcp-need">Needs ${itemLink(r.r)} ${srcTxt(r.r)}</div>` : `<div class="rcp-need mute">No recipe item needed</div>`}
     <ul class="rcp-mats">${r.m.map(([i, n]) => `<li><span class="q">×${fmt(n)}</span>${itemLink(i)}${srcTxt(i)}</li>`).join("")}</ul>
   </div>`;
@@ -252,6 +252,7 @@ function viewItem(i, qs){
     ${body}`;
   if ($("#farmThis")) $("#farmThis").onclick = () => farmGo([i]);
   if ($("#planThis")) $("#planThis").onclick = () => { planAdd(i); location.hash = "#/plan"; };
+  $$("[data-rplan]").forEach(b => b.onclick = () => { const [it, k] = b.dataset.rplan.split("|").map(Number); PLAN.rsel[it] = k; planAdd(it); location.hash = "#/plan"; });
   $$("#idlv button").forEach(b => b.onclick = () => { DUI.lv = +b.dataset.l; store("od2-dis", DUI); route(); });
   $$("[data-dsel]").forEach(a => a.addEventListener("click", () => { DUI.sel = +a.dataset.dsel; store("od2-dis", DUI); }));
   $$("[data-mobs]").forEach(b => b.onclick = () => { const row = document.querySelector(`[data-mobrow="${b.dataset.mobs}"]`); if (!row) return;

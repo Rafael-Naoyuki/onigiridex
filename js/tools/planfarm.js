@@ -20,7 +20,7 @@ function planCompute(){
     const n = {i, qty, have: take, rest, kids: [], canCraft: list.length > 0, alt: list.length};
     const craft = n.canCraft && !PLAN.nocraft[i] && !seen.has(i) && depth < 14 && nodes < 6000;
     if (rest > 0 && craft){
-      const rk = list[Math.min(PLAN.rsel[i] || 0, list.length - 1)], r = RECIPES[rk];
+      const rk = list[recipeSel(i)], r = RECIPES[rk];
       n.crafting = true; n.rk = rk; n.crafts = Math.ceil(rest / (r.n || 1)); n.ryou = n.crafts * (r.p || 0);
       crafts += n.crafts; ryou += n.ryou;
       if (r.r != null) recipes.set(r.r, (recipes.get(r.r) || 0) + n.crafts);
@@ -37,6 +37,14 @@ function planCompute(){
   return {roots, raw, gross, recipes, crafts, ryou};
 }
 
+// short description of a recipe, so two recipes of the same item can be told apart
+function recipeLabel(rk, long = false){
+  const r = RECIPES[rk], m = r.m;
+  if (long) return m.map(([i, n]) => `${ITEMS[i][0]} ×${fmt(n)}`).join(", ") + (r.r != null ? ` · needs ${ITEMS[r.r][0]}` : "") + ` · ${fmtM(r.p)} ryou`;
+  return `${ITEMS[m[0][0]][0]} ×${fmt(m[0][1])}${m.length > 1 ? ` +${m.length - 1}` : ""}${r.r != null ? " · scroll" : ""}`;
+}
+const recipeSel = i => (PLAN.rsel[i] || 0) % (RCP_MAKE[i] || [1]).length;
+
 // ---- list view (indented rows)
 const PLAN_OPEN = new Map();   // tree path -> open, kept while re-rendering
 function planNode(n, depth, path){
@@ -46,9 +54,11 @@ function planNode(n, depth, path){
     : n.crafting ? `<span class="pn-craft">Craft ×${fmt(n.crafts)}${n.ryou ? ` · ${fmtM(n.ryou)} ryou` : ""}</span>`
     : `<span class="pn-need">Get ×${fmt(n.rest)}</span>`;
   const ctl = n.canCraft ? `<button class="pn-tog ${PLAN.nocraft[n.i] ? "" : "on"}" data-nocraft="${n.i}" title="${PLAN.nocraft[n.i] ? "Craft it from its materials" : "Don't craft — I'll get it ready-made"}">${PLAN.nocraft[n.i] ? "Get it" : "Craft it"}</button>
-      ${n.alt > 1 ? `<select data-rsel="${n.i}" title="Recipe">${RCP_MAKE[n.i].map((rk, k) => `<option value="${k}" ${(PLAN.rsel[n.i] || 0) == k ? "selected" : ""}>Recipe ${k + 1}</option>`).join("")}</select>` : ""}` : "";
+` : "";
+  // two or more recipes: pick one, each button says what it needs
+  const recipes = n.canCraft && n.alt > 1 && !PLAN.nocraft[n.i] ? `<div class="pn-recipes"><span>Recipe</span>${RCP_MAKE[n.i].map((rk, k) => `<button class="pn-rb ${recipeSel(n.i) == k ? "on" : ""}" data-rpick="${n.i}|${k}" title="${esc(recipeLabel(rk, true))}" aria-pressed="${recipeSel(n.i) == k}"><b>${k + 1}</b>${esc(recipeLabel(rk))}</button>`).join("")}</div>` : "";
   const head = `<div class="pn-row ${n.rest == 0 ? "done" : ""}"><span class="pn-q">×${fmt(n.qty)}</span>${itemLink(n.i)}<span class="pn-kind">${esc(KIND[it[2]] || "")}</span>
-    <span class="pn-sp"></span>${status}${ctl}${haveIn}</div>`;
+    <span class="pn-sp"></span>${status}${ctl}${haveIn}</div>${recipes}`;
   if (!n.kids.length) return `<div class="pn leaf">${head}</div>`;
   const open = PLAN_OPEN.has(path) ? PLAN_OPEN.get(path) : depth < 1;
   return `<details class="pn" data-path="${path}" ${open ? "open" : ""}><summary>${head}</summary><div class="pn-kids">${n.kids.map((k, x) => planNode(k, depth + 1, path + "." + x)).join("")}</div></details>`;
@@ -67,7 +77,7 @@ function diaNode(n, depth, path){
   else { const s = gearSources(n.i)[0]; info = `<b>Get ×${fmt(n.rest)}</b>${s ? `<span class="gs-${s.k}">${esc(s.label)}</span>` : `<span class="faint">event / quest</span>`}`; }
   return `<li><div class="tgn ${cls}" title="${esc(ITEMS[n.i][0])}${n.have ? ` · you have ${n.have}` : ""}">
       <div class="tgn-top"><span class="tgq">×${fmt(n.qty)}</span>${itemLink(n.i)}</div>
-      <div class="tgn-i">${info}${has ? `<button class="tgt" data-dtog="${path}" aria-expanded="${open}" title="${open ? "Hide" : "Show"} its ${n.kids.length} materials">${open ? "−" : "+" + n.kids.length}</button>` : ""}</div>
+      <div class="tgn-i">${info}${n.alt > 1 && n.canCraft ? `<button class="tgr" data-rcycle="${n.i}" title="${n.alt} recipes — click to switch:\n${esc(RCP_MAKE[n.i].map((rk, k) => `${recipeSel(n.i) == k ? "▶" : "  "} Recipe ${k + 1}: ${recipeLabel(rk, true)}`).join("\n"))}">⇄ ${recipeSel(n.i) + 1}/${n.alt}</button>` : ""}${has ? `<button class="tgt" data-dtog="${path}" aria-expanded="${open}" title="${open ? "Hide" : "Show"} its ${n.kids.length} materials">${open ? "−" : "+" + n.kids.length}</button>` : ""}</div>
     </div>${open ? `<ul>${n.kids.map((k, x) => diaNode(k, depth + 1, path + "." + x)).join("")}</ul>` : ""}</li>`;
 }
 
@@ -288,6 +298,8 @@ function bindPlan(farmable){
   // diagram view
   $$("[data-pview]").forEach(b => b.onclick = () => { PLAN.view = b.dataset.pview; re(); planCenterTree(); });
   $$("[data-pdir]").forEach(b => b.onclick = () => { PLAN.dir = b.dataset.pdir; re(); planCenterTree(); });
+  $$("[data-rpick]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const [i, k] = b.dataset.rpick.split("|").map(Number); PLAN.rsel[i] = k; re(); });
+  $$("[data-rcycle]").forEach(b => b.onclick = e => { e.preventDefault(); const i = b.dataset.rcycle; PLAN.rsel[i] = (recipeSel(i) + 1) % RCP_MAKE[i].length; re(); });
   $$("[data-dtog]").forEach(b => b.onclick = e => { e.preventDefault(); const p = b.dataset.dtog; PLAN_DOPEN.set(p, b.getAttribute("aria-expanded") != "true"); re(); });
   if ($("#pexp")) $("#pexp").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = true; re(); } else $$(".plan-tree details").forEach(d => d.open = true); };
   if ($("#pcol")) $("#pcol").onclick = () => { if (PLAN.view == "tree"){ PLAN_DOPEN.clear(); PLAN_DDEF = false; re(); } else $$(".plan-tree details").forEach(d => d.open = false); };
