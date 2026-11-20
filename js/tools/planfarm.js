@@ -105,10 +105,10 @@ function viewPlan(){
       <div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Item</th><th class="r">Need</th><th class="r">Have</th><th class="r">Missing</th><th>How to get</th></tr></thead><tbody>
         ${planGroups(res.gross)}
       </tbody></table></div>
-      ${recList.length ? `<h3 class="plan-sub">Recipes needed</h3>
+      ${recList.length ? `<details class="plan-rec" id="precs" ${PLAN.showRec ? "open" : ""}><summary><h3 class="plan-sub">Recipes needed <span class="mute">${recList.length}</span></h3><span class="plan-rec-t">${PLAN.showRec ? "Hide" : "Show"}</span></summary>
       <div class="wrap"><table class="tbl plan-tbl"><thead><tr><th>Recipe</th><th class="r">Crafts</th><th>How to get</th></tr></thead><tbody>
         ${recList.map(([i, c]) => `<tr><td class="name">${itemLink(i)}</td><td class="r num">${fmt(c)}</td><td>${gearChips(i, gearSources(i))}</td></tr>`).join("")}
-      </tbody></table></div>` : ""}
+      </tbody></table></div></details>` : ""}
     </section>
   </div>` : ""}`;
   bindPlan(farmable);
@@ -140,4 +140,5 @@ function bindPlan(farmable){
   if ($("#pexp")) $("#pexp").onclick = () => $$(".plan-tree details").forEach(d => d.open = true);
   if ($("#pcol")) $("#pcol").onclick = () => $$(".plan-tree details").forEach(d => d.open = false);
   if ($("#pfarm")) $("#pfarm").onclick = () => farmGo(farmable);
+  if ($("#precs")) $("#precs").ontoggle = e => { PLAN.showRec = e.target.open; savePlan(); $(".plan-rec-t").textContent = PLAN.showRec ? "Hide" : "Show"; };
 }
