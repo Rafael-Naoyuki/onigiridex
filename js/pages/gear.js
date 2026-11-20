@@ -88,13 +88,14 @@ function viewGear(tabId){
       : (a, b) => lvOf(b) - lvOf(a) || ITEMS[b][4] - ITEMS[a][4] || ITEMS[a][0].localeCompare(ITEMS[b][0]));
     $("#gcount").textContent = `${fmt(list.length)} of ${fmt(all.length)} ${tab.label.toLowerCase()}`;
     $("#gbody").innerHTML = list.slice(0, limit).map(i => {
-      const it = ITEMS[i], x = gearRec(i), name = `<td class="name">${itemLink(i)}<div class="jp jp-under">${esc(it[1])}</div></td>`, how = `<td>${gearChips(i, srcOf.get(i))}</td>`;
+      const it = ITEMS[i], x = gearRec(i), name = `<td class="name">${itemLink(i)}<div class="jp jp-under">${esc(it[1])}</div></td>`, how = `<td><div class="g-how">${gearChips(i, srcOf.get(i))}${RCP_MAKE[i] ? (PLAN.targets.some(t => t.i == i) ? `<a class="g-plan on" href="#/plan" title="Already in your Farm Planner">✓ In plan</a>` : `<button class="g-plan" data-gplan="${i}" title="Add to the Farm Planner (full crafting tree and materials)">+ Plan</button>`) : ""}</div></td>`;
       if (!x) return `<tr>${name}${tab.kind == 8 ? `<td class="faint">—</td><td class="r num">${it[6] || "—"}</td><td class="r faint">—</td><td class="faint">no stats in the game data</td>` : tab.kind == 9 ? `<td class="r num">${it[6] || "—"}</td><td class="r faint">—</td><td class="r faint">—</td><td class="r faint">—</td><td class="faint">no stats in the game data</td>` : `<td class="r num">${it[6] || "—"}</td><td class="faint">no stats in the game data</td>`}${how}</tr>`;
       if (tab.kind == 8) return `<tr>${name}<td class="gcat">${catIcon(x.c) ? iconOf(catIcon(x.c)) : ""}${esc(CATS[x.c] || "")} <span class="gel">${elemBadge(x)}</span></td><td class="r num">${x.lv}</td><td class="r num">${atkOf.get(i) > 0 ? `<b title="Grade 100 with smelt and refine at max">${fmt(atkOf.get(i))}</b>` : `<span class="faint">—</span>`}</td><td>${gearFx(x, 2)}</td>${how}</tr>`;
       if (tab.kind == 9) return `<tr>${name}<td class="r num">${x.lv}</td><td class="r num">${x.cost}</td><td class="r num">${fmt(x.pd)} / ${fmt(x.md)}</td><td class="r num">${x.sl}</td><td>${gearFx(x)}</td>${how}</tr>`;
       return `<tr>${name}<td class="r num">${x.lv}</td><td>${gearFx(x)}</td>${how}</tr>`;
     }).join("") || `<tr><td colspan="8">${emptyState("Nothing matches", "Try another name or source.")}</td></tr>`;
     $("#gmore").style.display = list.length > limit ? "" : "none";
+    $$("[data-gplan]").forEach(btn => btn.onclick = () => { planAdd(+btn.dataset.gplan); btn.outerHTML = `<a class="g-plan on" href="#/plan" title="Open the Farm Planner">✓ In plan</a>`; });
     store("od2-gear2-" + tab.id, st);
   };
   $("#gq").oninput = e => { st.q = e.target.value; limit = 80; draw(); };

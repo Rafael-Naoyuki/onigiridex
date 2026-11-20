@@ -260,3 +260,8 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 @media (max-width:1350px){.toolcards.tc-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){.toolcards.tc-5,.toolcards.tc-3{grid-template-columns:1fr}}
 .quickpick + .quickpick{margin-top:10px}
+/* Equipment: quick add to the Farm Planner */
+.g-how{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.g-plan{flex:none;padding:3px 9px;border-radius:7px;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));background:var(--card);color:var(--gold);font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
+.g-plan:hover{background:color-mix(in srgb,var(--gold) 14%,var(--card))}
+.g-plan.on{border-color:color-mix(in srgb,var(--jade) 55%,var(--line));color:var(--jade)}
