@@ -42,26 +42,23 @@ function planCompute(){
 function recipeLabel(rk, long = false){
   const r = RECIPES[rk], m = r.m;
   if (long) return m.map(([i, n]) => `${ITEMS[i][0]} ×${fmt(n)}`).join(", ") + (r.r != null ? ` · needs ${ITEMS[r.r][0]}` : "") + ` · ${fmtM(r.p)} ryou`;
-  return `${ITEMS[m[0][0]][0]} ×${fmt(m[0][1])}${m.length > 1 ? ` +${m.length - 1}` : ""}${r.r != null ? " · scroll" : ""}`;
+  // lead with the first material only this recipe uses (materials shared by every recipe of the item don't help to choose)
+  const others = new Set((RCP_MAKE[r.i] || []).filter(k => k != rk).flatMap(k => RECIPES[k].m.map(([x]) => x)));
+  const lead = m.find(([x]) => !others.has(x)) || m[0];
+  return `${ITEMS[lead[0]][0]} ×${fmt(lead[1])}${m.length > 1 ? ` +${m.length - 1}` : ""}${r.r != null ? " · scroll" : ""}`;
 }
 const recipeSel = i => (PLAN.rsel[i] || 0) % (RCP_MAKE[i] || [1]).length;
 
 // ---- items of the plan that can be made in more than one way: shown first so you pick before reading the tree
 function planChoices(choices){
   if (!choices.size) return "";
-  const src = itemSources(S.party);
-  const mat = ([m, n]) => { const b = bestAny(src, m); return `<li>${itemLink(m)}<span class="q">×${fmt(n)}</span>${b ? `<span class="pc-src">${pct(b.p)}</span>` : RCP_MAKE[m] ? `<span class="pc-src faint">craft</span>` : ""}</li>`; };
   const undecided = [...choices.keys()].filter(i => PLAN.rsel[i] == null).length;
   return `<details class="card plan-choose" id="pchoose" ${PLAN.showChoose !== false ? "open" : ""}>
     <summary class="sim-head"><h3>Choose a recipe <span class="mute">${choices.size} item${choices.size > 1 ? "s" : ""} in your plan can be made in more than one way${undecided ? ` · <b class="pc-und">${undecided} still on the default</b>` : " · all chosen ✓"}</span></h3><span class="plan-rec-t">${PLAN.showChoose !== false ? "Hide" : "Show"}</span></summary>
     <div class="pc-list">${[...choices.keys()].map(i => `<div class="pc-item">
-      <div class="pc-name">${itemLink(i)}<span class="mute">${PLAN.rsel[i] != null ? `<span class="ok">✓ chosen</span>` : "default: recipe 1"}</span></div>
-      <div class="pc-opts">${RCP_MAKE[i].map((rk, k) => { const r = RECIPES[rk], on = recipeSel(i) == k;
-        return `<div class="pc-opt ${on ? "on" : ""}" data-rpick="${i}|${k}" role="button" tabindex="0" aria-pressed="${on}">
-          <div class="pc-oh"><b>Recipe ${k + 1}</b>${on ? `<span class="pc-use">✓ in use</span>` : `<span class="pc-use off">use this</span>`}</div>
-          <ul>${r.m.map(mat).join("")}</ul>
-          <div class="pc-meta"><span>${fmtM(r.p)} ryou</span>${r.r != null ? `<span>needs ${esc(ITEMS[r.r][0])}</span>` : `<span>no scroll needed</span>`}</div>
-        </div>`; }).join("")}</div></div>`).join("")}</div>
+      <div class="pc-name">${itemLink(i)}${PLAN.rsel[i] != null ? `<span class="ok" title="You picked this recipe">✓</span>` : ""}</div>
+      <div class="pc-opts">${RCP_MAKE[i].map((rk, k) => { const on = recipeSel(i) == k;
+        return `<button class="pn-rb ${on ? "on" : ""}" data-rpick="${i}|${k}" aria-pressed="${on}" title="${esc(recipeLabel(rk, true))}"><b>${k + 1}</b>${esc(recipeLabel(rk))}</button>`; }).join("")}</div></div>`).join("")}</div>
   </details>`;
 }
 
