@@ -113,3 +113,13 @@
 .sim-slot.add{cursor:pointer}
 .sim-slot.add:hover{border-color:var(--gold)}
 .sim-slot.add>i{color:var(--gold)}
+/* skills table: drop Hits / Cast on medium screens so it never scrolls sideways */
+@media (max-width:1700px){.sim-tbl .c-sm{display:none}}
+.sim-tbl td.name{max-width:300px}
+/* target elements: one compact row */
+.sim-res .rstrip{display:inline-grid;grid-template-columns:repeat(13,40px);gap:2px}
+.sim-res .rc{height:44px}
+.sim-res .rc i{font-size:14px}
+.sim-res .rc u{font-size:7px;letter-spacing:0}
+.sim-res .rc b{font-size:10.5px}
+@media (max-width:1300px){.sim-res .rstrip{grid-template-columns:repeat(7,40px)}}

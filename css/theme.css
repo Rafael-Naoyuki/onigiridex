@@ -243,3 +243,20 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 .istats-fx{margin-top:4px}
 .istats-fx .optl{columns:2 420px;column-gap:28px}
 .istats-fx .optl li{break-inside:avoid}
+
+/* home v3: Continue / Tools / Explore */
+.home-h{margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+.home-h .linkbtn{margin-left:auto}
+.conts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.cont{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));border-left:4px solid var(--gold);border-radius:var(--radius,12px);background:var(--card);color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s}
+.cont:hover{border-color:var(--gold);transform:translateY(-1px)}
+.cont-k{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--gold)}
+.cont b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-recent{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px 12px}
+.toolcard{transition:border-color .15s,transform .15s}
+.toolcard:hover{transform:translateY(-1px)}
+.toolcards.tc-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.toolcards.tc-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:1350px){.toolcards.tc-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:900px){.toolcards.tc-5,.toolcards.tc-3{grid-template-columns:1fr}}
+.quickpick + .quickpick{margin-top:10px}

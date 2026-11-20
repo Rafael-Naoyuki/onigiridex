@@ -10,12 +10,13 @@ function viewMonsters(){
     <div class="seg" id="mnat"><button data-n="-1" class="${st.nat<0?"on":""}">All</button>${NATURES.map((n,i) => `<button data-n="${i}" class="${st.nat==i?"on":""}">${n[0]}</button>`).join("")}</div>
     <label title="Monsters that are not placed in any dungeon or field map (events, summons, unused)"><input type="checkbox" id="mall" ${st.all?"checked":""}> include monsters not placed anywhere</label>
   </div>
-  <div class="wrap"><table class="tbl" id="mt"><thead><tr><th class="s" data-s="n">Monster</th><th>Nature</th><th>Size</th><th class="r s" data-s="lv">Lv range</th><th class="r s" data-s="hp">Max HP</th><th class="r s" data-s="loc">Locations</th></tr></thead><tbody></tbody></table></div>
+  <div class="wrap"><table class="tbl" id="mt"><thead><tr><th class="s" data-s="n">Monster</th><th>Nature</th><th>Size</th><th class="r s" data-s="lv">Lv range</th><th class="r s" data-s="hp">Max HP</th><th><span class="tip" title="The 2 elements that hurt it most (toughest version). Color by its resistance: green 30 or less, yellow 31-69, red 70+">Best elements</span></th><th class="r s" data-s="loc">Locations</th></tr></thead><tbody></tbody></table></div>
   <button class="more" id="mmore">Show more</button>`;
   let limit = PAGE;
   const rows = Object.entries(E).map(([id, e]) => {
     const vs = Object.values(e.v), lvs = vs.map(v => v[0]), hps = vs.map(v => v[1]);
-    return {id:+id, e, lo: lvs.length ? Math.min(...lvs) : 0, hi: lvs.length ? Math.max(...lvs) : 0, hp: hps.length ? Math.max(...hps) : 0, loc: enemyLoc[id]?.size || 0};
+    const top = vs.reduce((a, v) => !a || v[1] > a[1] ? v : a, null);
+    return {id:+id, e, lo: lvs.length ? Math.min(...lvs) : 0, hi: lvs.length ? Math.max(...lvs) : 0, hp: hps.length ? Math.max(...hps) : 0, loc: enemyLoc[id]?.size || 0, res: top ? top[5] : null, cov: top ? !!top[18] : false};
   });
   const draw = () => {
     const q = st.q.trim().toLowerCase();
@@ -23,7 +24,7 @@ function viewMonsters(){
     list.sort((a, b) => (b.loc ? 1 : 0) - (a.loc ? 1 : 0) || (st.sort == "n" ? a.e.n.localeCompare(b.e.n) : st.sort == "hp" ? b.hp - a.hp : st.sort == "loc" ? b.loc - a.loc : a.lo - b.lo));
     $$("#mt th.s").forEach(th => th.classList.toggle("sorted", th.dataset.s == st.sort));
     $("#mt tbody").innerHTML = list.slice(0, limit).map(r => `<tr class="rowlink" data-href="#/monster/${r.id}"><td class="name"><b>${esc(r.e.n)}</b> <span class="mid" title="Monster ID (several monsters share a name)">#${r.id}</span>${r.loc ? "" : ` <span class="badge b-est" title="Not placed in any dungeon or field map (event, summon or unused)">NOT PLACED</span>`}<div class="jp">${esc(r.e.j)}</div></td><td>${natureTag(r.e)}</td><td class="mute">${SIZES[r.e.sz] || ""}</td>
-      <td class="r num">${!r.hi ? "—" : r.lo == r.hi ? r.lo : r.lo + "–" + r.hi}</td><td class="r num">${r.hp ? fmtM(r.hp) : "—"}</td><td class="r num">${r.loc || "—"}</td></tr>`).join("") || `<tr><td colspan="6">${emptyState("No monsters match")}</td></tr>`;
+      <td class="r num">${!r.hi ? "—" : r.lo == r.hi ? r.lo : r.lo + "–" + r.hi}</td><td class="r num">${r.hp ? fmtM(r.hp) : "—"}</td><td class="mbest">${r.res ? bestElems(r.res, r.cov, 2).map(([i, c]) => `<span class="band-${resBand(r.res[i])}"><i style="color:${ATTR_COLORS[i]}">${ATTRS[i][1]}</i> ${ATTRS[i][0]} ${chgLabel(c)}%</span>`).join("") + (r.cov ? covBadge() : "") : "—"}</td><td class="r num">${r.loc || "—"}</td></tr>`).join("") || `<tr><td colspan="7">${emptyState("No monsters match")}</td></tr>`;
     $("#mmore").style.display = list.length > limit ? "" : "none";
     store("od2-mfilter2", st);
   };

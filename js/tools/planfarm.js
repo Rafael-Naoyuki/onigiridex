@@ -229,7 +229,7 @@ function viewPlan(){
     ${PLAN.targets.length ? `<div class="plan-targets">${PLAN.targets.map((t, k) => ITEMS[t.i] ? `<div class="pt">
       ${itemLink(t.i)}<div class="pt-q"><button data-tq="${k}|-1" aria-label="One less">−</button><input type="number" min="1" data-tqv="${k}" value="${t.q}" aria-label="Quantity"><button data-tq="${k}|1" aria-label="One more">+</button></div>
       <button class="pt-x" data-tdel="${k}" aria-label="Remove ${esc(ITEMS[t.i][0])}">✕</button></div>` : "").join("")}
-      <button class="linkbtn" id="pclear">Clear all</button></div>` : `<div class="hint">Search an item or browse the lists. Items with a recipe come first.</div>`}
+      <button class="linkbtn" id="pclear">Clear all</button></div>` : ""}
   </section>
   ${PLAN.targets.length ? `
   <div class="plan-kpis">
@@ -263,7 +263,7 @@ function viewPlan(){
         ${recList.map(([i, c]) => `<tr><td class="name">${itemLink(i)}</td><td class="r num">${fmt(c)}</td><td>${gearChips(i, gearSources(i))}</td></tr>`).join("")}
       </tbody></table></div></details>` : ""}
     </section>
-  </div>` : ""}`;
+  </div>` : planEmpty()}`;
   bindPlan(farmable);
   drawBrowse();
   if (!planRerender.busy) planCenterTree();
@@ -275,6 +275,21 @@ function planCenterTree(){
   const root = tg.querySelector(".tg-root > li > .tgn"); if (!root) return;
   const r = root.getBoundingClientRect(), t = tg.getBoundingClientRect();
   tg.scrollLeft = Math.max(0, tg.scrollLeft + (r.left + r.width / 2) - (t.left + tg.clientWidth / 2));
+}
+// empty planner: how it works + a few endgame items to start from
+function planEmpty(){
+  const top = kind => ITEMS.map((it, i) => i).filter(i => ITEMS[i][2] == kind && RCP_MAKE[i] && !isTestItem(ITEMS[i]) && !isGhostItem(ITEMS[i]))
+    .sort((a, b) => (gearRec(b)?.lv || ITEMS[b][6] || 0) - (gearRec(a)?.lv || ITEMS[a][6] || 0) || ITEMS[a][0].localeCompare(ITEMS[b][0]));
+  const seen = new Set(), pick = (list, n) => list.filter(i => { const base = ITEMS[i][0].replace(/\s*[-–].*$/, ""); if (seen.has(base)) return false; seen.add(base); return true; }).slice(0, n);
+  const ex = [...pick(top(8), 4), ...pick(top(9), 4)];
+  return `<section class="plan-empty">
+    <div class="pe-steps">
+      <div><b>1</b><span><strong>Pick what you want to make</strong>Search above or browse weapons, magatama and accessories.</span></div>
+      <div><b>2</b><span><strong>Choose recipes and what you have</strong>Items with two recipes are listed first; type how many you already own.</span></div>
+      <div><b>3</b><span><strong>Farm</strong>Every raw material with where it drops — send them all to the Farm Finder.</span></div>
+    </div>
+    ${ex.length ? `<h3 class="pe-h">Start from an endgame item</h3><div class="pe-ex">${ex.map(i => `<button class="pe-item" data-padd="${i}">${icon(ITEMS[i])}<span>${esc(ITEMS[i][0])}</span><em>${esc(KIND[ITEMS[i][2]] || "")} · Lv ${gearRec(i)?.lv || ITEMS[i][6] || "—"}</em></button>`).join("")}</div>` : ""}
+  </section>`;
 }
 // re-render keeping the page and the diagram scrolled where they were
 function planRerender(){
@@ -299,6 +314,7 @@ function bindPlan(farmable){
     box.classList.add("show");
     box.querySelectorAll("[data-padd]").forEach(a => a.onclick = () => { planAdd(+a.dataset.padd); re(); setTimeout(() => $("#pq")?.focus(), 0); });
   };
+  $$(".pe-item").forEach(b => b.onclick = () => { planAdd(+b.dataset.padd); re(); });
   // browse panel
   $$("[data-pbrowse]").forEach(b => b.onclick = () => { PLAN.browse = PLAN.browse == b.dataset.pbrowse ? null : b.dataset.pbrowse; PB.limit = 60; PB.cat = -1; re(); });
   if ($("#pbclose")) $("#pbclose").onclick = () => { PLAN.browse = null; re(); };

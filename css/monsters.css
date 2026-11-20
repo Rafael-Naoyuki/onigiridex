@@ -77,7 +77,6 @@
 .sim-res + .covnote{margin:8px 0 0}
 .rpanel.cov{border-color:color-mix(in srgb,#b48cff 45%,var(--line))}
 .rstrip.cov{padding:3px;border-radius:9px;box-shadow:inset 0 0 0 1px color-mix(in srgb,#b48cff 55%,transparent)}
-.sim-res .rstrip{display:inline-grid;grid-template-columns:repeat(7,52px)}
 
 /* resistance bands: 70+ red, 31-69 yellow, <=30 green */
 :root{--midc:#e3b341}
@@ -90,3 +89,9 @@
 .rcell.mid em{background:var(--midc)}
 .rcell.res{border-color:color-mix(in srgb,var(--resc) 45%,var(--line));background:color-mix(in srgb,var(--resc) 8%,var(--bg2))}
 .band-weak{color:var(--weak)} .band-mid{color:var(--midc)} .band-res{color:var(--resc)}
+/* monster list: best elements column */
+.mbest{white-space:nowrap}
+.mbest span{display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:12.5px;font-weight:700}
+.mbest i{font-style:normal;font-weight:800;font-size:14px}
+:root[data-theme="light"] .mbest i{filter:brightness(.62) saturate(1.5)}
+.mbest .badge{margin-left:2px}

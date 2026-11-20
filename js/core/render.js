@@ -73,7 +73,7 @@ function hpPanel(v){
 }
 function skillAttrChips(a){ return `<div class="attrs">${a.map(([i, r]) => `<span class="at neu" style="color:${ATTR_COLORS[i]}">${r}% ${ATTRS[i][0]}</span>`).join("")}</div>`; }
 function natureTag(e){ const n = NATURES[e.na]; return n ? `${n[0]} <span class="jp">${n[1]}</span>` : "—"; }
-function describeVar(nm){ const m = nm.match(/^(.*)_(\d)_(\d)$/); return m ? `${DIFFS[m[2]]||m[2]} · ${m[3]}P` : nm; }
+function describeVar(nm){ const m = nm.match(/^(.*)_(\d)_(\d)$/); return m ? `${DIFFS[m[2]]||m[2]} · ${m[3]}P` : "Base version"; }
 // quick "100% hit" with My ATK
 function recAtk(v){ return 2 * v[3]; }
 function atkCell(v){

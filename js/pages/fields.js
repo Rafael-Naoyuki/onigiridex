@@ -7,7 +7,7 @@ function viewSkill(id){
   remember(`#/skill/${id}`, sk.n, "Skill");
   const tg = targetStats(), r = calcSkill(sk, tg, SIM), x = sk.x || {};
   app.innerHTML = `${ph({k: `${esc(CATS[sk.c])} ${sk.o ? "ougi" : "skill"}`, title: esc(sk.n) + (sk.o ? ` <span class="badge b-ougi">OUGI</span>` : ""), jp: sk.j + " · ID " + sk.id, sub: sk.d ? esc(sk.d) : "", chips: skillAttrChips(sk.a)})}
-    <div class="tiles">${tile("Rank", sk.r, "", "hl")}${tile("Skill power", `${sk.p0} → ${sk.p1}`)}${tile("Cooldown", (sk.ct / 1000).toFixed(1) + "s")}${tile("SP", sk.sp)}${tile("MHC rate", sk.mh)}${tile("Hits", x.rateText ? esc(x.rateText) : "?")}${tile("Cast time", x.time ? x.time + "s" : "?")}${x.rDmg ? tile("Rating", esc(x.rDmg)) : ""}</div>
+    <div class="tiles">${tile("Rank", sk.r, "", "hl")}${tile("Skill power", fmt(sk.p1), `Lv 1: ${fmt(sk.p0)}`)}${tile("Cooldown", (sk.ct / 1000).toFixed(1) + "s")}${tile("SP", sk.sp)}${tile("MHC rate", sk.mh)}${tile("Hits", x.rates?.length ? x.rates.length : "?", x.rateText ? `<span title="${esc(x.rateText)}">${esc(x.rateText.length > 26 ? x.rateText.slice(0, 26) + "…" : x.rateText)}</span>` : "no hit data")}${tile("Cast time", x.time ? x.time + "s" : "?")}${x.rDmg ? tile("Rating", esc(x.rDmg)) : ""}</div>
     <div class="two">
       <div><h2 style="margin-top:0">Vs ${esc(tg.name)} <span class="count">${esc(tg.sub)}</span></h2>
         <div class="wrap"><table class="tbl"><thead><tr><th>Hit</th><th class="r">Rate</th><th class="r">ATK after cuts</th><th class="r">Defense eff.</th><th class="r">Damage</th></tr></thead><tbody>
@@ -24,9 +24,15 @@ function viewSkill(id){
 }
 function viewFields(){
   setCrumbs([["Field maps"]]);
-  app.innerHTML = `${ph({title:"Field maps", sub:"Open areas outside dungeons where monsters respawn."})}
-  <div class="grid">${D.fields.map(sid => { const ms = fieldMons(sid); const lvs = ms.map(m => m.v[0]);
-    return `<a class="dcard" href="#/field/${sid}"><div class="t">${esc(ST[sid].n)}</div><div class="jp">${esc(ST[sid].j)}</div><div class="lvpills"><span class="lvpill">Lv <b>${lvs.length ? Math.min(...lvs) + "–" + Math.max(...lvs) : "?"}</b></span><span class="lvpill"><b>${ms.length}</b> monsters</span></div></a>`; }).join("")}</div>`;
+  // only maps with monsters, sorted by level; seasonal / event maps in their own section
+  const isEvent = st => /event|chocolate|halloween|christmas|valentine|summer|new year|anniversary/i.test(st.n) || /イベント|ちょこ|チョコ|ハロウィン|クリスマス|バレンタイン|夏祭|正月|周年/.test(st.j);
+  const maps = D.fields.map(sid => { const ms = fieldMons(sid), lvs = ms.map(m => m.v[0]); return {sid, ms, lo: lvs.length ? Math.min(...lvs) : 0, hi: lvs.length ? Math.max(...lvs) : 0}; })
+    .filter(m => m.ms.length && !/\btest\b|^[?？\s]+$/i.test(ST[m.sid].n) && !/テスト/.test(ST[m.sid].j)).sort((a, b) => a.lo - b.lo || a.hi - b.hi || ST[a.sid].n.localeCompare(ST[b.sid].n));
+  const card = m => `<a class="dcard" href="#/field/${m.sid}"><div class="t">${esc(ST[m.sid].n)}</div><div class="jp">${esc(ST[m.sid].j)}</div><div class="lvpills"><span class="lvpill">Lv <b>${m.lo == m.hi ? m.lo : m.lo + "–" + m.hi}</b></span><span class="lvpill"><b>${m.ms.length}</b> monster${m.ms.length > 1 ? "s" : ""}</span>${m.ms.some(x => x.drop) ? "" : `<span class="lvpill faint">no drops</span>`}</div></a>`;
+  const reg = maps.filter(m => !isEvent(ST[m.sid])), ev = maps.filter(m => isEvent(ST[m.sid]));
+  app.innerHTML = `${ph({title:"Field maps", sub:`Open areas outside dungeons where monsters keep respawning — ${maps.length} maps with monsters, by level.`})}
+  <div class="grid">${reg.map(card).join("")}</div>
+  ${ev.length ? `<h2 class="home-h">Event maps <span class="count">${ev.length}</span></h2><div class="grid">${ev.map(card).join("")}</div>` : ""}`;
 }
 function viewField(sid, qs){
   const st = ST[sid]; if (!st) return notFound();

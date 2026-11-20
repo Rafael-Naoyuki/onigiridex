@@ -260,7 +260,7 @@ function viewBuild(){
     ${sum("Attack", fmt(sec[2]), r.weapon ? `${fmt(r.minAtk)} – ${fmt(r.maxAtk)}` : "no active weapon", "big")}
     ${sum("Max HP", fmt(sec[0]))}${sum("P. Def", fmt(sec[3]))}${sum("M. Def", fmt(sec[7]))}
     ${sum("Critical", sec[12] + "%")}${sum("Crit dmg", sec[13] + "%")}${sum("CT cut", sec[18] + "%")}
-    ${sum("Damage cap", fmtM(dmgCap), capSum ? `incl. +${fmtM(capSum)} from ${caps.length} ougi` : "no cap ougi equipped", "cap",
+    ${sum("Damage cap", dmgCap < 1e8 ? fmt(dmgCap) : fmtM(dmgCap), capSum ? `incl. +${fmtM(capSum)} from ${caps.length} ougi` : "no cap ougi equipped", "cap",
         `${fmtM(MAX_DMG)} base + ${fmtM(r.extraDmgLimit)} gear${caps.map(id => ` + ${fmtM(SKBY[id].dl[0])} ${SKBY[id].n}`).join("")}`)}
     ${sum("Points left", fmt(r.ptsLeft), `of ${fmt(r.ptsTotal)}`, "pts " + ptsCls)}
     ${sum("Capacity", `${r.used}/${r.capacity}`, r.used > r.capacity ? "over capacity" : "magatama", r.used > r.capacity ? "pts bad" : "")}

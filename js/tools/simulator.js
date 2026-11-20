@@ -223,15 +223,15 @@ function drawSimResults(){
       </div>
     </div>
     <div class="wrap sim-tblwrap"><table class="tbl sim-tbl" id="stbl"><thead><tr>
-      <th class="c"></th>${sortTh("n", "Skill", "", "")}<th>Elements</th><th class="r">Hits</th>${sortTh("dmg", "Dmg / cast")}<th class="r">Cast</th>${sortTh("cd", "Cooldown")}
-      ${sortTh("bdps", "Burst DPS", "Damage ÷ cast time (spamming with no cooldown)")}${sortTh("sdps", "Sustained", "Damage ÷ max(cast time, cooldown) — if you only used this skill")}<th class="r"><span class="tip" title="Casts of this skill alone to kill the target">Casts</span></th></tr></thead><tbody>
+      <th class="c"></th>${sortTh("n", "Skill", "", "")}<th>Elements</th><th class="r c-sm">Hits</th>${sortTh("dmg", "Dmg / cast")}<th class="r c-sm">Cast</th>${sortTh("cd", "Cooldown")}
+      ${sortTh("bdps", "Burst DPS", "Damage ÷ cast time (spamming with no cooldown)")}${sortTh("sdps", "Sustained", "Damage ÷ max(cast time, cooldown) — if you only used this skill")}<th class="r c-sm"><span class="tip" title="Casts of this skill alone to kill the target">Casts</span></th></tr></thead><tbody>
       ${list.slice(0, 200).map(({sk, r}) => { const inRot = loadout.includes(sk.id); return `<tr class="${inRot ? "picked" : ""}" ${inRot ? `style="--c:${colorOf.get(sk.id)}"` : ""}>
         <td class="c"><button class="addbtn ${inRot ? "on" : ""}" data-pick="${sk.id}" ${!inRot && full ? "disabled" : ""} aria-pressed="${inRot}" title="${inRot ? "Remove from rotation" : full ? "Rotation is full" : "Add to rotation"}">${inRot ? "✓" : "+ Add"}</button></td>
         <td class="name"><a href="#/skill/${sk.id}"><b>${esc(sk.n)}</b></a> ${sk.o?`<span class="badge b-ougi">${sk.o==2?"SKILL/OUGI":"OUGI"}</span>`:""} ${tg.cov && r.covF <= 0.1 ? `<span class="badge b-cov1" title="Covenant: this skill has one usable element, so it deals only 10%">×0.1</span> ` : ""}${r.measured?"":`<span class="badge b-est" title="No hit data in the spreadsheet: assumed 1 hit at 100% and ${SIM.defaultTime}s cast">≈</span>`}${sk.x?.rDmg?` <span class="chip" title="Community damage rating">${esc(sk.x.rDmg)}</span>`:""}<div class="jp">${esc(sk.j)}</div></td>
-        <td>${skillAttrChips(sk.a)}</td><td class="r num">${r.hits.length}</td><td class="r num"><b>${fmtM(r.total)}</b></td>
-        <td class="r num">${r.time ? r.time.toFixed(2)+"s" : `<span class="mute">${(+SIM.defaultTime).toFixed(1)}s?</span>`}</td><td class="r num">${r.cd.toFixed(1)}s</td>
+        <td>${skillAttrChips(sk.a)}</td><td class="r num c-sm">${r.hits.length}</td><td class="r num"><b>${fmtM(r.total)}</b></td>
+        <td class="r num c-sm">${r.time ? r.time.toFixed(2)+"s" : `<span class="mute">${(+SIM.defaultTime).toFixed(1)}s?</span>`}</td><td class="r num">${r.cd.toFixed(1)}s</td>
         <td class="r num">${fmtM(r.burst)}</td><td class="r sim-sus"><b class="num">${fmtM(r.sustained)}</b><div class="bar"><i style="width:${(r.sustained/maxS*100).toFixed(1)}%"></i></div></td>
-        <td class="r num">${isFinite(r.casts)?fmt(r.casts):"immune"}</td></tr>`; }).join("") || `<tr><td colspan="10" class="empty">No skills match.</td></tr>`}
+        <td class="r num c-sm">${isFinite(r.casts)?fmt(r.casts):"immune"}</td></tr>`; }).join("") || `<tr><td colspan="10" class="empty">No skills match.</td></tr>`}
     </tbody></table></div>
     ${list.length > 200 ? `<div class="mute" style="margin-top:6px">Showing 200 of ${list.length}. Use the filters to narrow it down.</div>` : ""}
   </section>

@@ -36,9 +36,16 @@ function viewFarm(){
     const out = $("#fres");
     if (!chosen.length){
       let rec = []; try { rec = JSON.parse(localStorage.getItem("od2-recent") || "[]").filter(x => /^#\/item\/\d+/.test(x.h)).map(x => +x.h.split("/")[2]).filter(i => ITEMS[i]); } catch(e){}
-      out.innerHTML = emptyState("Pick at least one item", "Type a name above, press “Farm” on any item page, or start from one of these:")
-        + (rec.length ? `<div class="quickpick"><span class="mute">Recently viewed</span>${rec.slice(0, 8).map(i => `<button class="chip x" data-qadd="${i}">${icon(ITEMS[i])} ${esc(ITEMS[i][0])}</button>`).join("")}</div>` : "");
+      // raw materials of the Farm Planner that drop somewhere: one click to rank dungeons for all of them
+      let planMats = [];
+      try { if (typeof planCompute == "function" && PLAN.targets.length){ const src = itemSources(party); planMats = [...planCompute().raw.keys()].filter(i => (src[i] || []).length); } } catch(e){}
+      const hasPick = rec.length || planMats.length;
+      out.innerHTML = emptyState("Pick at least one item", hasPick ? "Type a name above, press “Farm” on any item page, or start from here:" : "Type a name above, or press “Farm” on any item page. Tip: the Farm Planner can send every material of a recipe here in one click.")
+        + (planMats.length ? `<div class="quickpick"><span class="mute">From your Farm Planner</span><button class="btn pri sm" id="qplan">Rank dungeons for ${planMats.length} material${planMats.length > 1 ? "s" : ""}</button></div>` : "")
+        + (rec.length ? `<div class="quickpick"><span class="mute">Recently viewed</span>${rec.slice(0, 8).map(i => `<button class="chip x" data-qadd="${i}">${icon(ITEMS[i])} ${esc(ITEMS[i][0])}</button>`).join("")}</div>` : "")
+        + (!hasPick ? `<div class="quickpick"><a class="btn sm" href="#/plan">Open the Farm Planner</a><a class="btn sm" href="#/items">Browse items</a></div>` : "");
       $$("[data-qadd]").forEach(b => b.onclick = () => { FARM.items = [...new Set([...FARM.items, +b.dataset.qadd])]; store("od2-farm", FARM); viewFarm(); });
+      if ($("#qplan")) $("#qplan").onclick = () => { FARM.items = planMats; store("od2-farm", FARM); viewFarm(); };
       return;
     }
     const maxLv = +FARM.maxLv || 0;

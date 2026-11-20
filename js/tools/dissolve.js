@@ -144,7 +144,8 @@ function viewDissolve(){
   $("#dq").oninput = e => { DUI.q = e.target.value; store("od2-dis", DUI); drawList(); };
   $$("#dshow button").forEach(b => b.onclick = () => { DUI.show = b.dataset.s; store("od2-dis", DUI); $$("#dshow button").forEach(x => x.classList.toggle("on", x == b)); drawList(); });
   $$("#dlv button").forEach(b => b.onclick = () => { DUI.lv = +b.dataset.l; store("od2-dis", DUI); viewDissolve(); });
-  if (DUI.sel == null || DIS_BY[DUI.sel] == null){ const f = DIS.find(d => d.r >= 0 && !d.ub); DUI.sel = f ? f.c : null; }
+  // default selection = the first row of the list (same order: highest level first)
+  if (DUI.sel == null || DIS_BY[DUI.sel] == null){ const f = DIS.filter(d => d.r >= 0 && !d.ub).sort((a, b) => b.lv - a.lv || ITEMS[a.c][0].localeCompare(ITEMS[b.c][0]))[0]; DUI.sel = f ? f.c : null; }
   drawList(); drawOut();
   const on = $(".drow.on"); if (on) on.scrollIntoView({block: "nearest"});
 }
