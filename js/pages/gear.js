@@ -1,9 +1,9 @@
 "use strict";
 /* OnigiriDex — Equipment: weapons, magatama and accessories, each with how to craft or get it */
 const GEAR_TABS = [
-  {id:"weapons", label:"Weapons", kind:8},
-  {id:"magatama", label:"Magatama", kind:9},
-  {id:"accessories", label:"Accessories", kind:26},
+  {id:"weapons", label:"Weapons", kind:8, ic:"sword"},
+  {id:"magatama", label:"Magatama", kind:9, ic:"magatama_attack07"},
+  {id:"accessories", label:"Accessories", kind:26, ic:"acce_yellow"},
 ];
 const GEAR_SRC = [["any", "Any known source"], ["craft", "Craft"], ["drop", "Drop"], ["reward", "Clear reward"], ["shop", "Shop"], ["box", "Lucky box"], ["all", "Everything (incl. unknown)"]];
 const isTestItem = it => /test|alpha|beta|debug/i.test(it[0]) || /テスト|デバッグ/.test(it[1]);
@@ -54,7 +54,7 @@ function viewGear(tabId){
   const atkOf = new Map(tab.kind == 8 ? all.map(i => { const w = gearRec(i); return [i, BuildCalc.weaponAttack(w, 100, w.enh ? BuildCalc.enhanceCap(w, smeltN) : 0, w.enh ? smeltN : 0, BDB.smelt).max]; }) : []);
 
   app.innerHTML = `${ph({title:"Equipment", sub:"Weapons, magatama and accessories with every way to craft or get them."})}
-  <nav class="tabs">${GEAR_TABS.map(t => `<a href="#/gear/${t.id}" class="${t.id == tab.id ? "on" : ""}">${t.label}<span class="n">${counts[t.id]}</span></a>`).join("")}</nav>
+  <nav class="tabs gear-tabs">${GEAR_TABS.map(t => `<a href="#/gear/${t.id}" class="${t.id == tab.id ? "on" : ""}">${iconOf(t.ic)}<span>${t.label}</span><span class="n">${counts[t.id]}</span></a>`).join("")}</nav>
   <div class="toolbar gear-tb">
     <input type="text" id="gq" placeholder="Search ${tab.label.toLowerCase()}…" aria-label="Search" value="${esc(st.q)}">
     <select id="gsrc" aria-label="Source">${GEAR_SRC.map(([k, n]) => `<option value="${k}" ${st.src == k ? "selected" : ""}>${n}</option>`).join("")}</select>

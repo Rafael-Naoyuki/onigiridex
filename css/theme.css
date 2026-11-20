@@ -229,3 +229,9 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 .gs-box b{color:#b48cff}
 :root[data-theme="light"] .gs-box b{color:#6b3fa0}
 .gsrc{align-items:flex-start}
+
+/* Equipment tabs with the game's icons */
+.gear-tabs a{display:inline-flex;align-items:center;gap:8px;padding:8px 16px 9px}
+.gear-tabs .ico{transform:scale(1.25);margin:0 4px 0 2px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+.gear-tabs a:not(.on) .ico{opacity:.7}
+.gear-tabs a:hover .ico{opacity:1}
