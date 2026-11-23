@@ -1,0 +1,14 @@
+/* OnigiriDex — EXP Calculator */
+.exp-main{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+.exp-side{display:flex;flex-direction:column;gap:10px;position:sticky;top:calc(var(--hdr,58px) + 12px)}
+.exp-side h3{margin:4px 0 0}
+.exp-side .sim-f i{font-style:normal;color:var(--faint)}
+#xdiff{display:flex}#xdiff button{flex:1}#xdiff small{opacity:.7}
+.exp-out{display:flex;flex-direction:column;gap:14px;min-width:0}
+.exp-out .sim-kpis{margin-top:0}
+.exp-note{margin:10px 0 0}
+.exp-tbl tr.m1 td{background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.exp-tbl tr.m2 td{background:color-mix(in srgb,#f08a2d 20%,transparent)}
+.exp-tbl tr.m3 td{background:color-mix(in srgb,var(--accent) 24%,transparent)}
+.exp-tbl tr.est td{font-style:italic;color:var(--mute)}
+@media (max-width:1100px){.exp-main{grid-template-columns:1fr}.exp-side{position:static}}

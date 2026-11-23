@@ -22,6 +22,7 @@ function viewHome(){
     ["#/dissolve", "drop", "Dissolution", "What each magatama gives back, with the chance of every amount."],
     ["#/build", "build", "Build Planner", "Exact stats for weapons, magatama, ornaments and status points."],
     ["#/sim", "sim", "Boss Simulator <span class='badge b-wip' title='Work in progress: numbers are still being tuned'>WIP</span>", "Damage per skill and kill time against any boss."],
+    ["#/exp", "plan", "EXP Calculator", "Tickets, runs and OC needed to reach any level."],
     ["#/rotation", "plan", "Rotation DPS", "Order 5 skills and see the RT, CBT and cooldown timeline."],
   ];
   const cards = (list, cls) => `<div class="toolcards ${cls}">${list.map(([h, ic, t, s]) => `<a class="toolcard" href="${h}"><div class="ti">${svg(ic)}</div><div><b>${t}</b><span>${s}</span></div></a>`).join("")}</div>`;
