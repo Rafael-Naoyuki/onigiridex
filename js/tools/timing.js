@@ -6,7 +6,7 @@ const TIM_ROWS = window.ONIGIRI_TIMING || [];
 const TIM = load("od2-timing", {done: {}, sheet: "Bow", show: "todo", q: ""});
 const saveTim = () => store("od2-timing", TIM);
 const TIM_BY_ID = {}; TIM_ROWS.forEach(o => o.ids.forEach(id => TIM_BY_ID[id] = o));
-function timingOverride(sk){ const o = TIM_BY_ID[sk.id]; return o ? TIM.done[o.k] || null : null; }
+function timingOverride(sk){ const o = TIM_BY_ID[sk.id] || TIM_BY_ID[sk.x?.from]; return o ? TIM.done[o.k] || null : null; }
 const sec3 = ms => +(ms / 1000).toFixed(3);
 
 // candidates from the script. Combo: each step until its cancel point, the last one included in RT

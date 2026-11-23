@@ -20,14 +20,14 @@ const rotDmg = (r, mode) => r.d[mode] ?? r.d[0];
 
 // the friend's "Weighted DPS" (cooldown-affected, spamming one skill); AB-AE are empty in the sheet, so it is computed
 function rotWeighted(r, mode, cdMul){
-  const D = rotDmg(r, mode), T = r.t, RT = r.rt, rCD = r.cd * cdMul, W = Math.pow(T / ((r.cbt || 0) + rCD), 0.8);
+  const D = rotDmg(r, mode), T = r.t, RT = r.rt, rCD = r.fc ? r.cd : r.cd * cdMul, W = Math.pow(T / ((r.cbt || 0) + rCD), 0.8);
   if (rCD < RT) return D / T;
   return T > RT ? D / ((RT + T) / 2) * W : D / T * W;
 }
 function rotPass(list, mode, cdMul, chainFirst){
   let at = 0, dmg = 0;
   const rows = list.map((sk, i) => {
-    const r = rotOf(sk), ch = i > 0 || chainFirst ? 0.5 : 1, T = r.t * ch, CBT = (r.cbt || 0) * ch, RT = r.rt * ch, rCD = r.cd * cdMul;
+    const r = rotOf(sk), ch = i > 0 || chainFirst ? 0.5 : 1, T = r.t * ch, CBT = (r.cbt || 0) * ch, RT = r.rt * ch, rCD = r.fc ? r.cd : r.cd * cdMul;
     const row = {sk, i, D: rotDmg(r, mode), T, CBT, RT, rCD, start: at, cdStart: at + CBT, ready: at + CBT + rCD, need: CBT + rCD};
     at += RT; dmg += row.D; return row;
   });
@@ -56,7 +56,8 @@ function rotBest(list, mode, cdMul, edge){
   }
   return best;
 }
-const rotMax = s => s.r == 8 ? 1 : s.o > 0 ? (s.r <= 6 ? 2 : 1) : (s.r <= 5 ? 3 : 1);
+const rotMax = s => s.r == 8 || s.cs ? 1 : // cs: game flag ctshare, copies of the same skill share one cooldown
+ s.o > 0 ? (s.r <= 6 ? 2 : 1) : (s.r <= 5 ? 3 : 1);
 function rotCanAdd(list, sk){
   if (list.length >= 5 || list.filter(s => s == sk).length >= rotMax(sk)) return false;
   const all = [...list, sk], a = all.filter(s => s.o == 0).length, b = all.filter(s => s.o == 1).length;
@@ -91,7 +92,7 @@ function drawRotPick(){
   const rows = pool.filter(s => (!els.length || s.a.some(([a]) => els.includes(a))) && (!q || (s.n + " " + s.j).toLowerCase().includes(q)))
     .map(s => ({s, w: rotWeighted(rotOf(s), ROT.mode, cdMul)})).sort((a, b) => b.w - a.w);
   $("#rpick").innerHTML = rows.map(({s, w}) => { const n = list.filter(x => x == s).length, max = rotMax(s), can = rotCanAdd(list, s), r = rotOf(s);
-    return `<div class="rp ${n ? "on" : ""} ${!n && !can ? "off" : ""}" title="T ${r.t}s · RT ${r.rt}s${r.cbt ? ` · CBT ${r.cbt}s` : ""} · CD ${r.cd}s · up to ${max}x · ${s.a.map(([a, p]) => `${p}% ${ATTRS[a][0]}`).join(", ")}"><span>${esc(s.n)}</span><u class="rp-el">${s.a.map(([a]) => `<i style="color:${ATTR_COLORS[a]}">${ATTRS[a][1]}</i>`).join("")}</u><em>${w.toFixed(1)}M</em>
+    return `<div class="rp ${n ? "on" : ""} ${!n && !can ? "off" : ""}" title="T ${r.t}s · RT ${r.rt}s${r.cbt ? ` · CBT ${r.cbt}s` : ""} · CD ${r.cd}s · ${s.cs ? "shared cooldown, 1 copy only" : `up to ${max}x`} ·${s.a.map(([a, p]) => `${p}% ${ATTRS[a][0]}`).join(", ")}"><span>${esc(s.n)}</span><u class="rp-el">${s.a.map(([a]) => `<i style="color:${ATTR_COLORS[a]}">${ATTRS[a][1]}</i>`).join("")}</u><em>${w.toFixed(1)}M</em>
       ${n ? `<button class="rp-b" data-rm1="${s.id}" aria-label="Remove one ${esc(s.n)}">−</button><b class="rp-n">${n}/${max}</b>` : ""}<button class="rp-b" data-rp="${s.id}" ${can ? "" : "disabled"} aria-label="Add ${esc(s.n)}">+</button></div>`; }).join("") || emptyState("No skills", els.length || q ? "Try another element or filter." : "Nothing with complete timing data.");
   const done = () => { saveRot(); drawRotPick(); drawRot(); };
   $$("[data-rp]").forEach(b => b.onclick = () => { ROT.ids[ROT.cat] = [...list.map(s => s.id), +b.dataset.rp]; done(); });
@@ -141,7 +142,7 @@ function drawRot(){
   <section class="card"><div class="wrap"><table class="tbl"><thead><tr><th>#</th><th>Skill</th><th class="r">Damage</th><th class="r">T</th><th class="r">CBT</th><th class="r">RT</th><th class="r">rCD</th><th class="r">Starts</th><th class="r">Ready at</th><th class="r"><span class="tip" title="Cooldown-affected DPS if you spammed only this skill (computed with ikzki's formula)">Weighted</span></th></tr></thead><tbody>
     ${c.rows.map(x => `<tr><td>${x.i + 1}${x.i ? "" : ` <span class="mute" style="white-space:nowrap" title="No skill chain on the first rotation only; from rotation 2 it is halved too">full</span>`}</td><td class="name"><a href="#/skill/${x.sk.id}">${esc(x.sk.n)}</a></td><td class="r num">${x.D.toFixed(2)}M</td><td class="r num">${n2(x.T)}</td><td class="r num">${x.CBT ? n2(x.CBT) : "—"}</td><td class="r num">${rotOf(x.sk).est ? `<span title="${rotOf(x.sk).est == "script" ? "No RT in the sheet: unverified script estimate" : "No RT in the sheet: using T"}">≈</span>` : ""}${n2(x.RT)}</td><td class="r num">${n2(x.rCD)}</td><td class="r num">${n2(x.start)}</td><td class="r num">${n2(x.ready)}</td><td class="r num">${rotWeighted(rotOf(x.sk), ROT.mode, cdMul).toFixed(2)}M</td></tr>`).join("")}
   </tbody></table></div>
-  ${sheetCredit()}<details class="note sim-how"><summary>How it is calculated</summary>The table shows the first rotation. Skill 1 keeps its full T, CBT and RT only there; from rotation 2 on it follows the last skill, so all skills are halved by the skill chain. Each skill starts at the previous skill's RT. rCD = cooldown × (1 − cooldown cut), starting at the skill start or at CBT for combo skills. Rotation time = max(sum of RT, longest CBT + rCD). Rotation DPS = total damage ÷ rotation time. Weighted: W = (T ÷ (CBT + rCD))^0.8; if rCD is below RT it uses D ÷ T. Copies of a skill are counted as separate slots with their own cooldown. Damage, T, CBT, RT and cooldown come unchanged from ikzki's Onigiri Skill Database. The rotation rules and the Weighted DPS formula were proposed by ikzki.</details></section>`;
+  ${sheetCredit()}<details class="note sim-how"><summary>How it is calculated</summary>The table shows the first rotation. Skill 1 keeps its full T, CBT and RT only there; from rotation 2 on it follows the last skill, so all skills are halved by the skill chain. Each skill starts at the previous skill's RT. rCD = cooldown × (1 − cooldown cut), starting at the skill start or at CBT for combo skills. Rotation time = max(sum of RT, longest CBT + rCD). Rotation DPS = total damage ÷ rotation time. Weighted: W = (T ÷ (CBT + rCD))^0.8; if rCD is below RT it uses D ÷ T. Copies of a skill have separate cooldowns, except skills the game flags as shared cooldown, which can only be added once. Damage, T, CBT, RT and cooldown come unchanged from ikzki's Onigiri Skill Database. The rotation rules and the Weighted DPS formula were proposed by ikzki.</details></section>`;
   bindRot(list, best);
 }
 function bindRot(list, best){
