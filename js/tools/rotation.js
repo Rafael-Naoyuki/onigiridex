@@ -10,8 +10,9 @@ const saveRot = () => store("od2-rot", ROT);
 const ROT_MODES = ["DMG", "DMG + BDA", "MHC DMG", "MHC + BDA"];
 const ROT_COLORS = ["#e2563b", "#6fa8ff", "#5cc8a1", "#e8c26a", "#b48cff"];
 const n2 = v => (+v).toFixed(2) + "s";
-// Bow, Wand and Staff have no RT in the sheet yet: T is used instead (T >= RT, so the rotation is never shown faster than it is)
-const rotOf = sk => { const r = sk?.x?.rot; return r && r.d[0] != null && r.t && r.cd ? (r.rt ? r : {...r, rt: r.t, est: true}) : null; };
+// Bow, Wand and Staff have no RT in the sheet yet: estimated from the game's skill script (single-step skills), else T
+const rotOf = sk => { const r = sk?.x?.rot; if (!(r && r.d[0] != null && r.t && r.cd)) return null; if (r.rt) return r;
+  return ROT.useScript !== false && r.rtEst ? {...r, rt: r.rtEst, est: "script"} : {...r, rt: r.t, est: "t"}; };
 const rotDmg = (r, mode) => r.d[mode] ?? r.d[0];
 
 // the friend's "Weighted DPS" (cooldown-affected, spamming one skill); AB-AE are empty in the sheet, so it is computed
@@ -95,9 +96,10 @@ function drawRot(){
         + (x.CBT ? `<i class="tb cbt" style="left:${pc(o + x.cdStart)}" title="CBT: cooldown starts at ${n2(o + x.cdStart)}"></i>` : ""); }
     return `<div class="tl-row" style="--c:${ROT_COLORS[x.i]}"><span>${x.i + 1}. ${esc(x.sk.n.replace(/^Ougi:? /, ""))}</span><div class="tl-track">${bars}</div></div>`; }).join("");
   const marks = Array.from({length: ROT.cycles + 1}, (_, k) => `<i style="left:${pc(k * c.L)}"></i>`).join("");
-  const nEst = list.filter(s => rotOf(s).est).length;
+  const nEst = list.filter(s => rotOf(s).est).length; const nScript = list.filter(s => rotOf(s).est == "script").length;
   out.innerHTML = `<section class="card">${controls}
-    ${nEst ? `<div class="covnote"><b>Estimate.</b> ${nEst} of these skills ha${nEst > 1 ? "ve" : "s"} no RT or CBT in the sheet yet, so T is used as RT. The real rotation can be faster.</div>` : ""}
+    ${nEst ? `<div class="covnote"><b>Estimate.</b> ${nEst} of these skills ha${nEst > 1 ? "ve" : "s"} no RT or CBT in the sheet. ${nScript} use${nScript == 1 ? "s" : ""} the RT read from the game's skill script, ${nEst - nScript} use${nEst - nScript == 1 ? "s" : ""} T.
+      <label class="chk rot-est"><input type="checkbox" id="ruse" ${ROT.useScript !== false ? "checked" : ""}> use game script RT</label></div>` : ""}
     <div class="rot-slots">${c.rows.map(x => `<div class="rs" style="--c:${ROT_COLORS[x.i]}"><div class="rs-t"><b>${x.i + 1}</b><span>${esc(x.sk.n.replace(/^Ougi:? /, ""))}</span>${x.sk.o ? "<em>OUGI</em>" : ""}</div>
       <div class="rs-b"><button data-mv="${x.i}|-1" ${x.i ? "" : "disabled"} aria-label="Move earlier">←</button><button data-mv="${x.i}|1" ${x.i < c.rows.length - 1 ? "" : "disabled"} aria-label="Move later">→</button><button data-rm="${x.sk.id}" aria-label="Remove">✕</button></div></div>`).join("")}</div>
     <div class="sim-kpis">
@@ -114,7 +116,7 @@ function drawRot(){
   <section class="card"><div class="sim-head"><h3>Timeline</h3><div class="tl-legend"><span><i class="cast"></i>Cast (until RT)</span><span><i class="tail"></i>Until last hit (T)</span><span><i class="cd"></i>Cooldown</span><span><i class="cbt"></i>CBT</span></div></div>
     <div class="rot-tl"><div class="tl-marks">${marks}</div>${lanes}<div class="tl-axis"><div>${ticks}</div></div></div></section>
   <section class="card"><div class="wrap"><table class="tbl"><thead><tr><th>#</th><th>Skill</th><th class="r">Damage</th><th class="r">T</th><th class="r">CBT</th><th class="r">RT</th><th class="r">rCD</th><th class="r">Starts</th><th class="r">Ready at</th><th class="r"><span class="tip" title="Cooldown-affected DPS if you spammed only this skill (computed with the sheet's formula)">Weighted</span></th></tr></thead><tbody>
-    ${c.rows.map(x => `<tr><td>${x.i + 1}${x.i ? "" : ` <span class="mute" title="The first skill gets no skill chain">full</span>`}</td><td class="name"><a href="#/skill/${x.sk.id}">${esc(x.sk.n)}</a></td><td class="r num">${x.D.toFixed(2)}M</td><td class="r num">${n2(x.T)}</td><td class="r num">${x.CBT ? n2(x.CBT) : "—"}</td><td class="r num">${rotOf(x.sk).est ? `<span title="No RT in the sheet: using T">≈</span>` : ""}${n2(x.RT)}</td><td class="r num">${n2(x.rCD)}</td><td class="r num">${n2(x.start)}</td><td class="r num">${n2(x.ready)}</td><td class="r num">${rotWeighted(rotOf(x.sk), ROT.mode, cdMul).toFixed(2)}M</td></tr>`).join("")}
+    ${c.rows.map(x => `<tr><td>${x.i + 1}${x.i ? "" : ` <span class="mute" title="The first skill gets no skill chain">full</span>`}</td><td class="name"><a href="#/skill/${x.sk.id}">${esc(x.sk.n)}</a></td><td class="r num">${x.D.toFixed(2)}M</td><td class="r num">${n2(x.T)}</td><td class="r num">${x.CBT ? n2(x.CBT) : "—"}</td><td class="r num">${rotOf(x.sk).est ? `<span title="${rotOf(x.sk).est == "script" ? "No RT in the sheet: read from the game script" : "No RT in the sheet: using T"}">≈</span>` : ""}${n2(x.RT)}</td><td class="r num">${n2(x.rCD)}</td><td class="r num">${n2(x.start)}</td><td class="r num">${n2(x.ready)}</td><td class="r num">${rotWeighted(rotOf(x.sk), ROT.mode, cdMul).toFixed(2)}M</td></tr>`).join("")}
   </tbody></table></div>
   <details class="note sim-how"><summary>How it is calculated</summary>Skill 1 keeps its full T, CBT and RT; skills 2–5 have them halved by the skill chain. Each skill starts at the previous skill's RT. rCD = cooldown × (1 − cooldown cut), starting at the skill start or at CBT for combo skills. Rotation time = max(sum of RT, longest CBT + rCD). Rotation DPS = total damage ÷ rotation time. Damage, T, CBT, RT and cooldown come unchanged from the community sheet.</details></section>`;
   bindRot(list, best);
@@ -124,6 +126,7 @@ function bindRot(list, best){
   $$("#rmode button").forEach(b => b.onclick = () => { ROT.mode = +b.dataset.m; re(); });
   $("#rcut").onchange = e => { ROT.cut = Math.max(0, Math.min(95, +e.target.value || 0)); re(); };
   $("#rcyc").onchange = e => { ROT.cycles = +e.target.value; re(); };
+  if ($("#ruse")) $("#ruse").onchange = e => { ROT.useScript = e.target.checked; re(); };
   if ($("#redge")) $("#redge").onchange = e => { ROT.edgeCd = e.target.checked; re(); };
   if ($("#rbest")) $("#rbest").onclick = () => { ROT.ids[ROT.cat] = best.p.map(s => s.id); re(); };
   $$("[data-rm]").forEach(b => b.onclick = () => { ROT.ids[ROT.cat] = list.map(s => s.id).filter(id => id != b.dataset.rm); re(); });

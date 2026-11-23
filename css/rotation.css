@@ -45,3 +45,5 @@
 .tl-axis span:first-child{transform:none}.tl-axis span:last-child{transform:translateX(-100%)}
 @media (max-width:1250px){.rot-main{grid-template-columns:1fr}.rot-side{position:static;max-height:420px}}
 @media (max-width:800px){.rot-slots{grid-template-columns:1fr 1fr}.rot-tl{--lab:100px}}
+.rot-est{display:inline-flex;align-items:center;gap:5px;margin-left:10px;font-weight:700}
+.covnote+.rot-slots{margin-top:10px}
