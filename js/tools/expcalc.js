@@ -1,16 +1,15 @@
 "use strict";
-/* OnigiriDex — EXP Calculator. Levels up to 140 come from the game (systemSetting expMap);
-   141-150 are an estimate (each level = previous x 1.3).
+/* OnigiriDex — EXP Calculator. Levels come from the game (systemSetting expMap).
    Per level: tickets = ceil(EXP / ticket value), OC = ceil(tickets / tickets per run x energy / (level - 1)) x OC per restore */
 const EXPC = load("od2-expc", {from:125, to:140, into:0, ticket:10000000, perRun:43, diff:65, boost:50, oc:10, own:[0, 0, 0, 0]});
 const saveExpc = () => store("od2-expc", EXPC);
 const EXP_TICKETS = [["EXP Ticket I", 100000], ["EXP Ticket II", 2000000], ["EXP Ticket III", 10000000], ["EXP Ticket IV", 10000000]];
 const EXP_DIFFS = [["Normal", 25], ["Hard", 50], ["Hell", 65]];
 const EXP_MARKS = {130:"m1", 133:"m1", 135:"m1", 138:"m2", 140:"m3"};
-const EXP_MAX = 150;
-const EXP_TABLE = (() => { const t = {...(D.expTable || {})}; if (t[140]) for (let l = 141; l <= EXP_MAX; l++) t[l] = Math.floor(t[140] * Math.pow(1.3, l - 140)); return t; })();
+const EXP_TABLE = D.expTable || {};
 const expLevels = Object.keys(EXP_TABLE).map(Number).sort((a, b) => a - b);
 const expMin = expLevels[0] || 1;
+const EXP_MAX = expLevels[expLevels.length - 1] || 140;
 
 function expCalc(c){
   const tv = Math.max(1, +c.ticket), run = Math.max(1, +c.perRun), ocr = Math.max(1, +c.oc);
@@ -21,14 +20,14 @@ function expCalc(c){
     const tickets = Math.ceil(need / tv), runs = tickets / run;
     const oc = Math.ceil(runs * c.diff / (L - 1)) * ocr, ocb = Math.ceil(runs * c.boost / (L - 1)) * ocr;
     tot.exp += need; tot.tickets += tickets; tot.runs += runs; tot.oc += oc; tot.ocb += ocb;
-    rows.push({L, total: EXP_TABLE[L], full, need, tickets, oc, ocb, sumT: tot.tickets, sumO: tot.oc, sumB: tot.ocb, est: L > 140});
+    rows.push({L, total: EXP_TABLE[L], full, need, tickets, oc, ocb, sumT: tot.tickets, sumO: tot.oc, sumB: tot.ocb});
   }
   tot.runs = Math.ceil(tot.runs);
   return {rows, tot, spare: bank};
 }
 function viewExp(){
   setCrumbs([["Tools"], ["EXP Calculator"]]);
-  const lvOpts = (v, lo, hi) => expLevels.filter(l => l >= lo && l <= hi).map(l => `<option value="${l}" ${l == v ? "selected" : ""}>${l}${l > 140 ? " (estimated)" : ""}</option>`).join("");
+  const lvOpts = (v, lo, hi) => expLevels.filter(l => l >= lo && l <= hi).map(l => `<option value="${l}" ${l == v ? "selected" : ""}>${l}</option>`).join("");
   EXPC.from = Math.max(expMin, Math.min(EXP_MAX - 1, EXPC.from)); EXPC.to = Math.max(EXPC.from + 1, Math.min(EXP_MAX, EXPC.to));
   app.innerHTML = `${ph({title:"EXP Calculator", sub:"How many EXP tickets, runs and OC you need to reach a level."})}
   <div class="exp-main">
@@ -63,7 +62,7 @@ function viewExp(){
   drawExp();
 }
 function drawExp(){
-  const c = expCalc(EXPC), t = c.tot, hasEst = EXPC.to > 140;
+  const c = expCalc(EXPC), t = c.tot;
   $("#xout").innerHTML = `<section class="card">
     <div class="sim-kpis">
       <div class="sim-kpi main"><span>OC needed</span><b>${fmt(t.oc)}</b></div>
@@ -72,11 +71,9 @@ function drawExp(){
       <div class="sim-kpi"><span>Runs</span><b>${fmt(t.runs)}</b></div>
       <div class="sim-kpi"><span>EXP missing</span><b title="${fmt(t.exp)}">${t.exp >= 1e9 ? (t.exp / 1e9).toFixed(1) + "B" : fmtM(t.exp)}</b></div>
     </div>
-    ${c.spare > 0 ? `<div class="rot-note"><span class="ok">Your tickets already cover this level, with ${fmt(c.spare)} EXP to spare.</span></div>` : ""}
-    ${hasEst ? `<div class="covnote exp-note"><b>Estimate.</b> Levels above 140 are not in the game yet: each one is the previous level × 1.3.</div>` : ""}
-  </section>
+    ${c.spare > 0 ? `<div class="rot-note"><span class="ok">Your tickets already cover this level, with ${fmt(c.spare)} EXP to spare.</span></div>` : ""}  </section>
   <section class="card"><div class="wrap exp-wrap"><table class="tbl exp-tbl"><thead><tr><th>Level</th><th class="r">Total EXP</th><th class="r">EXP to get</th><th class="r">Tickets</th><th class="r">OC</th><th class="r">OC boost</th><th class="r">Tickets total</th><th class="r">OC total</th><th class="r">Boost total</th></tr></thead><tbody>
-    ${c.rows.map(r => `<tr class="${EXP_MARKS[r.L] || ""} ${r.est ? "est" : ""}"><td><b>${r.L}</b>${r.est ? ` <span class="mute">est.</span>` : ""}</td><td class="r num">${fmt(r.total)}</td><td class="r num">${fmt(r.need)}</td><td class="r num">${fmt(r.tickets)}</td><td class="r num">${fmt(r.oc)}</td><td class="r num">${fmt(r.ocb)}</td><td class="r num">${fmt(r.sumT)}</td><td class="r num"><b>${fmt(r.sumO)}</b></td><td class="r num">${fmt(r.sumB)}</td></tr>`).join("")}
+    ${c.rows.map(r => `<tr class="${EXP_MARKS[r.L] || ""}"><td><b>${r.L}</b></td><td class="r num">${fmt(r.total)}</td><td class="r num">${fmt(r.need)}</td><td class="r num">${fmt(r.tickets)}</td><td class="r num">${fmt(r.oc)}</td><td class="r num">${fmt(r.ocb)}</td><td class="r num">${fmt(r.sumT)}</td><td class="r num"><b>${fmt(r.sumO)}</b></td><td class="r num">${fmt(r.sumB)}</td></tr>`).join("")}
   </tbody></table></div>
-  <details class="note sim-how"><summary>How it is calculated</summary>For each level: tickets = EXP ÷ ticket value, rounded up. OC = (tickets ÷ tickets per run × energy per run ÷ energy per restore), rounded up, × OC per restore. One restore gives (level − 1) energy. EXP up to level 140 comes from the game files.</details></section>`;
+  <details class="note sim-how"><summary>How it is calculated</summary>For each level: tickets = EXP ÷ ticket value, rounded up. OC = (tickets ÷ tickets per run × energy per run ÷ energy per restore), rounded up, × OC per restore. One restore gives (level − 1) energy. EXP values come from the game files.</details></section>`;
 }
