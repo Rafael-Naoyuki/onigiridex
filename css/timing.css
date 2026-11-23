@@ -1,5 +1,6 @@
 /* OnigiriDex — Timing Helper */
 .tim-tb input[type=text]{width:220px}
+.tim-warn{margin:0 0 12px}
 .tprog{display:flex;align-items:center;gap:12px;margin:0 0 8px;font-size:13px;color:var(--mute)}
 .tprog b{color:var(--ink)}.tprog .bar{flex:1;height:7px}
 .tim-legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 10px;font-size:11.5px;color:var(--mute)}

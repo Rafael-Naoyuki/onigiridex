@@ -49,7 +49,8 @@ function viewTiming(){
   setCrumbs([["Tools"], ["Timing Helper"]]);
   const sheets = [...new Set(TIM_ROWS.map(o => o.sheet))];
   if (!sheets.includes(TIM.sheet)) TIM.sheet = sheets[0];
-  app.innerHTML = `${ph({title:"Timing Helper", sub:"Fill the missing RT and CBT faster: check what the game script says, confirm it, and paste the result in the sheet."})}
+  app.innerHTML = `${ph({title:"Timing Helper", sub:"Type the RT and CBT you measured in game, then paste the result in the sheet."})}
+  <div class="covnote tim-warn"><b>Measure in game.</b> The small numbers are unverified script estimates. They ignore jumps, gravity, landing and projectile travel, and combo CBT is not reliable.</div>
   <div class="toolbar tim-tb">
     <div class="seg" id="tsheet" role="group" aria-label="Sheet">${sheets.map(s => `<button data-s="${esc(s)}" class="${TIM.sheet == s ? "on" : ""}">${esc(s)}</button>`).join("")}</div>
     <input type="text" id="tq" placeholder="Filter skills…" aria-label="Filter skills" value="${esc(TIM.q)}">
@@ -70,8 +71,8 @@ function drawTimRows(){
   $("#tbody").innerHTML = list.slice(0, 150).map(o => { const g = timSuggest(o), d = TIM.done[o.k];
     return `<tr data-k="${esc(o.k)}" class="${d ? "tdone" : ""}"><td class="name"><b>${esc(o.n)}</b>${g.combo ? ` <span class="badge b-ougi">COMBO ${o.st.length}</span>` : ""}<div class="jp">${esc(o.sec)}</div></td>
       <td class="r num">${o.row}</td><td class="r num">${o.t}</td><td class="tbar-c">${timBar(o)}</td>
-      <td>${g.combo ? `<input class="tcbt" type="number" step="0.001" min="0" value="${d?.cbt ?? g.cbt ?? ""}" aria-label="CBT"><div class="tcs">${g.cbts.map(v => `<button data-f="cbt" data-v="${v}">${v}</button>`).join("")}</div>` : `<span class="faint">/</span>`}</td>
-      <td><input class="trt" type="number" step="0.001" min="0" max="${o.t}" value="${d?.rt ?? g.rt ?? ""}" aria-label="RT"><div class="tcs">${g.rts.map(v => `<button data-f="rt" data-v="${v}" title="${v == o.t ? "Same as T" : "From the script"}">${v}</button>`).join("")}</div></td>
+      <td>${g.combo ? `<input class="tcbt" type="number" step="0.001" min="0" value="${d?.cbt ?? ""}" placeholder="measure" aria-label="CBT"><div class="tcs">${g.cbts.map(v => `<button data-f="cbt" data-v="${v}">${v}</button>`).join("")}</div>` : `<span class="faint">/</span>`}</td>
+      <td><input class="trt" type="number" step="0.001" min="0" max="${o.t}" value="${d?.rt ?? ""}" placeholder="measure" aria-label="RT"><div class="tcs">${g.rts.map(v => `<button data-f="rt" data-v="${v}" title="${v == o.t ? "Same as T" : "Unverified script estimate"}">${v}</button>`).join("")}</div></td>
       <td class="r"><button class="addbtn ${d ? "on" : ""}" data-ok>${d ? "✓ Undo" : "Confirm"}</button></td></tr>`; }).join("")
     || `<tr><td colspan="7">${emptyState(TIM.show == "todo" ? "All done here ✓" : "Nothing here", "")}</td></tr>`;
   $$("#tbody tr[data-k]").forEach(tr => {

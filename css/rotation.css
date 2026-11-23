@@ -4,13 +4,15 @@
 .rot-side input{width:100%}
 .rot-side #rtab{display:flex}.rot-side #rtab button{flex:1}
 .rot-pick{overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0;flex:1}
-.rp{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid transparent;border-radius:7px;background:none;color:var(--ink);font:inherit;font-size:12.5px;text-align:left;cursor:pointer}
+.rp{display:flex;flex:none;align-items:center;gap:6px;padding:4px 6px 4px 8px;border:1px solid transparent;border-radius:7px;color:var(--ink);font-size:12.5px}
 .rp span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rp em{font-style:normal;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
-.rp b{width:16px;text-align:center;color:var(--gold)}
-.rp:hover:not(:disabled){border-color:var(--gold)}
+.rp-n{min-width:24px;text-align:center;font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums}
+.rp-b{flex:none;width:24px;height:24px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--gold);font:inherit;font-weight:700;cursor:pointer}
+.rp-b:hover:not(:disabled){border-color:var(--gold)}.rp-b:focus-visible{outline:2px solid var(--gold);outline-offset:1px}.rp-b:disabled{opacity:.3;cursor:not-allowed}
+.rp.off{opacity:.45}
+.rp:hover{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}
 .rp.on{background:color-mix(in srgb,var(--gold) 12%,transparent);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
-.rp:disabled{opacity:.38;cursor:not-allowed}
 .rot-out{display:flex;flex-direction:column;gap:14px;min-width:0}
 .rot-ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:12.5px;color:var(--mute);margin-bottom:12px}
 .rot-ctl label{display:flex;align-items:center;gap:6px}.rot-ctl input{width:66px}
