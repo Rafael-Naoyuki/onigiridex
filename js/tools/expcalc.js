@@ -18,7 +18,7 @@ function expCalc(c){
   for (let L = c.from + 1; L <= c.to; L++){
     const full = EXP_TABLE[L] - EXP_TABLE[L - 1], used = Math.min(bank, full), need = full - used; bank -= used;
     const tickets = Math.ceil(need / tv), runs = tickets / run;
-    const oc = Math.ceil(runs * c.diff / (L - 1)) * ocr, ocb = Math.ceil(runs * c.boost / (L - 1)) * ocr;
+    const oc = Math.ceil(runs * c.diff / (L - 1)) * ocr, ocb = Math.ceil(runs * Math.min(c.diff, c.boost) / (L - 1)) * ocr; // the boost only lowers Hell (65 to 50)
     tot.exp += need; tot.tickets += tickets; tot.runs += runs; tot.oc += oc; tot.ocb += ocb;
     rows.push({L, total: EXP_TABLE[L], full, need, tickets, oc, ocb, sumT: tot.tickets, sumO: tot.oc, sumB: tot.ocb});
   }
@@ -44,10 +44,9 @@ function viewExp(){
       <div class="seg" id="xdiff" role="group" aria-label="Difficulty">${EXP_DIFFS.map(([n, e]) => `<button data-e="${e}" class="${EXPC.diff == e ? "on" : ""}">${n} <small>${e}</small></button>`).join("")}</div>
       <div class="sim-grid2">
         <label class="sim-f"><span>Ticket to farm</span><select id="xticket">${[[100000, "I · 100k"], [2000000, "II · 2M"], [10000000, "III / IV · 10M"]].map(([v, n]) => `<option value="${v}" ${EXPC.ticket == v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
-        <label class="sim-f"><span>Tickets per run</span><input type="number" min="1" data-x="perRun" value="${EXPC.perRun}"></label>
-        <label class="sim-f"><span>Boosted energy</span><input type="number" min="1" data-x="boost" value="${EXPC.boost}"></label>
-        <label class="sim-f"><span>OC per restore</span><input type="number" min="1" data-x="oc" value="${EXPC.oc}"></label>
+        <label class="sim-f"><span>Tickets per run</span><input type="number" min="1" data-x="perRun" value="${EXPC.perRun}"></label>        <label class="sim-f"><span>OC per restore</span><input type="number" min="1" data-x="oc" value="${EXPC.oc}"></label>
       </div>
+      <button type="button" class="exp-switch" id="xboost" role="switch" aria-checked="${!!EXPC.boostOn}"><span><b>Boost period</b><small>Hell costs ${EXPC.boost} energy instead of 65</small></span><i></i></button>
     </aside>
     <div class="exp-out" id="xout"></div>
   </div>`;
@@ -59,21 +58,22 @@ function viewExp(){
   $$("[data-own]").forEach(i => i.oninput = () => { EXPC.own[+i.dataset.own] = Math.max(0, +i.value || 0); redraw(); });
   $$("[data-x]").forEach(i => i.oninput = () => { const v = +i.value; if (v > 0){ EXPC[i.dataset.x] = v; redraw(); } });
   $$("#xdiff button").forEach(b => b.onclick = () => { EXPC.diff = +b.dataset.e; $$("#xdiff button").forEach(x => x.classList.toggle("on", x == b)); redraw(); });
+  $("#xboost").onclick = e => { EXPC.boostOn = !EXPC.boostOn; e.currentTarget.setAttribute("aria-checked", EXPC.boostOn); redraw(); };
   drawExp();
 }
 function drawExp(){
-  const c = expCalc(EXPC), t = c.tot;
+  const c = expCalc(EXPC), t = c.tot, on = !!EXPC.boostOn;
   $("#xout").innerHTML = `<section class="card">
     <div class="sim-kpis">
-      <div class="sim-kpi main"><span>OC needed</span><b>${fmt(t.oc)}</b></div>
-      <div class="sim-kpi"><span>OC during boost</span><b>${fmt(t.ocb)}</b></div>
+      <div class="sim-kpi main"><span>OC needed${on ? " (boost)" : ""}</span><b>${fmt(on ? t.ocb : t.oc)}</b></div>
+      <div class="sim-kpi"><span>${on ? "OC saved" : "OC with boost"}</span><b>${fmt(on ? t.oc - t.ocb : t.ocb)}</b></div>
       <div class="sim-kpi"><span>Tickets to farm</span><b>${fmt(t.tickets)}</b></div>
       <div class="sim-kpi"><span>Runs</span><b>${fmt(t.runs)}</b></div>
       <div class="sim-kpi"><span>EXP missing</span><b title="${fmt(t.exp)}">${t.exp >= 1e9 ? (t.exp / 1e9).toFixed(1) + "B" : fmtM(t.exp)}</b></div>
     </div>
     ${c.spare > 0 ? `<div class="rot-note"><span class="ok">Your tickets already cover this level, with ${fmt(c.spare)} EXP to spare.</span></div>` : ""}  </section>
-  <section class="card"><div class="wrap exp-wrap"><table class="tbl exp-tbl"><thead><tr><th>Level</th><th class="r">Total EXP</th><th class="r">EXP to get</th><th class="r">Tickets</th><th class="r">OC</th><th class="r">OC boost</th><th class="r">Tickets total</th><th class="r">OC total</th><th class="r">Boost total</th></tr></thead><tbody>
-    ${c.rows.map(r => `<tr class="${EXP_MARKS[r.L] || ""}"><td><b>${r.L}</b></td><td class="r num">${fmt(r.total)}</td><td class="r num">${fmt(r.need)}</td><td class="r num">${fmt(r.tickets)}</td><td class="r num">${fmt(r.oc)}</td><td class="r num">${fmt(r.ocb)}</td><td class="r num">${fmt(r.sumT)}</td><td class="r num"><b>${fmt(r.sumO)}</b></td><td class="r num">${fmt(r.sumB)}</td></tr>`).join("")}
+  <section class="card"><div class="wrap exp-wrap"><table class="tbl exp-tbl"><thead><tr><th>Level</th><th class="r">Total EXP</th><th class="r">EXP to get</th><th class="r">Tickets</th><th class="r">OC</th><th class="r">Tickets total</th><th class="r">OC total</th></tr></thead><tbody>
+    ${c.rows.map(r => `<tr class="${EXP_MARKS[r.L] || ""}"><td><b>${r.L}</b></td><td class="r num">${fmt(r.total)}</td><td class="r num">${fmt(r.need)}</td><td class="r num">${fmt(r.tickets)}</td><td class="r num">${fmt(on ? r.ocb : r.oc)}</td><td class="r num">${fmt(r.sumT)}</td><td class="r num"><b>${fmt(on ? r.sumB : r.sumO)}</b></td></tr>`).join("")}
   </tbody></table></div>
   <details class="note sim-how"><summary>How it is calculated</summary>For each level: tickets = EXP ÷ ticket value, rounded up. OC = (tickets ÷ tickets per run × energy per run ÷ energy per restore), rounded up, × OC per restore. One restore gives (level − 1) energy. EXP values come from the game files.</details></section>`;
 }
