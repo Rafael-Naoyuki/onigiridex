@@ -265,3 +265,8 @@ input[type=number],input[type=text],select{background-color:var(--card);border-c
 .g-plan{flex:none;padding:3px 9px;border-radius:7px;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));background:var(--card);color:var(--gold);font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
 .g-plan:hover{background:color-mix(in srgb,var(--gold) 14%,var(--card))}
 .g-plan.on{border-color:color-mix(in srgb,var(--jade) 55%,var(--line));color:var(--jade)}
+
+/* search */
+.sugg mark{background:color-mix(in srgb,var(--gold) 32%,transparent);color:inherit;border-radius:2px}
+.sg-h span{float:right;font-weight:600;opacity:.7}
+.sg-fuzzy{padding:8px 12px;font-size:12px;color:var(--gold)}

@@ -22,6 +22,7 @@ function viewHome(){
     ["#/dissolve", "drop", "Dissolution", "What each magatama gives back, with the chance of every amount."],
     ["#/build", "build", "Build Planner", "Exact stats for weapons, magatama, ornaments and status points."],
     ["#/sim", "sim", "Boss Simulator <span class='badge b-wip' title='Work in progress: numbers are still being tuned'>WIP</span>", "Damage per skill and kill time against any boss."],
+    ["#/rotation", "plan", "Rotation DPS", "Order 5 skills and see the RT, CBT and cooldown timeline."],
   ];
   const cards = (list, cls) => `<div class="toolcards ${cls}">${list.map(([h, ic, t, s]) => `<a class="toolcard" href="${h}"><div class="ti">${svg(ic)}</div><div><b>${t}</b><span>${s}</span></div></a>`).join("")}</div>`;
   // "continue" strip: only what the user actually has (recent pages, saved builds, a farm plan)
@@ -42,7 +43,7 @@ function viewHome(){
     </div>
   </section>
   ${cont.length ? `<h2 class="home-h">Continue</h2><div class="conts">${cont.join("")}</div>` : ""}
-  <h2 class="home-h">Tools</h2>${cards(tools, "tc-5")}
+  <h2 class="home-h">Tools</h2>${cards(tools, "tc-3")}
   <h2 class="home-h">Explore</h2>${cards(explore, "tc-3")}
   ${recent.length ? `<h2 class="home-h">Recently viewed <button class="linkbtn" data-clear-recent>Clear</button></h2>
     <div class="card" style="padding:6px"><div class="recent home-recent">${recent.map(r => `<a href="${r.h}"><span>${esc(r.n)}</span><span class="tag">${esc(r.t)}</span><button class="rmx" data-rm-recent="${esc(r.h)}" title="Remove from recent" aria-label="Remove ${esc(r.n)} from recent">✕</button></a>`).join("")}</div></div>` : ""}

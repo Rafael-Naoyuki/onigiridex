@@ -1,0 +1,47 @@
+/* OnigiriDex — Rotation DPS */
+.rot-main{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+.rot-side{position:sticky;top:calc(var(--hdr,58px) + 12px);display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - var(--hdr,58px) - 24px);min-height:0}
+.rot-side input{width:100%}
+.rot-side #rtab{display:flex}.rot-side #rtab button{flex:1}
+.rot-pick{overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0;flex:1}
+.rp{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid transparent;border-radius:7px;background:none;color:var(--ink);font:inherit;font-size:12.5px;text-align:left;cursor:pointer}
+.rp span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp em{font-style:normal;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.rp b{width:16px;text-align:center;color:var(--gold)}
+.rp:hover:not(:disabled){border-color:var(--gold)}
+.rp.on{background:color-mix(in srgb,var(--gold) 12%,transparent);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.rp:disabled{opacity:.38;cursor:not-allowed}
+.rot-out{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rot-ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:12.5px;color:var(--mute);margin-bottom:12px}
+.rot-ctl label{display:flex;align-items:center;gap:6px}.rot-ctl input{width:66px}
+.rot-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.rs{min-width:0;padding:7px 8px;border:1px solid color-mix(in srgb,var(--c) 50%,var(--line));border-top:3px solid var(--c);border-radius:8px;background:color-mix(in srgb,var(--c) 8%,var(--card))}
+.rs-t{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;min-width:0}
+.rs-t b{color:var(--c)}.rs-t span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rs-t em{font-style:normal;font-size:9px;color:var(--gold)}
+.rs-b{display:flex;gap:3px;margin-top:6px}
+.rs-b button{flex:1;height:24px;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--ink);cursor:pointer}
+.rs-b button:hover:not(:disabled){border-color:var(--gold)}.rs-b button:disabled{opacity:.3;cursor:default}
+.rot-note{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:var(--mute)}
+.rot-note .chk{display:inline-flex;align-items:center;gap:5px;margin-left:auto}
+.tl-legend{margin-left:auto;display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--mute)}
+.tl-legend span{display:inline-flex;align-items:center;gap:5px}
+.tl-legend i{display:inline-block;width:16px;height:9px;border-radius:2px}
+.tl-legend .cast{background:var(--gold)}.tl-legend .tail{background:color-mix(in srgb,var(--gold) 40%,transparent)}.tl-legend .cd{background:color-mix(in srgb,var(--ink) 22%,transparent)}.tl-legend .cbt{width:3px;height:13px;background:var(--ink)}
+.rot-tl{position:relative;--lab:170px}
+.tl-marks{position:absolute;left:var(--lab);right:0;top:0;bottom:18px;pointer-events:none}
+.tl-marks i{position:absolute;top:0;bottom:0;border-left:1px dashed color-mix(in srgb,var(--gold) 55%,transparent)}
+.tl-row{display:grid;grid-template-columns:var(--lab) minmax(0,1fr);align-items:center;height:32px;font-size:12px}
+.tl-row>span{padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--c);font-weight:700}
+.tl-track{position:relative;height:22px;border-radius:4px;background:var(--bg2);overflow:hidden}
+.tb{position:absolute;top:0;bottom:0;display:block}
+.tb.cd{top:7px;bottom:7px;background:color-mix(in srgb,var(--c) 30%,transparent)}
+.tb.tail{background:color-mix(in srgb,var(--c) 42%,transparent)}
+.tb.cast{background:var(--c);border-radius:2px}
+.tb.cbt{width:2px;background:var(--ink)}
+.tl-axis{margin-left:var(--lab);position:relative;height:18px}
+.tl-axis div{position:relative;height:100%;font-size:10.5px;color:var(--faint)}
+.tl-axis span{position:absolute;top:3px;transform:translateX(-50%)}
+.tl-axis span:first-child{transform:none}.tl-axis span:last-child{transform:translateX(-100%)}
+@media (max-width:1250px){.rot-main{grid-template-columns:1fr}.rot-side{position:static;max-height:420px}}
+@media (max-width:800px){.rot-slots{grid-template-columns:1fr 1fr}.rot-tl{--lab:100px}}

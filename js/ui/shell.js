@@ -33,6 +33,7 @@ function route(){
     else if (k == "plan") viewPlan();
     else if (k == "dissolve") viewDissolve();
     else if (k == "sim"){ setCrumbs([["Tools"], ["Boss Simulator"]]); viewSim(); }
+    else if (k == "rotation") viewRotation();
     else if (k == "build"){ setCrumbs([["Tools"], ["Build Planner"]]); viewBuild(); }
     else if (k == "skill") viewSkill(+parts[1]);
     else if (k == "fields") viewFields();
