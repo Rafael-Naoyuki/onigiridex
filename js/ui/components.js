@@ -21,6 +21,7 @@ const SVG = {
   plan:'<path d="M9 5h11M9 12h11M9 19h11"/><path d="M4 5h.01M4 12h.01M4 19h.01"/>',
   drop:'<path d="M12 3c3.5 4.2 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7.2 12 3z"/>',
 };
+const sheetCredit = () => `<div class="credit-line">Skill data from the <b>Onigiri Skill Database</b> by <b class="credit">ikzki</b></div>`;
 const svg = (n, cls="") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${SVG[n] || ""}</svg>`;
 
 // ---------------------------------------------------------------- shared components

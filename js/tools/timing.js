@@ -58,7 +58,7 @@ function viewTiming(){
   <div id="tprog"></div>
   <div class="tim-legend"><span><i class="l-c"></i>Cancel opens</span><span><i class="l-h"></i>Hit</span><span><i class="l-t"></i>T</span><span class="mute">Enter confirms and jumps to the next skill. RT can never be above T.</span></div>
   <div class="wrap"><table class="tbl tim-tbl"><thead><tr><th>Skill</th><th class="r">Row</th><th class="r">T</th><th>Script timeline</th><th>CBT</th><th>RT</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
-  <section class="card tim-out" id="tout"></section>`;
+  <section class="card tim-out" id="tout"></section>${sheetCredit()}`;
   $$("#tsheet button").forEach(b => b.onclick = () => { TIM.sheet = b.dataset.s; saveTim(); viewTiming(); });
   $$("#tshow button").forEach(b => b.onclick = () => { TIM.show = b.dataset.v; saveTim(); viewTiming(); });
   $("#tq").oninput = e => { TIM.q = e.target.value; saveTim(); drawTimRows(); };

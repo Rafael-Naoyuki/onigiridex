@@ -87,7 +87,7 @@ function viewSim(){
   app.innerHTML = `
   <div class="bp-top sim-top">
     <div class="bp-title"><h1>Boss Simulator <span class="badge b-wip">WIP</span></h1>
-      <details class="sim-wip"><summary>Uses the game's damage formula and the community spreadsheet's hit data. Still being tuned — what's not modeled yet?</summary>
+      <details class="sim-wip"><summary>Uses the game's damage formula and the hit data from ikzki's Onigiri Skill Database. Still being tuned — what's not modeled yet?</summary>
         <div>Kill time splits the boss HP between the players in the party and uses basic combos while skills are on cooldown. Buffs, partners, debuffs, movement and boss invulnerability phases are not modeled yet. Use it mainly to compare skills and builds.</div></details></div>
     <div class="bp-actions">
       <a class="btn" href="#/build">Build Planner</a>
@@ -227,7 +227,7 @@ function drawSimResults(){
       ${sortTh("bdps", "Burst DPS", "Damage ÷ cast time (spamming with no cooldown)")}${sortTh("sdps", "Sustained", "Damage ÷ max(cast time, cooldown) — if you only used this skill")}<th class="r c-sm"><span class="tip" title="Casts of this skill alone to kill the target">Casts</span></th></tr></thead><tbody>
       ${list.slice(0, 200).map(({sk, r}) => { const inRot = loadout.includes(sk.id); return `<tr class="${inRot ? "picked" : ""}" ${inRot ? `style="--c:${colorOf.get(sk.id)}"` : ""}>
         <td class="c"><button class="addbtn ${inRot ? "on" : ""}" data-pick="${sk.id}" ${!inRot && full ? "disabled" : ""} aria-pressed="${inRot}" title="${inRot ? "Remove from rotation" : full ? "Rotation is full" : "Add to rotation"}">${inRot ? "✓" : "+ Add"}</button></td>
-        <td class="name"><a href="#/skill/${sk.id}"><b>${esc(sk.n)}</b></a> ${sk.o?`<span class="badge b-ougi">${sk.o==2?"SKILL/OUGI":"OUGI"}</span>`:""} ${tg.cov && r.covF <= 0.1 ? `<span class="badge b-cov1" title="Covenant: this skill has one usable element, so it deals only 10%">×0.1</span> ` : ""}${r.measured?"":`<span class="badge b-est" title="No hit data in the spreadsheet: assumed 1 hit at 100% and ${SIM.defaultTime}s cast">≈</span>`}${sk.x?.rDmg?` <span class="chip" title="Community damage rating">${esc(sk.x.rDmg)}</span>`:""}<div class="jp">${esc(sk.j)}</div></td>
+        <td class="name"><a href="#/skill/${sk.id}"><b>${esc(sk.n)}</b></a> ${sk.o?`<span class="badge b-ougi">${sk.o==2?"SKILL/OUGI":"OUGI"}</span>`:""} ${tg.cov && r.covF <= 0.1 ? `<span class="badge b-cov1" title="Covenant: this skill has one usable element, so it deals only 10%">×0.1</span> ` : ""}${r.measured?"":`<span class="badge b-est" title="No hit data in the spreadsheet: assumed 1 hit at 100% and ${SIM.defaultTime}s cast">≈</span>`}${sk.x?.rDmg?` <span class="chip" title="Damage rating by ikzki (Onigiri Skill Database)">${esc(sk.x.rDmg)}</span>`:""}<div class="jp">${esc(sk.j)}</div></td>
         <td>${skillAttrChips(sk.a)}</td><td class="r num c-sm">${r.hits.length}</td><td class="r num"><b>${fmtM(r.total)}</b></td>
         <td class="r num c-sm">${r.time ? r.time.toFixed(2)+"s" : `<span class="mute">${(+SIM.defaultTime).toFixed(1)}s?</span>`}</td><td class="r num">${r.cd.toFixed(1)}s</td>
         <td class="r num">${fmtM(r.burst)}</td><td class="r sim-sus"><b class="num">${fmtM(r.sustained)}</b><div class="bar"><i style="width:${(r.sustained/maxS*100).toFixed(1)}%"></i></div></td>
@@ -235,7 +235,7 @@ function drawSimResults(){
     </tbody></table></div>
     ${list.length > 200 ? `<div class="mute" style="margin-top:6px">Showing 200 of ${list.length}. Use the filters to narrow it down.</div>` : ""}
   </section>
-  <details class="note sim-how"><summary>How the damage is computed</summary>Per hit, in the same order as the server: <code>ATK − ATK cut</code> → multi-hit cut <code>ATK ÷ (hit# × MHC% + 1)</code> blended by the skill's MHC rate → defense curve → × hit rate × skill power × (1 + Skill Force%) → × Σ element% × (1 + your element%) × (1 − boss resist%) → expected critical (crit damage reduced by crit res.) → capped at ${fmtM(MAX_DMG)} per hit. Checked against the spreadsheet's measured damage: median error ≈ 0%, typical spread ≈ 6%.</details>`;
+  ${sheetCredit()}<details class="note sim-how"><summary>How the damage is computed</summary>Per hit, in the same order as the server: <code>ATK − ATK cut</code> → multi-hit cut <code>ATK ÷ (hit# × MHC% + 1)</code> blended by the skill's MHC rate → defense curve → × hit rate × skill power × (1 + Skill Force%) → × Σ element% × (1 + your element%) × (1 − boss resist%) → expected critical (crit damage reduced by crit res.) → capped at ${fmtM(MAX_DMG)} per hit. Checked against the damage measured in ikzki's spreadsheet: median error ≈ 0%, typical spread ≈ 6%.</details>`;
 
   $$("#stbl th.s").forEach(th => { th.classList.toggle("sorted", th.dataset.s == SIM.sort); th.onclick = () => { SIM.sort = th.dataset.s; saveSim(); drawSimResults(); }; });
   $$("[data-pick]").forEach(c => c.onclick = () => {

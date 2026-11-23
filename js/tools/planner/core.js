@@ -292,7 +292,7 @@ function drawSkillList(cat){
       <span class="att">${skillAttrChips(s.a)}</span>
       <span class="rk">${ROMAN[s.r]}</span>
       <span class="rt" title="Community damage rating">${s.x?.rDmg ? esc(s.x.rDmg) : "—"}</span>
-      <span class="dm mute" title="Measured damage, spreadsheet test build">${s.x?.dmg ? s.x.dmg + "M" : ""}</span>
+      <span class="dm mute" title="Measured damage from ikzki's Onigiri Skill Database">${s.x?.dmg ? s.x.dmg + "M" : ""}</span>
       <span class="cd mute">${(s.ct/1000).toFixed(1)}s</span></button>`).join("") || `<div class="empty" style="padding:14px">No skills match.</div>`;
   box.querySelectorAll("[data-skpick]").forEach(b => b.onclick = () => {
     const W2 = BUILD.weapons[P.w]; if (!W2) return;

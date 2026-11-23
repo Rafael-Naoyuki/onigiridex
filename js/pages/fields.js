@@ -14,7 +14,7 @@ function viewSkill(id){
         ${r.hits.map((h, i) => `<tr><td>#${i + 1}</td><td class="r num">${h.rate}</td><td class="r num">${fmt(h.atk)}</td><td class="r num">${(h.att * 100).toFixed(1)}%</td><td class="r num"><b>${fmt(h.dmg)}</b></td></tr>`).join("")}
         <tr><td colspan="4"><b>Total per cast</b></td><td class="r num"><b>${fmt(r.total)}</b></td></tr></tbody></table></div>
         <div class="note">Skill Force +${r.sf}% (rank ${sk.r}) · skill power ×${r.power.toFixed(2)} · element ×${r.mix.toFixed(3)} · crit ${(r.cri * 100).toFixed(0)}% × ${r.critF.toFixed(2)} · cooldown ${r.cd.toFixed(1)}s</div></div>
-      <div><h2 style="margin-top:0">Community data</h2>
+      <div><h2 style="margin-top:0">Community data <span class="count">by ikzki</span></h2>
         ${sk.x ? `<div class="wrap"><table class="tbl"><tbody>
           ${x.rDmg ? `<tr><td class="mute">Damage rating</td><td><b>${esc(x.rDmg)}</b></td></tr>` : ""}${x.rDps ? `<tr><td class="mute">DPS rating</td><td><b>${esc(x.rDps)}</b></td></tr>` : ""}
           ${x.dmg ? `<tr><td class="mute">Measured damage</td><td>${x.dmg}M${x.dmgMhc ? ` · ${x.dmgMhc}M vs MHC 90` : ""}</td></tr>` : ""}${x.dps ? `<tr><td class="mute">Measured DPS</td><td>${x.dps}M</td></tr>` : ""}

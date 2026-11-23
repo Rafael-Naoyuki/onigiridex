@@ -47,7 +47,7 @@ function viewHome(){
   <h2 class="home-h">Explore</h2>${cards(explore, "tc-3")}
   ${recent.length ? `<h2 class="home-h">Recently viewed <button class="linkbtn" data-clear-recent>Clear</button></h2>
     <div class="card" style="padding:6px"><div class="recent home-recent">${recent.map(r => `<a href="${r.h}"><span>${esc(r.n)}</span><span class="tag">${esc(r.t)}</span><button class="rmx" data-rm-recent="${esc(r.h)}" title="Remove from recent" aria-label="Remove ${esc(r.n)} from recent">✕</button></a>`).join("")}</div></div>` : ""}
-  <p class="faint" style="font-size:12px;margin-top:26px">Data built ${esc(D.built)}. Drop chances are base rates (events and boosts can multiply them). Skill hit data: community "Onigiri Skill Database" spreadsheet.</p>`;
+  <p class="faint" style="font-size:12px;margin-top:26px">Data built ${esc(D.built)}. Drop chances are base rates (events and boosts can multiply them). Skill data: "Onigiri Skill Database" by <b class="credit">ikzki</b>.</p>`;
   const hs = $("#homeSearch"); hs.onclick = () => $("#q").focus(); hs.onkeydown = e => { if (e.key == "Enter" || e.key == " "){ e.preventDefault(); $("#q").focus(); } };
   $$("[data-loadbuild]").forEach(a => a.onclick = () => { try { BUILD = normalizeBuild(JSON.parse(JSON.stringify(saved[a.dataset.loadbuild]))); store("od2-build", BUILD); } catch(e){} });
 }
