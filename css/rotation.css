@@ -7,6 +7,12 @@
 .rp{display:flex;flex:none;align-items:center;gap:6px;padding:4px 6px 4px 8px;border:1px solid transparent;border-radius:7px;color:var(--ink);font-size:12.5px}
 .rp span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rp em{font-style:normal;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.rot-els{display:flex;flex:none;flex-wrap:wrap;gap:3px}
+.rel{display:inline-flex;align-items:center;gap:3px;height:24px;padding:0 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--mute);font:inherit;font-size:11px;cursor:pointer}
+.rel i{font-style:normal;font-weight:700;color:var(--ec)}
+.rel:hover{border-color:var(--ec,var(--gold))}.rel:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.rel.on{border-color:var(--ec,var(--gold));background:color-mix(in srgb,var(--ec,var(--gold)) 20%,transparent);color:var(--ink)}
+.rp-el{display:inline-flex;flex:none;gap:2px;font-size:10.5px;text-decoration:none}.rp-el i{font-style:normal;font-weight:700}
 .rp-n{min-width:24px;text-align:center;font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums}
 .rp-b{flex:none;width:24px;height:24px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--bg2);color:var(--gold);font:inherit;font-weight:700;cursor:pointer}
 .rp-b:hover:not(:disabled){border-color:var(--gold)}.rp-b:focus-visible{outline:2px solid var(--gold);outline-offset:1px}.rp-b:disabled{opacity:.3;cursor:not-allowed}

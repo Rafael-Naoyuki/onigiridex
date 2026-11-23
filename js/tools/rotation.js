@@ -72,6 +72,7 @@ function viewRotation(){
       <div class="seg sim-cats" id="rcat" role="group" aria-label="Weapon type">${Object.entries(CATS).map(([k, n]) => `<button data-c="${k}" class="${ROT.cat == k ? "on" : ""}">${esc(n)}</button>`).join("")}</div>
       <input type="text" id="rq" placeholder="Filter skills…" aria-label="Filter skills">
       <div class="seg" id="rtab" role="group" aria-label="Skill type"><button data-t="s" class="${ROT.tab == "s" ? "on" : ""}">Skills</button><button data-t="o" class="${ROT.tab == "o" ? "on" : ""}">Ougi</button></div>
+      <div class="rot-els" id="rels" role="group" aria-label="Filter by element"></div>
       <div class="rot-pick" id="rpick"></div>
     </aside>
     <div id="rout" class="rot-out"></div>
@@ -83,11 +84,15 @@ function viewRotation(){
 }
 function drawRotPick(){
   const q = ($("#rq")?.value || "").trim().toLowerCase(), list = rotList(), cdMul = 1 - ROT.cut / 100;
-  const rows = SKILLS.filter(s => s.c == ROT.cat && !s.b && rotOf(s) && (ROT.tab == "o" ? s.o > 0 : s.o != 1) && (!q || (s.n + " " + s.j).toLowerCase().includes(q)))
+  const pool = SKILLS.filter(s => s.c == ROT.cat && !s.b && rotOf(s) && (ROT.tab == "o" ? s.o > 0 : s.o != 1));
+  const avail = ATTRS.map((_, i) => i).filter(i => pool.some(s => s.a.some(([a]) => a == i))), els = (ROT.els || []).filter(i => avail.includes(i));
+  $("#rels").innerHTML = `<button class="rel all ${els.length ? "" : "on"}" data-el="all" aria-pressed="${!els.length}">All</button>` + avail.map(i => `<button class="rel ${els.includes(i) ? "on" : ""}" data-el="${i}" style="--ec:${ATTR_COLORS[i]}" aria-pressed="${els.includes(i)}" title="${ATTRS[i][0]}"><i>${ATTRS[i][1]}</i>${ATTRS[i][0]}</button>`).join("");
+  $$("#rels button").forEach(b => b.onclick = () => { const v = b.dataset.el; ROT.els = v == "all" ? [] : els.includes(+v) ? els.filter(x => x != +v) : [...els, +v]; saveRot(); drawRotPick(); });
+  const rows = pool.filter(s => (!els.length || s.a.some(([a]) => els.includes(a))) && (!q || (s.n + " " + s.j).toLowerCase().includes(q)))
     .map(s => ({s, w: rotWeighted(rotOf(s), ROT.mode, cdMul)})).sort((a, b) => b.w - a.w);
   $("#rpick").innerHTML = rows.map(({s, w}) => { const n = list.filter(x => x == s).length, max = rotMax(s), can = rotCanAdd(list, s), r = rotOf(s);
-    return `<div class="rp ${n ? "on" : ""} ${!n && !can ? "off" : ""}" title="T ${r.t}s · RT ${r.rt}s${r.cbt ? ` · CBT ${r.cbt}s` : ""} · CD ${r.cd}s · up to ${max}x"><span>${esc(s.n)}</span><em>${w.toFixed(1)}M</em>
-      ${n ? `<button class="rp-b" data-rm1="${s.id}" aria-label="Remove one ${esc(s.n)}">−</button><b class="rp-n">${n}/${max}</b>` : ""}<button class="rp-b" data-rp="${s.id}" ${can ? "" : "disabled"} aria-label="Add ${esc(s.n)}">+</button></div>`; }).join("") || emptyState("No skills", "Nothing with complete timing data.");
+    return `<div class="rp ${n ? "on" : ""} ${!n && !can ? "off" : ""}" title="T ${r.t}s · RT ${r.rt}s${r.cbt ? ` · CBT ${r.cbt}s` : ""} · CD ${r.cd}s · up to ${max}x · ${s.a.map(([a, p]) => `${p}% ${ATTRS[a][0]}`).join(", ")}"><span>${esc(s.n)}</span><u class="rp-el">${s.a.map(([a]) => `<i style="color:${ATTR_COLORS[a]}">${ATTRS[a][1]}</i>`).join("")}</u><em>${w.toFixed(1)}M</em>
+      ${n ? `<button class="rp-b" data-rm1="${s.id}" aria-label="Remove one ${esc(s.n)}">−</button><b class="rp-n">${n}/${max}</b>` : ""}<button class="rp-b" data-rp="${s.id}" ${can ? "" : "disabled"} aria-label="Add ${esc(s.n)}">+</button></div>`; }).join("") || emptyState("No skills", els.length || q ? "Try another element or filter." : "Nothing with complete timing data.");
   const done = () => { saveRot(); drawRotPick(); drawRot(); };
   $$("[data-rp]").forEach(b => b.onclick = () => { ROT.ids[ROT.cat] = [...list.map(s => s.id), +b.dataset.rp]; done(); });
   $$("[data-rm1]").forEach(b => b.onclick = () => { const a = list.map(s => s.id); a.splice(a.lastIndexOf(+b.dataset.rm1), 1); ROT.ids[ROT.cat] = a; done(); });
