@@ -14,7 +14,6 @@ const ROT_COLORS = ["#e2563b", "#6fa8ff", "#5cc8a1", "#e8c26a", "#b48cff"];
 const n2 = v => (+v).toFixed(2) + "s";
 // Bow, Wand and Staff have no RT in the sheet yet: uses T unless the user opts in to the unverified script estimate
 const rotOf = sk => { const r = sk?.x?.rot; if (!(r && r.d[0] != null && r.t && r.cd)) return null; if (r.rt) return r;
-  const own = timingOverride(sk); if (own) return {...r, rt: own.rt, cbt: own.cbt || 0};
   return ROT.useScript === true && r.rtEst ? {...r, rt: r.rtEst, est: "script"} : {...r, rt: r.t, est: "t"}; };
 const rotDmg = (r, mode) => r.d[mode] ?? r.d[0];
 
