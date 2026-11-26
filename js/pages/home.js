@@ -14,6 +14,7 @@ function viewHome(){
     ["#/bestiary", "book", "Bestiary", "The game's monster guide: art, lore and card rewards."],
     ["#/items", "item", "Items", "Every item and how to get it: drops, crafting, shops, boxes."],
     ["#/gear", "gear", "Equipment", "Weapons, magatama and accessories with stats and sources."],
+    ["#/partners", "partners", "Partners", "Partners, mounts, supports and yokai, and how to unlock them."],
     ["#/fields", "map", "Field maps", "Open areas with respawning monsters and their drops."],
   ];
   const tools = [

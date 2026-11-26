@@ -8,7 +8,7 @@
 <meta name="description" content="OnigiriDex: dungeons, monsters, drops, build planner and boss simulator for Onigiri.">
 <title>OnigiriDex</title>
 <link rel="icon" type="image/png" href="img/logo-96.png">
-<script>document.write('<link rel="stylesheet" href="css/app.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/theme.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/sim.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/monsters.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/plan.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/rotation.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/expcalc.css?v=' + Date.now() + '">');</script>
+<script>document.write('<link rel="stylesheet" href="css/app.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/theme.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/sim.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/monsters.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/plan.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/rotation.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/partners.css?v=' + Date.now() + '"><link rel="stylesheet" href="css/expcalc.css?v=' + Date.now() + '">');</script>
 </head>
 <body>
 <a class="skip" href="#app">Skip to content</a>
@@ -23,6 +23,7 @@
       <a href="#/bestiary" data-k="bestiary" title="Alt+9" aria-keyshortcuts="Alt+9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6M9 12h4"/></svg>Bestiary<kbd class="key">9</kbd></a>
       <a href="#/items" data-k="items" title="Alt+4" aria-keyshortcuts="Alt+4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>Items<kbd class="key">4</kbd></a>
       <a href="#/gear" data-k="gear" title="Weapons, magatama and accessories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4.5l5 5L9 20H4v-5z"/><path d="M12 7l5 5"/></svg>Equipment</a>
+      <a href="#/partners" data-k="partners" title="Partners, mounts, supports and yokai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.5 5.5-5.5s5.5 2.3 5.5 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.8c.5-.2 1-.3 1.5-.3 2.3 0 4 1.8 4 4.5"/></svg>Partners</a>
       <a href="#/fields" data-k="fields" title="Alt+5" aria-keyshortcuts="Alt+5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Field maps<kbd class="key">5</kbd></a>
       <div class="nav-sec">Tools</div>
       <a href="#/farm" data-k="farm" title="Alt+6" aria-keyshortcuts="Alt+6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11c0-4 3-7 7-7 0 4-3 7-7 7z"/><path d="M12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg>Farm Finder<kbd class="key">6</kbd></a>
@@ -55,7 +56,7 @@
 </div>
 <script>
 /* always load the current files (the desktop app's browser otherwise keeps old copies in its cache) */
-(function(){ var v = Date.now(); ["icons.js","data.js","js/core/base.js","js/core/indexes.js","js/core/damage.js","js/core/render.js","js/core/farm.js","js/ui/components.js","js/pages/home.js","js/pages/dungeons.js","js/pages/monsters.js","js/pages/items.js","js/pages/gear.js","js/tools/farm.js","js/tools/planfarm.js","js/pages/fields.js","js/tools/simulator.js","js/tools/rotation.js","js/tools/expcalc.js","js/pages/bestiary.js","js/tools/dissolve.js","js/tools/planner/calc.js","js/tools/planner/core.js","js/tools/planner/effects.js","js/tools/planner/view.js","js/ui/search.js","js/ui/shell.js","js/ui/a11y.js"].forEach(function(f){ document.write('<script src="' + f + '?v=' + v + '"><\/script>'); }); })();
+(function(){ var v = Date.now(); ["icons.js","data.js","js/core/base.js","js/core/indexes.js","js/core/damage.js","js/core/render.js","js/core/farm.js","js/ui/components.js","js/pages/home.js","js/pages/dungeons.js","js/pages/monsters.js","js/pages/items.js","js/pages/gear.js","js/pages/partners.js","js/tools/farm.js","js/tools/planfarm.js","js/pages/fields.js","js/tools/simulator.js","js/tools/rotation.js","js/tools/expcalc.js","js/pages/bestiary.js","js/tools/dissolve.js","js/tools/planner/calc.js","js/tools/planner/core.js","js/tools/planner/effects.js","js/tools/planner/view.js","js/ui/search.js","js/ui/shell.js","js/ui/a11y.js"].forEach(function(f){ document.write('<script src="' + f + '?v=' + v + '"><\/script>'); }); })();
 </script>
 </body>
 </html>

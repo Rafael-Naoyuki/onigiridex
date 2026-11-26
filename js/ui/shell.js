@@ -7,7 +7,7 @@ applyTheme();
 $("#builtAt").innerHTML = `Data ${esc(D.built || "")}<br>made by <b>Naoyuki</b>`;
 
 // ---------------------------------------------------------------- router
-const SECTION = {bestiary:"bestiary", dungeon:"dungeons", monster:"monsters", item:"items", field:"fields", skill:"sim"};
+const SECTION = {bestiary:"bestiary", dungeon:"dungeons", monster:"monsters", item:"items", field:"fields", skill:"sim", partner:"partners"};
 function route(){
   const h = location.hash.slice(1) || "/";
   const [path, query] = h.split("?");
@@ -29,6 +29,8 @@ function route(){
     else if (k == "items") viewItems();
     else if (k == "item") viewItem(+parts[1], qs);
     else if (k == "gear") viewGear(parts[1]);
+    else if (k == "partners") viewPartners(parts[1]);
+    else if (k == "partner") viewPartner(+parts[1], +parts[2]);
     else if (k == "farm") viewFarm();
     else if (k == "plan") viewPlan();
     else if (k == "dissolve") viewDissolve();
