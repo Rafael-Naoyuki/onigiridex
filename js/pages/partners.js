@@ -25,6 +25,8 @@ function ptVariant(v, p){
   const left = (ITEMS[own[0]][1] || "").replace(/^\d+/, "").replace("召喚札", "").replace(p.j, "").trim();
   return left ? (PT_COLORS[left] || Object.entries(PT_COLORS).filter(([k]) => left.includes(k)).map(([, e]) => e).join(" ") || left) : "Normal";
 }
+// what players confirmed where the game text is wrong
+const PT_HOW = {"0:20": "Obtained from a shop and a quest.", "0:22": "Obtained from a shop and a quest."};
 const ptCount = t => PARTNERS.filter(p => p.t == t).length;
 // card text: intro lines, then one block per awakening level
 function ptAwaken(text){
@@ -40,7 +42,7 @@ function ptAwaken(text){
   return out;
 }
 const ptBadges = p => [
-  PT_RANKS[p.rk] && p.t < 3 ? `<span class="pt-rk rk${p.rk}">${PT_RANKS[p.rk]}</span>` : "",
+  PT_RANKS[p.rk] && p.t < 3 && !(p.t == 0 && p.g == 0) ? `<span class="pt-rk rk${p.rk}">${PT_RANKS[p.rk]}</span>` : "",
   p.t == 0 && PT_GROUPS[p.g] ? `<span class="chip">${PT_GROUPS[p.g][0]}</span>` : "",
   p.t == 2 && p.mc?.length ? `<span class="chip">${p.mc.map(c => esc(CATS[c] || "?")).join(" / ")}</span>` : "",
   p.t == 3 && p.v?.length > 1 ? `<span class="chip">${p.v.length} variants</span>` : "",
@@ -88,7 +90,7 @@ function viewPartner(t, id){
       <div class="hint">How much each stat grows per point, compared with its other stats.</div></section>` : "";
   const unlock = t < 3 ? `<section class="card"><h3>How to unlock</h3>
       ${card ? `<div class="pt-unlock">${itemLink(p.c)}${srcs.length ? gearChips(p.c, srcs) : ""}</div>` : `<div class="hint">There is no unlock item for this ${PT_ONE[t]} in the game files.</div>`}
-      ${p.how ? `<div class="pt-how">${esc(p.how).replace(/\n/g, "<br>")}</div>` : ""}
+      ${PT_HOW[t + ":" + id] ? `<div class="pt-how">${PT_HOW[t + ":" + id]}</div>` : p.how ? `<div class="pt-how">${esc(p.how).replace(/\n/g, "<br>")}</div>` : ""}
       ${aw.intro.length ? `<div class="pt-intro">${aw.intro.map(esc).join("<br>")}</div>` : ""}</section>` : "";
   const awaken = aw.lv.length ? `<section class="card"><h3>Awakening</h3><div class="hint">Use more copies of the unlock item to awaken it.</div>
       <ol class="pt-aw">${aw.lv.map(l => `<li><b>Lv ${l.n}</b><div>${l.fx.map(f => `<span>${esc(f)}</span>`).join("")}</div></li>`).join("")}</ol></section>` : "";
