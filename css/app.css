@@ -1207,20 +1207,3 @@ main:has(.bp8-page){padding-top:14px;padding-bottom:14px}
 .sfx tr.on td:first-child{box-shadow:none;color:var(--gold)}
 .gs-row{grid-template-columns:1fr auto 52px;padding:3px 0}
 .gs-row i{grid-column:auto;margin:0;text-align:right}
-/* ---------- image zoom ---------- */
-.bd-art img,.pt-side .pt-img img,.pt-vimg img{cursor:zoom-in}
-.zoom-btn{position:absolute;right:8px;top:8px;z-index:2;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);background:color-mix(in srgb,var(--bg) 78%,transparent);color:var(--ink);cursor:zoom-in;opacity:0;transition:opacity .15s,transform .15s,border-color .15s}
-.bcard:hover .zoom-btn,.pt-card:hover .zoom-btn,.zoom-btn:focus-visible{opacity:1}
-.zoom-btn:hover{border-color:var(--gold);transform:scale(1.08)}
-@media (hover:none){.zoom-btn{opacity:1}}
-.zoombox{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(6,8,12,.86);backdrop-filter:blur(4px);animation:zbIn .15s ease;cursor:zoom-out}
-.zoombox figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:92vw}
-.zoombox figure img{max-width:92vw;max-height:84vh;min-height:min(60vh,520px);object-fit:contain;filter:drop-shadow(0 10px 30px rgba(0,0,0,.5));cursor:default}
-.zoombox figcaption{color:#e8e6e1;font-size:13px;font-weight:600;white-space:pre}
-.zoombox button{position:absolute;display:grid;place-items:center;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;border-radius:50%;cursor:pointer;transition:background .15s}
-.zoombox button:hover{background:rgba(255,255,255,.18)}
-.zb-x{top:16px;right:16px;width:40px;height:40px;font-size:16px}
-.zb-p,.zb-n{top:50%;transform:translateY(-50%);width:46px;height:46px;font-size:28px;line-height:1}
-.zb-p{left:16px}.zb-n{right:16px}
-@keyframes zbIn{from{opacity:0}}
-@media (max-width:600px){.zb-p,.zb-n{top:auto;bottom:20px;transform:none}.zoombox figure img{min-height:0}}

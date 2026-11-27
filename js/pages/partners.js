@@ -66,7 +66,7 @@ function viewPartners(tabId){
     const list = PARTNERS.filter(p => p.t == tab.t && (tab.t != 0 || st.g < 0 || p.g == st.g) && (tab.t == 3 || !st.rk || p.rk == st.rk)
       && (!q || searchNorm(p.n + " " + p.j).includes(q)));
     $("#ptn").textContent = `${list.length} of ${ptCount(tab.t)}`;
-    $("#ptgrid").innerHTML = list.map(p => `<a class="pt-card" href="#/partner/${p.t}/${p.id}">${ptPortrait(p).slice(0, -6) + (p.img ? zoomBtn() : "") + "</div>"}
+    $("#ptgrid").innerHTML = list.map(p => `<a class="pt-card" href="#/partner/${p.t}/${p.id}">${ptPortrait(p)}
       <div class="pt-meta"><b>${esc(p.n)}</b>${p.j && p.j != p.n ? `<span class="jp">${esc(p.j)}</span>` : ""}<div class="pt-badges">${ptBadges(p)}</div></div></a>`).join("")
       || emptyState("Nothing found", "Try another name or filter.");
   };
