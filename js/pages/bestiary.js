@@ -44,7 +44,7 @@ function viewBestiary(){
       const weak = b.a.filter(([a, lv]) => lv > 0 && typeof a == "number").sort((x, y) => y[1] - x[1]);
       const res = b.a.filter(([a, lv]) => lv < 0 && typeof a == "number").sort((x, y) => x[1] - y[1]);
       return `<a class="bcard" href="#/bestiary/${b.id}">
-        <div class="bcard-art">${bestArt(b)}<span class="bno">No.${String(b.id).padStart(3, "0")}</span></div>
+        <div class="bcard-art">${bestArt(b)}${b.img ? zoomBtn() : ""}<span class="bno">No.${String(b.id).padStart(3, "0")}</span></div>
         <div class="bcard-b"><b>${esc(b.n)}</b><div class="jp">${esc(b.j)}${bestNature(b) ? ` · ${bestNature(b)}` : ""}</div>
           <div class="bchips">${weak.map(([a, lv]) => bestChip(a, lv)).join("")}${res.length && weak.length ? `<span class="bsep"></span>` : ""}${res.map(([a, lv]) => bestChip(a, lv)).join("")}</div></div></a>`;
     }).join("") || emptyState("No monster matches");

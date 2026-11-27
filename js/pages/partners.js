@@ -12,7 +12,7 @@ const PT_RANKS = {1: "Platinum", 2: "Gold"};
 const PT_STATS = ["STR", "VIT", "INT", "MND", "DEX"];
 const PT_BY = {}; PARTNERS.forEach(p => PT_BY[p.t + ":" + p.id] = p);
 const ptImg = key => key ? `img/partners/${key.split("/").pop().replace(/\.[^.]+$/, "")}.webp` : "";
-const ptPortrait = (p, cls = "") => `<div class="pt-img ${cls} rk${p.rk}">${p.img ? `<img src="${ptImg(p.img)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</div>`;
+const ptPortrait = (p, cls = "") => `<div class="pt-img ${cls} rk${p.rk}">${p.img ? `<img src="${ptImg(p.img)}" alt="${esc(p.n)}" loading="lazy" onerror="this.remove()">` : ""}</div>`;
 const PT_ONE = ["partner", "mount", "support", "yokai"];
 // variant name from the summon card made for it, e.g. "30021青一反木綿召喚札" -> "Blue"
 // in reading order, so "黒かぼちゃ" -> "Black Pumpkin" and "素直ボイス" -> "Gentle voice"
@@ -66,7 +66,7 @@ function viewPartners(tabId){
     const list = PARTNERS.filter(p => p.t == tab.t && (tab.t != 0 || st.g < 0 || p.g == st.g) && (tab.t == 3 || !st.rk || p.rk == st.rk)
       && (!q || searchNorm(p.n + " " + p.j).includes(q)));
     $("#ptn").textContent = `${list.length} of ${ptCount(tab.t)}`;
-    $("#ptgrid").innerHTML = list.map(p => `<a class="pt-card" href="#/partner/${p.t}/${p.id}">${ptPortrait(p)}
+    $("#ptgrid").innerHTML = list.map(p => `<a class="pt-card" href="#/partner/${p.t}/${p.id}">${ptPortrait(p).slice(0, -6) + (p.img ? zoomBtn() : "") + "</div>"}
       <div class="pt-meta"><b>${esc(p.n)}</b>${p.j && p.j != p.n ? `<span class="jp">${esc(p.j)}</span>` : ""}<div class="pt-badges">${ptBadges(p)}</div></div></a>`).join("")
       || emptyState("Nothing found", "Try another name or filter.");
   };

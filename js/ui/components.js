@@ -59,3 +59,31 @@ function remember(h, n, t){
 }
 const lvPills = d => d.L.map((L, i) => L ? `<span class="lvpill d${i}">${DIFFS[i]}${L.lv > 0 ? ` <b>${L.lv}</b>` : ""}</span>` : "").join("");
 const bossOf = (d, diff) => { const L = d.L[diff]; if (!L) return null; for (const fl of dungeonFloors(d, diff, S.party)) for (const m of fl.mons) if (m.boss || m.last) return m; return null; };
+
+/* ---------- image zoom: click a detail portrait, or the zoom button on a card, to see it full size ---------- */
+const ZOOM_SEL = ".bd-art img, .pt-side .pt-img img, .pt-vimg img";
+function zoomOpen(img){
+  const grid = img.closest(".bgrid, .pt-grid");
+  const list = grid ? [...grid.querySelectorAll(".bart:not(.none), .pt-img img")].filter(i => i.tagName === "IMG") : [img];
+  let at = Math.max(0, list.indexOf(img));
+  if (!list.length) list.push(img);
+  const box = document.createElement("div");
+  box.className = "zoombox"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-label", "Image viewer");
+  box.innerHTML = `<button class="zb-x" aria-label="Close">✕</button>${list.length > 1 ? `<button class="zb-p" aria-label="Previous image">‹</button><button class="zb-n" aria-label="Next image">›</button>` : ""}<figure><img alt=""><figcaption></figcaption></figure>`;
+  const big = box.querySelector("figure img"), cap = box.querySelector("figcaption");
+  const show = () => { const s = list[at]; big.src = s.currentSrc || s.src; big.alt = s.alt || ""; cap.textContent = (s.dataset.zoomName || s.alt || "") + (list.length > 1 ? `  ·  ${at + 1} / ${list.length}` : ""); };
+  const step = d => { at = (at + d + list.length) % list.length; show(); };
+  const close = () => { box.remove(); document.removeEventListener("keydown", key, true); img.focus?.(); };
+  const key = e => { if (e.key === "Escape") { e.preventDefault(); close(); } else if (e.key === "ArrowLeft") step(-1); else if (e.key === "ArrowRight") step(1); };
+  box.addEventListener("click", e => { if (e.target.closest(".zb-p")) step(-1); else if (e.target.closest(".zb-n")) step(1); else if (e.target !== big) close(); });
+  document.addEventListener("keydown", key, true);
+  window.addEventListener("hashchange", close, {once: true});
+  show(); document.body.appendChild(box); box.querySelector(".zb-x").focus();
+}
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".zoom-btn");
+  if (btn) { e.preventDefault(); e.stopPropagation(); const i = btn.parentElement.querySelector("img"); if (i) zoomOpen(i); return; }
+  const i = e.target.closest(ZOOM_SEL);
+  if (i && !i.closest("a")) { e.preventDefault(); zoomOpen(i); }
+}, true);
+const zoomBtn = () => `<button type="button" class="zoom-btn" aria-label="View image full size" title="View full size"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg></button>`;
