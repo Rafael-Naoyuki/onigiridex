@@ -22,7 +22,7 @@ const m3dBtn = (k, label, on, tip) => `<button type="button" class="btn sm m3d-t
 const modelPanel = i => modelOf(i) ? `<div class="m3d" id="m3d" data-model="${modelOf(i)}">
   <div class="m3d-stage"><div class="m3d-load">Loading 3D model…</div></div>
   <div class="m3d-bar"><span class="m3d-hint">Drag to rotate · scroll to zoom</span><span class="sp"></span>
-    ${m3dBtn("spin", "Rotate", M3D.spin, "Turn the weapon around by itself")}${m3dBtn("anim", "Effects", M3D.anim, "Glow and effects from the game (loads more data)")}${m3dBtn("char", "Character", !!M3D.char, "Sakura holding the weapon, the way the game puts it in her hand")}
+    ${m3dBtn("spin", "Rotate", M3D.spin, "Turn the weapon around by itself")}${m3dBtn("anim", "Effects", M3D.anim, "Glow and effects from the game (loads more data)")}
     <button type="button" class="btn sm" data-m3d="reset" title="Back to the starting view">Reset</button></div></div>` : "";
 
 // additive glow that leaves the canvas alpha alone: the canvas is transparent, so adding to alpha would paint dark halos
@@ -170,7 +170,7 @@ function mountModel(){
           b.name = mt.name; mt = b;
         }
         // effect meshes: the additive ones are the glows seen in game; the normal-blend ones (dark auras, smoke) are left out
-        if (tl && !x.add){ o.visible = false; o.userData.skip = 1; return; }
+        if (tl && (!x.add || (!x.tex && !mt.map))){ o.visible = false; o.userData.skip = 1; return; }   // also effect meshes whose texture is missing in the game files (they would be solid shells)
         // in the game the weapon effects only add light (no dark smoke or shadows), so every effect mesh is additive
         if (x.add || tl) addBlend(T, mt);
         if (tl && x.tex) mt.map = fxTex(x.tex);   // effect textures are shared files, loaded once
@@ -214,33 +214,13 @@ function mountModel(){
       const w0 = groups[0]; if (w0){ w0.fx = null; for (const m of w0.mats){ m.mt.color.copy(m.base); if (m.mt.emissive && !m.mt.emissiveMap) m.mt.emissive.setRGB(0, 0, 0); } }
     }
     // framing: on the weapon alone, or on the character holding it
-    let wpos = null, wsize = 1, charObj = null, twin = null, charCenter = null;
+    let wpos = null, wsize = 1;
     const frame = (center, size, side) => {
       const d = size / (2 * Math.tan(cam.fov * Math.PI / 360)) * 1.15;
       home = side ? new T.Vector3(center.x + d * 0.25, center.y + d * 0.05, center.z - d * 0.97) : new T.Vector3(d * 0.55, d * 0.15, d * 0.85).add(center);
       cam.position.copy(home); cam.near = d / 100; cam.far = d * 20; cam.updateProjectionMatrix();
       ctl.target.copy(center); ctl.update();
     };
-    function weaponAlone(){
-      if (twin){ twin.parent?.remove(twin); twin = null; }
-      if (charObj) scene.remove(charObj);
-      scene.add(root); root.matrixAutoUpdate = true; root.rotation.set(Math.PI / 2, 0, 0); root.scale.set(1, 1, 1); root.position.copy(wpos);
-      root.updateMatrixWorld(true); frame(new T.Vector3(), wsize);
-    }
-    const charAsset = () => assets.__char || (assets.__char = new Promise((ok, no) => loader.load("models/char/sakura.glb", ok, undefined, no)));
-    async function withChar(){
-      const g = await charAsset().catch(() => null);
-      if (!g || !alive || !M3D.char) return;
-      charObj = g.scene; scene.add(charObj);
-      const H = charObj.userData || {}, hands = (window.WEAPON_HAND || {})[mdl] || "R";
-      const hold = (key, obj, flip) => { const h = new T.Group(); h.matrixAutoUpdate = false; h.matrix.fromArray(H[key]);
-        obj.position.set(0, 0, 0); obj.rotation.set(0, 0, flip ? Math.PI : 0); h.add(obj); charObj.add(h); };
-      hold(hands[0] == "L" ? "lhand" : "rhand", root, false);
-      if (hands.length > 1 && hands[1] != hands[0]){ twin = root.clone(true); hold("lhand", twin, true); }
-      charObj.updateMatrixWorld(true);
-      const bb = new T.Box3().setFromObject(charObj), cc = bb.getCenter(new T.Vector3()), ss = bb.getSize(new T.Vector3());
-      charCenter = cc; frame(cc, Math.max(ss.y, ss.x * 1.1), true);
-    }
     loader.load(`models/${mdl}.glb`, g => {
       if (!alive) return;
       const m = root = g.scene; m.rotation.x = Math.PI / 2;               // the game's long axis is Z; stand it up
@@ -251,7 +231,6 @@ function mountModel(){
       frame(new T.Vector3(), wsize);
       stage.innerHTML = ""; stage.appendChild(r.domElement);
       const fb = box.querySelector('[data-m3d="anim"]'); if (fb) fb.hidden = !hasFx;
-      if (M3D.char) withChar();
       if (M3D.anim && hasFx) loadFx().catch(() => {});
     }, undefined, () => { stage.innerHTML = `<div class="m3d-load">Could not load the model.</div>`; });
     function apply(t, dt){
@@ -315,9 +294,8 @@ function mountModel(){
     const tog = (k, fn) => { const b = box.querySelector(`[data-m3d="${k}"]`); b.onclick = () => { M3D[k] = !M3D[k]; store("od2-m3d", M3D);
       b.classList.toggle("on", M3D[k]); b.setAttribute("aria-pressed", M3D[k]); fn(M3D[k]); }; };
     tog("spin", on => ctl.autoRotate = on);
-    tog("char", on => { if (!root) return; if (on) withChar(); else weaponAlone(); });
     tog("anim", on => on ? loadFx() : unloadFx());
-    box.querySelector('[data-m3d="reset"]').onclick = () => { if (home){ cam.position.copy(home); if (M3D.char && charObj && charCenter) ctl.target.copy(charCenter); else ctl.target.set(0, 0, 0); ctl.update(); } };
+    box.querySelector('[data-m3d="reset"]').onclick = () => { if (home){ cam.position.copy(home); ctl.target.set(0, 0, 0); ctl.update(); } };
     _m3dStop = () => { alive = false; ro.disconnect(); ctl.dispose(); r.dispose(); r.forceContextLoss?.(); };
   }).catch(() => { stage.innerHTML = `<div class="m3d-load">3D viewer not available.</div>`; });
 }
