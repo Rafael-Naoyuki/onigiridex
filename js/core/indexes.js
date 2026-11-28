@@ -2,6 +2,13 @@
 /* OnigiriDex — lookup tables built from data.js (dungeons, drops, item sources) */
 // ---------------------------------------------------------------- indexes
 const E = D.enemies, ST = D.stages, ITEMS = D.items, DROPS = D.drops, SKILLS = D.skills || [];
+// drop tables sometimes name items the client does not have ("Item 11:365013"): they can never drop, so they are left out
+const isGhostIdx = i => /^(Item \d+:\d+|#\d+:\d+)$/.test(ITEMS[i]?.[0] || "");
+for (let t = 0; t < DROPS.length; t++){
+  if (!DROPS[t]) continue;
+  DROPS[t] = DROPS[t].map(ent => Array.isArray(ent[1]) ? [ent[0], ent[1].filter(g => !isGhostIdx(g[1])), ...ent.slice(2)] : ent)
+    .filter(ent => Array.isArray(ent[1]) ? ent[1].length : !isGhostIdx(ent[1]));
+}
 const DUN = D.dungeons; const DUNBY = {}; DUN.forEach(d => DUNBY[d.id] = d);
 const SKBY = {}; SKILLS.forEach(s => SKBY[s.id] = s);
 const ITEMKEY = {}; ITEMS.forEach((it, i) => ITEMKEY[it[2] + ":" + it[3]] = i);

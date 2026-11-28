@@ -39,6 +39,11 @@ function viewMonsters(){
 function viewMonster(id, qs){
   const e = E[id]; if (!e) return notFound();
   const names = Object.keys(e.v);
+  if (!names.length){   // listed in the game data but never spawned with stats (cutscene or unused monster)
+    setCrumbs([["Monsters", "#/monsters"], [e.n]]);
+    app.innerHTML = `${ph({k: "Monster", title: esc(e.n), jp: e.j})}${emptyState("No stats in the game data", "This monster has no level, drops or spawn data. It may only appear in a cutscene or not be used.")}`;
+    return;
+  }
   let sel = qs.get("v");
   if (!sel || !e.v[sel]) sel = names.find(n => n.endsWith("_" + S.diff + "_" + S.party)) || names[0];
   const v = e.v[sel];

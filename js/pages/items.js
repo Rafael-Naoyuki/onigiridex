@@ -46,7 +46,7 @@ const SHOP_SELL = {}, SHOP_CUR = {}, BOX_FROM = {}, BOX_OF = {};
 SHOPS.forEach((sh, si) => sh.it.forEach(([it, cost], k) => { (SHOP_SELL[it] ||= []).push([si, k]); cost.forEach(([c]) => (SHOP_CUR[c] ||= []).push([si, k])); }));
 BOXES.forEach((b, bi) => { BOX_OF[b.b] = bi; b.p.forEach(([p, its]) => its.forEach(([it, n]) => (BOX_FROM[it] ||= []).push([bi, p, n]))); });
 const shopName = sh => `${esc(sh.n)}${sh.ev ? ` <span class="badge b-elite" title="Event exchange: only while the event runs">EVENT</span>` : ""}`;
-const costTxt = cost => cost.length ? cost.map(([c, n]) => `<span class="cost">×${fmt(n)} ${itemLink(c)}</span>`).join(" ") : `<span class="mute">ryou</span>`;
+const costTxt = (cost, ryou) => cost.length ? cost.map(([c, n]) => `<span class="cost">×${fmt(n)} ${itemLink(c)}</span>`).join(" ") : ryou ? `<span class="cost"><b>${fmt(ryou)}</b> ryou</span>` : `<span class="mute">ryou</span>`;
 
 // short "how to get it" summary for any item
 function howToGet(i){
@@ -80,10 +80,10 @@ function dropInfo(did, diff, item, partyOverride){
 const playersCell = x => !x ? "—" : x.fixed ? `<span class="mute" title="This difficulty always uses a party of ${x.minP}">${x.minP} (fixed)</span>` : x.minP == null ? "—" : x.minP == 1 ? "1+" : `<b class="meh">${x.minP}+</b>`;
 
 function boxContents(box){
-  const prizeTxt = its => its.map(([it, n]) => `${itemLink(it)}${n > 1 ? ` <b>×${fmt(n)}</b>` : ""}`).join(" + ");
+  const prizeTxt = its => its.filter(([it]) => !isGhostIdx(it)).map(([it, n]) => `${itemLink(it)}${n > 1 ? ` <b>×${fmt(n)}</b>` : ""}`).join(" + ");
   // group prizes that share the same chance and item type (e.g. "1 of 52 magatama")
   const groups = new Map();
-  for (const pr of BOX_SORT(box)){ const [p, its] = pr; const k = p.toFixed(6) + "|" + (its.length == 1 ? ITEMS[its[0][0]][2] : "x"); (groups.get(k) || groups.set(k, []).get(k)).push(pr); }
+  for (const pr of BOX_SORT(box).filter(([, its]) => its.some(([it]) => !isGhostIdx(it)))){ const [p, its] = pr; const k = p.toFixed(6) + "|" + (its.length == 1 ? ITEMS[its[0][0]][2] : "x"); (groups.get(k) || groups.set(k, []).get(k)).push(pr); }
   const rows = [];
   for (const list of groups.values()){
     if (list.length < 4){ list.forEach(([p, its]) => rows.push({p, html: `<tr><td>${prizeTxt(its)}</td><td class="r">${pct(p)}${oneIn(p)}</td></tr>`})); continue; }
@@ -174,7 +174,7 @@ function viewItem(i, qs){
     const srcAll = itemSources(S.party);
     body = `${sells.length ? `<h3 class="sub-h">Exchange shops <span class="count">${sells.length}</span></h3>
       <div class="wrap" style="margin-bottom:16px"><table class="tbl"><thead><tr><th>Shop</th><th>Price</th></tr></thead><tbody>${sells.map(([si, k]) => { const sh = SHOPS[si];
-        return `<tr><td>${shopName(sh)}</td><td>${costTxt(sh.it[k][1])}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+        return `<tr><td>${shopName(sh)}</td><td>${costTxt(sh.it[k][1], sh.it[k][2])}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
       ${fromBox.length ? `<h3 class="sub-h">Lucky boxes <span class="count">${fromBox.length}</span></h3>
       <div class="wrap"><table class="tbl"><thead><tr><th>Box</th><th class="r">Amount</th><th class="r">Chance per box</th><th>Where to get the box</th></tr></thead><tbody>${fromBox.sort((a, b) => b[1] - a[1]).map(([bi, p, n]) => { const b = BOXES[bi], bb = bestAny(srcAll, b.b), bs = (SHOP_SELL[b.b] || []).length;
         return `<tr><td>${itemLink(b.b)}</td><td class="r num">×${fmt(n)}</td><td class="r">${pct(p)}${oneIn(p)}</td>
