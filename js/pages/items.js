@@ -238,7 +238,7 @@ function viewItem(i, qs){
       chips: `${it[4] >= 0 ? `<span class="chip">Rank <b>${"CBAS"[it[4]]}</b></span>` : ""}${it[6] > 1 ? `<span class="chip">Req. Lv <b>${it[6]}</b></span>` : ""}${[[groups.size, "dungeon"], [fields.length, "field map"], [ranks.length, "clear reward"], [sells.length, "shop"], [fromBox.length, "box", "es"], [disFrom.length, "dissolution", "s"], [makes.length, "recipe"]].filter(([n]) => n).map(([n, w, pl]) => `<span class="chip"><b>${n}</b> ${w}${n > 1 ? (pl || "s") : ""}</span>`).join("") || `<span class="chip">no known source</span>`}`,
       actions: `${src.length ? `${partySeg()}<button class="btn pri" id="farmThis">Open in Farm Finder</button>` : ""}${RCP_MAKE[i] ? `<button class="btn" id="planThis" title="Add to the Farm Planner">+ Farm Planner</button>` : ""}`})}
     ${it[7] && !/^[A-Za-z]+\[/.test(it[7]) ? `<div class="note" style="white-space:pre-line;margin:0 0 14px">${esc(it[7])}</div>` : ""}
-    ${itemStatsPanel(i)}
+    ${modelOf(i) ? `<div class="item-top">${modelPanel(i)}<div>${itemStatsPanel(i)}</div></div>` : itemStatsPanel(i)}
     ${best.length ? `<h2 style="margin-top:0">Best places to farm <span class="count">one full clear · party of ${S.party}</span></h2>
       <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-bottom:6px">${best.map(r => { const p = 1 - r.per[0].none; const runs = p >= 1 ? 1 : Math.ceil(Math.log(0.1) / Math.log(1 - p));
         return `<a class="dcard" href="#/dungeon/${r.d.id}" data-godiff="${r.diff}"><div class="t">${esc(r.d.n)}</div><div class="boss">${esc(r.d.gn || "")}</div>
@@ -250,6 +250,7 @@ function viewItem(i, qs){
     ${scroll != null ? `<h2 style="margin-top:0">This recipe makes</h2><div class="rcp-grid">${recipeCard(scroll, {showProduct: true})}</div>` : ""}
     ${tabsBar(tabs, tab, base)}
     ${body}`;
+  mountModel();
   if ($("#farmThis")) $("#farmThis").onclick = () => farmGo([i]);
   if ($("#planThis")) $("#planThis").onclick = () => { planAdd(i); location.hash = "#/plan"; };
   $$("[data-rplan]").forEach(b => b.onclick = () => { const [it, k] = b.dataset.rplan.split("|").map(Number); PLAN.rsel[it] = k; planAdd(it); location.hash = "#/plan"; });
