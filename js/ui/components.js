@@ -22,7 +22,7 @@ const SVG = {
   partners:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.5 5.5-5.5s5.5 2.3 5.5 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.8c.5-.2 1-.3 1.5-.3 2.3 0 4 1.8 4 4.5"/>',
   drop:'<path d="M12 3c3.5 4.2 6 7.3 6 10.5A6 6 0 0 1 6 13.5C6 10.3 8.5 7.2 12 3z"/>',
 };
-const sheetCredit = () => `<div class="credit-line">Skill data from the <b>Onigiri Skill Database</b> by <b class="credit">ikzki</b></div>`;
+const sheetCredit = () => `<div class="credit-line">Hit rates, measured timings (T, CBT, RT), cooldowns and damage come from the <b>Onigiri Skill Database</b> by <b class="credit">ikzki</b> (Kazuki). Thank you for keeping it updated for the community.</div>`;
 const svg = (n, cls="") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${SVG[n] || ""}</svg>`;
 
 // ---------------------------------------------------------------- shared components

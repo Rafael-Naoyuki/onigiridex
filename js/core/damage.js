@@ -88,10 +88,12 @@ function calcSkill(sk, tg, b, capBuff){
   // "Damage against <monster>" bonuses from the planner build
   const vsRate = FB && FB.vsCard && tg.eid != null ? FB.vsCard.filter(v => v.eids.includes(+tg.eid)).reduce((a, v) => a + v.rate, 0) : 0;
   if (vsRate){ total *= 1 + vsRate / 100; hits.forEach(h => h.dmg *= 1 + vsRate / 100); }
-  const time = sk.x?.time || null;
-  const cd = (sk.ct / 1000) * (1 - Math.min(+b.cdc||0, 95) / 100);
+  // time until you can act again: the sheet's measured RT (recovery time) when there is one, else the full animation
+  const rt = sk.x?.rot?.rt || null, time = rt || sk.x?.time || null;
+  // FIXED_COOLTIME skills ignore cooldown cut (ikzki)
+  const cd = (sk.ct / 1000) * (sk.x?.rot?.fc ? 1 : 1 - Math.min(+b.cdc||0, 95) / 100);
   const castT = time || +SIM.defaultTime || 1.5;
-  return {total, hits, measured:!!measured, time, castT, cd, mix, covF, critF, cri, power, sf, vsRate,
+  return {total, hits, measured:!!measured, time, rt:!!rt, castT, cd, mix, covF, critF, cri, power, sf, vsRate,
     burst: total / castT, sustained: total / Math.max(castT, cd), casts: total > 0 ? Math.ceil(tg.hp / total) : Infinity};
 }
 // greedy rotation: always cast the ready skill with the best damage per second of cast time
