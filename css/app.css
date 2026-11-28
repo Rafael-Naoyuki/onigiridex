@@ -1217,6 +1217,6 @@ main:has(.bp8-page){padding-top:14px;padding-bottom:14px}
 .m3d-stage:active{cursor:grabbing}
 .m3d-stage canvas{display:block;width:100%!important;height:100%!important}
 .m3d-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);font-size:13px}
-.m3d-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent)}
+.m3d-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent)}
 .m3d-hint{font-size:11.5px;color:var(--faint)}
 .m3d-bar .btn.on{border-color:var(--gold);color:var(--gold)}
