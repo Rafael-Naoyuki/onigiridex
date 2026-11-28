@@ -1,3 +1,0 @@
-[     202ms] [ERROR] ReferenceError: modelOf is not defined
-    at viewItem (http://127.0.0.1:8765/js/pages/items.js?v=1795843280963:240:112)
-    at route (http://127.0.0.1:8765/js/ui/shell.js?v=1795843280963:30:27) @ http://127.0.0.1:8765/js/ui/shell.js?v=1795843280963:46
