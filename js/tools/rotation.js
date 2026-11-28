@@ -155,3 +155,15 @@ function bindRot(list, best){
   $$("[data-rm]").forEach(b => b.onclick = () => { const a = list.map(s => s.id); a.splice(+b.dataset.rm, 1); ROT.ids[ROT.cat] = a; re(); });
   $$("[data-mv]").forEach(b => b.onclick = () => { const [i, d] = b.dataset.mv.split("|").map(Number), a = list.map(s => s.id); [a[i], a[i + d]] = [a[i + d], a[i]]; ROT.ids[ROT.cat] = a; re(); });
 }
+
+// Boss Simulator: kill time from the Rotation DPS rotation (sheet damage, same rules as this page).
+// Sheet damage is in millions. Rotation 1 runs once, then the loop repeats; damage is spread evenly inside each pass.
+function rotKillTime(list, hp, mode, cdMul){
+  if (!list.length || !(hp > 0)) return null;
+  const c = rotCalc(list, mode, cdMul), d1 = c.dmg * 1e6, d2 = c.loop.dmg * 1e6;
+  if (!(d1 > 0)) return null;
+  let t;
+  if (hp <= d1) t = hp / d1 * c.L;
+  else { if (!(d2 > 0)) return null; const rest = hp - d1, n = Math.floor(rest / d2); t = c.L + n * c.loop.L + (rest - n * d2) / d2 * c.loop.L; }
+  return {t, c, dps: hp / t};
+}

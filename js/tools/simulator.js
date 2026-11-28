@@ -188,6 +188,12 @@ function drawSimResults(){
   const players = simPlayers(tg, SIM);
   const rot = loadout.length ? simulateRotation(loadout, tg, SIM, 3600, players) : null;
   if (rot) rot.solo = players > 1 ? simulateRotation(loadout, tg, SIM, 3600, 1) : rot;
+  // main number: the Rotation DPS rotation of this weapon (sheet damage), else the simulator skills in their order
+  const rotIds = (ROT.ids[SIM.cat] || []).filter(id => SKBY[id] && rotOf(SKBY[id]));
+  const fromRot = rotIds.length > 0;
+  const sheetList = (fromRot ? rotIds : loadout).map(id => SKBY[id]).filter(sk => sk && rotOf(sk)).slice(0, 5);
+  const cdMul = 1 - ROT.cut / 100;
+  const sheet = sheetList.length ? {list: sheetList, fromRot, party: rotKillTime(sheetList, tg.hp / players, ROT.mode, cdMul), solo: players > 1 ? rotKillTime(sheetList, tg.hp, ROT.mode, cdMul) : null, players} : null;
   const basics = basicSkills(SIM.cat), fsk = simFiller(SIM);
   const elemsUsed = [...new Set(sks.flatMap(s => s.a.map(a => a[0])))];
   const colorOf = new Map(loadout.map((id, i) => [id, SIM_COLORS[i % SIM_COLORS.length]]));
@@ -209,6 +215,7 @@ function drawSimResults(){
     ${loadout.length ? `<div class="sim-slots" aria-label="Skills in the rotation">${loadout.map((id, i) => { const sk = SKBY[id];
       return `<button class="sim-slot on" data-unpick="${id}" style="--c:${colorOf.get(id)}" title="Remove ${esc(sk.n)}"><i>${i + 1}</i><span>${esc(sk.n.replace(/^Ougi /, ""))}</span>${sk.o ? `<em>OUGI</em>` : ""}<b aria-hidden="true">✕</b></button>`; }).join("")}
       ${full ? "" : `<button class="sim-slot add" id="toList"><i>+</i><span class="mute">${loadout.length}/${SIM_SLOTS} · add from the list</span></button>`}</div>` : ""}
+    ${sheetView(sheet)}
     ${rot ? rotationView(rot, colorOf) : `<div class="sim-empty">Press <b>+ Add</b> on the skills you have on your weapon (up to ${SIM_SLOTS}) to simulate a fight against ${esc(tg.name)}.</div>`}
   </section>
 
@@ -246,6 +253,7 @@ function drawSimResults(){
   });
   $$("[data-unpick]").forEach(c => c.onclick = () => { SIM.loadout = SIM.loadout.filter(x => x != c.dataset.unpick); saveSim(); drawSimResults(); });
   if ($("#toList")) $("#toList").onclick = () => { $(".sim-list").scrollIntoView({behavior: "smooth", block: "start"}); setTimeout(() => $("#sq")?.focus({preventScroll: true}), 350); };
+  if ($("#toRot")) $("#toRot").onclick = () => { ROT.cat = SIM.cat; saveRot(); };
   if ($("#clearLoad")) $("#clearLoad").onclick = () => { SIM.loadout = SIM.loadout.filter(id => SKBY[id]?.c != SIM.cat); saveSim(); drawSimResults(); };
   $("#sq").oninput = e => { SIM.q = e.target.value; saveSim(); clearTimeout(drawSimResults.t); drawSimResults.t = setTimeout(() => { drawSimResults(); const i = $("#sq"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
   $("#sougi").onchange = e => { SIM.ougi = +e.target.value; saveSim(); drawSimResults(); };
@@ -255,6 +263,22 @@ function drawSimResults(){
   $("#smeas").onchange = e => { SIM.measuredOnly = e.target.checked; saveSim(); drawSimResults(); };
 }
 
+function sheetView(sh){
+  const link = `<a href="#/rotation" id="toRot">${sh && sh.fromRot ? "Edit in Rotation DPS" : "Build it in Rotation DPS"}</a>`;
+  if (!sh) return `<div class="sim-sheet"><div class="hint">No rotation yet. ${link} and the kill time here will use its damage and timings.</div></div>`;
+  const p = sh.party, c = p && p.c;
+  return `<div class="sim-sheet">
+    <div class="sim-kpis">
+      <div class="sim-kpi main"><span class="tip" title="Boss HP ÷ ${sh.players} player(s), dealt at the Rotation DPS of this rotation (sheet damage, ${ROT_MODES[ROT.mode]}, ${ROT.cut}% cooldown cut)">Kill time · party of ${sh.players}</span><b>${p ? fmtS(p.t) : "—"}</b></div>
+      ${sh.solo ? `<div class="sim-kpi"><span class="tip" title="Only you hitting the full boss HP">Kill time · solo</span><b>${fmtS(sh.solo.t)}</b></div>` : ""}
+      <div class="sim-kpi"><span title="DPS from rotation 2 onward">Sustained DPS</span><b>${c ? c.loop.dps.toFixed(2) + "M" : "—"}</b></div>
+      <div class="sim-kpi"><span>Rotation time</span><b>${c ? c.loop.L.toFixed(2) + "s" : "—"}</b></div>
+    </div>
+    <div class="hint">${sh.fromRot ? "Rotation from Rotation DPS" : "Simulator skills in their order (no Rotation DPS rotation for this weapon)"}: ${sh.list.map(sk => esc(sk.n)).join(" → ")}. ${link}</div>
+    <details class="sim-wip"><summary>Formula estimate against this boss</summary><div class="hint">Below: the same fight simulated with the game's damage formula, your stats and this boss's defense and resistances. Useful to compare bosses; the kill time above is the reference.</div></details>
+  </div>`;
+}
+
 function rotationView(rot, colorOf){
   const col = s => s.filler ? "var(--faint)" : colorOf.get(s.sk.id) || "#777";
   const total = rot.timeline.reduce((a, x) => a + x.d, 0) || 1;
@@ -262,9 +286,9 @@ function rotationView(rot, colorOf){
   const rows = rot.sks.slice().sort((a, b) => b.dmg - a.dmg);
   const share = s => s.dmg / Math.max(rot.dealt, 1) * 100;
   return `<div class="sim-kpis">
-      <div class="sim-kpi main"><span class="tip" title="Boss HP split between ${rot.share} player(s) with your DPS (WIP)">Kill time · party of ${rot.share}</span><b>${rot.time != null ? fmtS(rot.time) : "> " + fmtS(rot.limit)}</b></div>
-      ${rot.share > 1 ? `<div class="sim-kpi"><span class="tip" title="Only you hitting the full boss HP">Kill time · solo</span><b>${rot.solo.time != null ? fmtS(rot.solo.time) : "> " + fmtS(rot.solo.limit)}</b></div>` : ""}
-      <div class="sim-kpi"><span>Your average DPS</span><b>${fmtM(rot.dps)}</b></div>
+      <div class="sim-kpi main"><span class="tip" title="Boss HP split between ${rot.share} player(s), damage from the formula (WIP)">Formula kill time · party of ${rot.share}</span><b>${rot.time != null ? fmtS(rot.time) : "> " + fmtS(rot.limit)}</b></div>
+      ${rot.share > 1 ? `<div class="sim-kpi"><span class="tip" title="Only you hitting the full boss HP">Formula kill time · solo</span><b>${rot.solo.time != null ? fmtS(rot.solo.time) : "> " + fmtS(rot.solo.limit)}</b></div>` : ""}
+      <div class="sim-kpi"><span>Formula average DPS</span><b>${fmtM(rot.dps)}</b></div>
       <div class="sim-kpi ${rot.idle > 0.5 ? "warn" : ""}"><span class="tip" title="Time spent waiting because everything was on cooldown (pick a filler to use basic attacks instead)">Idle</span><b>${fmtS(rot.idle)}</b></div>
     </div>
     <div class="sim-tl"><div class="tl" role="img" aria-label="Fight timeline">${rot.timeline.slice(0, 400).map(x => `<i style="width:${(x.d/total*100).toFixed(3)}%;background:${x.idle ? "transparent" : col(rot.sks.find(s => s.sk.id == x.sk.id) || {sk: x.sk})}" title="${x.idle ? "waiting" : esc(x.sk.n)} @ ${x.t.toFixed(1)}s"></i>`).join("")}</div>

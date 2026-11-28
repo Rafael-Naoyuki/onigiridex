@@ -123,3 +123,8 @@
 .sim-res .rc u{font-size:7px;letter-spacing:0}
 .sim-res .rc b{font-size:10.5px}
 @media (max-width:1300px){.sim-res .rstrip{grid-template-columns:repeat(7,40px)}}
+
+.sim-sheet .sim-kpis{margin-top:4px}
+.sim-sheet{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line, rgba(127,127,127,.25))}
+.sim-sheet .hint{margin-top:8px}
+.sim-sheet .sim-wip{margin-top:6px}
