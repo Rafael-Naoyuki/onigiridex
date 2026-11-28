@@ -1220,3 +1220,4 @@ main:has(.bp8-page){padding-top:14px;padding-bottom:14px}
 .m3d-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--card) 85%,transparent)}
 .m3d-hint{font-size:11.5px;color:var(--faint)}
 .m3d-bar .btn.on{border-color:var(--gold);color:var(--gold)}
+.m3d-bar [hidden]{display:none!important}

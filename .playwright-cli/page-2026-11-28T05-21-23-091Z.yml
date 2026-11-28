@@ -1,0 +1,79 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "OnigiriDex Onigiri server database" [ref=e5] [cursor=pointer]:
+        - /url: "#/"
+        - generic [ref=e7]:
+          - generic [ref=e8]: OnigiriDex
+          - generic [ref=e9]: Onigiri server database
+      - navigation "Main" [ref=e10]:
+        - link "Home 1" [ref=e11] [cursor=pointer]:
+          - /url: "#/"
+          - text: Home
+          - generic [ref=e15]: "1"
+        - generic [ref=e16]: Explore
+        - link "Dungeons 2" [ref=e17] [cursor=pointer]:
+          - /url: "#/dungeons"
+          - text: Dungeons
+          - generic [ref=e21]: "2"
+        - link "Monsters 3" [ref=e22] [cursor=pointer]:
+          - /url: "#/monsters"
+          - text: Monsters
+          - generic [ref=e28]: "3"
+        - link "Bestiary 9" [ref=e29] [cursor=pointer]:
+          - /url: "#/bestiary"
+          - text: Bestiary
+          - generic [ref=e33]: "9"
+        - link "Items 4" [ref=e34] [cursor=pointer]:
+          - /url: "#/items"
+          - text: Items
+          - generic [ref=e38]: "4"
+        - link "Equipment" [ref=e39] [cursor=pointer]:
+          - /url: "#/gear"
+        - link "Partners" [ref=e43] [cursor=pointer]:
+          - /url: "#/partners"
+        - link "Field maps 5" [ref=e49] [cursor=pointer]:
+          - /url: "#/fields"
+          - text: Field maps
+          - generic [ref=e53]: "5"
+        - generic [ref=e54]: Tools
+        - link "Farm Finder 6" [ref=e55] [cursor=pointer]:
+          - /url: "#/farm"
+          - text: Farm Finder
+          - generic [ref=e59]: "6"
+        - link "Farm Planner" [ref=e60] [cursor=pointer]:
+          - /url: "#/plan"
+        - link "Dissolution" [ref=e64] [cursor=pointer]:
+          - /url: "#/dissolve"
+        - link "Build Planner 7" [ref=e68] [cursor=pointer]:
+          - /url: "#/build"
+          - text: Build Planner
+          - generic [ref=e71]: "7"
+        - link "Boss Simulator WIP" [ref=e72] [cursor=pointer]:
+          - /url: "#/sim"
+          - text: Boss Simulator
+          - 'generic "Work in progress: numbers are still being tuned" [ref=e78]': WIP
+        - link "Rotation DPS" [ref=e79] [cursor=pointer]:
+          - /url: "#/rotation"
+        - link "EXP Calculator" [ref=e84] [cursor=pointer]:
+          - /url: "#/exp"
+      - generic [ref=e87]: Recent
+      - generic [ref=e89]: Pages you open show up here.
+      - generic [ref=e91]:
+        - button "Light / dark" [ref=e92] [cursor=pointer]
+        - generic [ref=e96]: Data 2026-11-27 23:53made by Naoyuki
+    - generic [ref=e97]:
+      - banner [ref=e98]:
+        - generic [ref=e99]:
+          - link "Items" [ref=e240] [cursor=pointer]:
+            - /url: "#/items"
+          - text: /Weapon/Hajuma Evil Eye Axe - Chaos Pupil
+        - generic [ref=e100]:
+          - searchbox "Search" [ref=e104]
+          - generic [ref=e105]: Ctrl K
+      - main [ref=e106]:
+        - generic [ref=e241]:
+          - generic [ref=e242]: Something went wrong on this page
+          - text: modelOf is not defined

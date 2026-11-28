@@ -1,0 +1,384 @@
+- generic [active] [ref=f4e1]:
+  - link "Skip to content" [ref=f4e2] [cursor=pointer]:
+    - /url: "#app"
+  - generic [ref=f4e3]:
+    - complementary [ref=f4e4]:
+      - link "OnigiriDex Onigiri server database" [ref=f4e5] [cursor=pointer]:
+        - /url: "#/"
+        - generic [ref=f4e7]:
+          - generic [ref=f4e8]: OnigiriDex
+          - generic [ref=f4e9]: Onigiri server database
+      - navigation "Main" [ref=f4e10]:
+        - link "Home 1" [ref=f4e11] [cursor=pointer]:
+          - /url: "#/"
+          - text: Home
+          - generic [ref=f4e15]: "1"
+        - generic [ref=f4e16]: Explore
+        - link "Dungeons 2" [ref=f4e17] [cursor=pointer]:
+          - /url: "#/dungeons"
+          - text: Dungeons
+          - generic [ref=f4e21]: "2"
+        - link "Monsters 3" [ref=f4e22] [cursor=pointer]:
+          - /url: "#/monsters"
+          - text: Monsters
+          - generic [ref=f4e28]: "3"
+        - link "Bestiary 9" [ref=f4e29] [cursor=pointer]:
+          - /url: "#/bestiary"
+          - text: Bestiary
+          - generic [ref=f4e33]: "9"
+        - link "Items 4" [ref=f4e34] [cursor=pointer]:
+          - /url: "#/items"
+          - text: Items
+          - generic [ref=f4e38]: "4"
+        - link "Equipment" [ref=f4e39] [cursor=pointer]:
+          - /url: "#/gear"
+        - link "Partners" [ref=f4e43] [cursor=pointer]:
+          - /url: "#/partners"
+        - link "Field maps 5" [ref=f4e49] [cursor=pointer]:
+          - /url: "#/fields"
+          - text: Field maps
+          - generic [ref=f4e53]: "5"
+        - generic [ref=f4e54]: Tools
+        - link "Farm Finder 6" [ref=f4e55] [cursor=pointer]:
+          - /url: "#/farm"
+          - text: Farm Finder
+          - generic [ref=f4e59]: "6"
+        - link "Farm Planner" [ref=f4e60] [cursor=pointer]:
+          - /url: "#/plan"
+        - link "Dissolution" [ref=f4e64] [cursor=pointer]:
+          - /url: "#/dissolve"
+        - link "Build Planner 7" [ref=f4e68] [cursor=pointer]:
+          - /url: "#/build"
+          - text: Build Planner
+          - generic [ref=f4e71]: "7"
+        - link "Boss Simulator WIP" [ref=f4e72] [cursor=pointer]:
+          - /url: "#/sim"
+          - text: Boss Simulator
+          - 'generic "Work in progress: numbers are still being tuned" [ref=f4e78]': WIP
+        - link "Rotation DPS" [ref=f4e79] [cursor=pointer]:
+          - /url: "#/rotation"
+        - link "EXP Calculator" [ref=f4e84] [cursor=pointer]:
+          - /url: "#/exp"
+      - generic [ref=f4e87]:
+        - generic [ref=f4e88]: Recent
+        - button "Clear" [ref=f4e89] [cursor=pointer]
+      - generic [ref=f4e90]:
+        - link "Dimension Tear Sword - Echo of Gold Weapon Remove Dimension Tear Sword - Echo of Gold from recent" [ref=f4e91] [cursor=pointer]:
+          - /url: "#/item/5177"
+          - generic [ref=f4e92]: Dimension Tear Sword - Echo of Gold
+          - generic [ref=f4e93]: Weapon
+          - button "Remove Dimension Tear Sword - Echo of Gold from recent" [ref=f4e94]: ✕
+        - link "Axe of Blue Light -Eternal Ice- Weapon Remove Axe of Blue Light -Eternal Ice- from recent" [ref=f4e95] [cursor=pointer]:
+          - /url: "#/item/5540"
+          - generic [ref=f4e96]: Axe of Blue Light -Eternal Ice-
+          - generic [ref=f4e97]: Weapon
+          - button "Remove Axe of Blue Light -Eternal Ice- from recent" [ref=f4e98]: ✕
+        - link "Hajuma Evil Eye Axe - Chaos Pupil Weapon Remove Hajuma Evil Eye Axe - Chaos Pupil from recent" [ref=f4e99] [cursor=pointer]:
+          - /url: "#/item/5494"
+          - generic [ref=f4e100]: Hajuma Evil Eye Axe - Chaos Pupil
+          - generic [ref=f4e101]: Weapon
+          - button "Remove Hajuma Evil Eye Axe - Chaos Pupil from recent" [ref=f4e102]: ✕
+      - generic [ref=f4e103]:
+        - button "Light / dark" [ref=f4e104] [cursor=pointer]
+        - generic [ref=f4e108]: Data 2026-11-27 23:53made by Naoyuki
+    - generic [ref=f4e109]:
+      - banner [ref=f4e110]:
+        - generic [ref=f4e111]:
+          - link "Items" [ref=f4e112] [cursor=pointer]:
+            - /url: "#/items"
+          - text: /Weapon/Dimension Tear Sword - Inferno
+        - generic [ref=f4e113]:
+          - searchbox "Search" [ref=f4e117]
+          - generic [ref=f4e118]: Ctrl K
+      - main [ref=f4e119]:
+        - generic [ref=f4e120]:
+          - generic [ref=f4e124]:
+            - generic [ref=f4e125]: Weapon
+            - heading "Dimension Tear Sword - Inferno" [level=1] [ref=f4e126]
+            - generic [ref=f4e128]: 境壊ノ刀 紅焔
+            - generic [ref=f4e129]:
+              - generic [ref=f4e130]:
+                - text: Rank
+                - generic [ref=f4e131]: S
+              - generic [ref=f4e132]:
+                - text: Req. Lv
+                - generic [ref=f4e133]: "138"
+              - generic [ref=f4e134]:
+                - generic [ref=f4e135]: "1"
+                - text: recipe
+          - button "+ Farm Planner" [ref=f4e137] [cursor=pointer]
+        - generic [ref=f4e138]: "Shizuka explains: \"A weapon used by a man from a parallel dimension, remade just for you by Abe no Seimei. It seems like this is the original form of Shiro's Reckless Blade, and a physical one rather than light, which was the exposed and violent Ki circuitry of the Reckless Blade. Part of the circuitry has been rearranged in order to impart the power of fire for those competent enough to wield it."
+        - generic [ref=f4e139]:
+          - generic [ref=f4e140]:
+            - generic [ref=f4e141]: Loading 3D model…
+            - generic [ref=f4e143]:
+              - generic [ref=f4e144]: Drag to rotate · scroll to zoom
+              - button "Rotate" [ref=f4e145] [cursor=pointer]
+              - button "Effects" [pressed] [ref=f4e146] [cursor=pointer]
+              - button "Reset" [ref=f4e147] [cursor=pointer]
+          - generic [ref=f4e149]:
+            - heading "Stats grade 100" [level=2] [ref=f4e150]:
+              - text: Stats
+              - generic [ref=f4e151]: grade 100
+            - generic [ref=f4e152]:
+              - generic [ref=f4e153]:
+                - generic [ref=f4e154]: Type
+                - generic [ref=f4e155]: Sword
+                - generic [ref=f4e157]:
+                  - generic "Fire" [ref=f4e158]: 炎
+                  - generic "Slash" [ref=f4e159]: 斬
+              - generic [ref=f4e160]:
+                - generic [ref=f4e161]: Level
+                - generic [ref=f4e162]: "138"
+              - generic [ref=f4e163]:
+                - generic [ref=f4e164]: ATK (max)
+                - generic [ref=f4e165]: 32,288
+                - generic [ref=f4e166]: 30,146 – 32,288 · smelt & refine max
+              - generic [ref=f4e167]:
+                - generic [ref=f4e168]: ATK (base)
+                - generic [ref=f4e169]: 16,100
+                - generic [ref=f4e170]: 13,958 – 16,100 · grade 100
+            - generic [ref=f4e171]:
+              - heading "Effects 24" [level=3] [ref=f4e172]
+              - list [ref=f4e173]:
+                - listitem [ref=f4e174]: "60% chance on hit: adds 1× your Fire% of the damage as Fire damage (max 3.00M)"
+                - listitem [ref=f4e175]: Damage limit +200,000
+                - listitem [ref=f4e176]: Damage limit +200,000 — Level 140 or more
+                - listitem [ref=f4e177]: Damage limit +500,000 — 4+ Swords equipped
+                - listitem [ref=f4e178]: +50% Skill Force (Sword, rank 5+)
+                - listitem [ref=f4e179]: +20% Skill Force (Sword, rank 5+) — 3+ Swords equipped
+                - listitem [ref=f4e180]: +40% Skill Force (Sword, rank 5+) — 4+ Swords equipped
+                - listitem [ref=f4e181]: +3,000 ATK
+                - listitem [ref=f4e182]: +10% ATK — 3+ Swords equipped
+                - listitem [ref=f4e183]: +20% ATK — 4+ Swords equipped
+                - listitem [ref=f4e184]: +30% Affinity (Sword)
+                - listitem [ref=f4e185]: +10% Affinity (Sword) — 3+ Swords equipped
+                - listitem [ref=f4e186]: +30% Affinity (Sword) — 4+ Swords equipped
+                - listitem [ref=f4e187]: +15 Attack speed
+                - listitem [ref=f4e188]: +10 Attack speed — 4+ Swords equipped
+                - listitem [ref=f4e189]: +5 Crit rate
+                - listitem [ref=f4e190]: +10 Crit rate — 4+ Swords equipped
+                - listitem [ref=f4e191]: +15 Cooldown cut
+                - listitem [ref=f4e192]: +90 Fire
+                - listitem [ref=f4e193]: +130 Slash
+                - listitem [ref=f4e194]: Weapon durability loss −30%
+                - listitem [ref=f4e195]: −20 SP regen — 4+ Swords equipped
+                - listitem [ref=f4e196]: −130 Water
+                - listitem [ref=f4e197]: −150 Pierce
+        - heading "How to craft 1 recipe" [level=2] [ref=f4e198]:
+          - text: How to craft
+          - generic [ref=f4e199]: 1 recipe
+        - generic [ref=f4e201]:
+          - generic [ref=f4e202]:
+            - generic [ref=f4e203]: Recipe
+            - generic [ref=f4e204]:
+              - generic "Crafting cost" [ref=f4e205]: 4,280,000 ryou
+              - generic "Required crafting level" [ref=f4e206]:
+                - text: Craft Lv
+                - generic [ref=f4e207]: "7"
+          - generic [ref=f4e208]:
+            - text: Needs
+            - link "Dimension Tear Sword - Inferno Recipe" [ref=f4e209] [cursor=pointer]:
+              - /url: "#/item/2889"
+            - generic [ref=f4e212]: best 0.31%
+          - list [ref=f4e213]:
+            - listitem [ref=f4e214]:
+              - generic [ref=f4e215]: ×1
+              - link "Dimension Tear Sword - Shura" [ref=f4e216] [cursor=pointer]:
+                - /url: "#/item/5171"
+              - generic [ref=f4e219]: craftable
+            - listitem [ref=f4e220]:
+              - generic [ref=f4e221]: ×1
+              - link "Dimension Tear Sword - Shura" [ref=f4e222] [cursor=pointer]:
+                - /url: "#/item/5171"
+              - generic [ref=f4e225]: craftable
+            - listitem [ref=f4e226]:
+              - generic [ref=f4e227]: ×1
+              - link "Dimension Tear Sword - Shura" [ref=f4e228] [cursor=pointer]:
+                - /url: "#/item/5171"
+              - generic [ref=f4e231]: craftable
+            - listitem [ref=f4e232]:
+              - generic [ref=f4e233]: ×1
+              - link "Dimension Tear Sword - Shura" [ref=f4e234] [cursor=pointer]:
+                - /url: "#/item/5171"
+              - generic [ref=f4e237]: craftable
+            - listitem [ref=f4e238]:
+              - generic [ref=f4e239]: ×1
+              - link "Dimension Tear Sword - Shura" [ref=f4e240] [cursor=pointer]:
+                - /url: "#/item/5171"
+              - generic [ref=f4e243]: craftable
+            - listitem [ref=f4e244]:
+              - generic [ref=f4e245]: ×300
+              - link "Quality Powder" [ref=f4e246] [cursor=pointer]:
+                - /url: "#/item/2133"
+              - generic [ref=f4e249]: best 100%
+            - listitem [ref=f4e250]:
+              - generic [ref=f4e251]: ×100
+              - link "Exceptional Clove Oil" [ref=f4e252] [cursor=pointer]:
+                - /url: "#/item/2134"
+              - generic [ref=f4e255]: best 15%
+            - listitem [ref=f4e256]:
+              - generic [ref=f4e257]: ×10
+              - link "Infernal Helix" [ref=f4e258] [cursor=pointer]:
+                - /url: "#/item/5172"
+              - generic [ref=f4e261]: no drop
+            - listitem [ref=f4e262]:
+              - generic [ref=f4e263]: ×200
+              - link "Tusk of Hope" [ref=f4e264] [cursor=pointer]:
+                - /url: "#/item/1891"
+              - generic [ref=f4e267]: best 85%
+            - listitem [ref=f4e268]:
+              - generic [ref=f4e269]: ×70
+              - link "Fused Calamity Debris" [ref=f4e270] [cursor=pointer]:
+                - /url: "#/item/1990"
+              - generic [ref=f4e273]: best 12%
+            - listitem [ref=f4e274]:
+              - generic [ref=f4e275]: ×150
+              - link "Pure White Plume" [ref=f4e276] [cursor=pointer]:
+                - /url: "#/item/619"
+              - generic [ref=f4e279]: best 100%
+            - listitem [ref=f4e280]:
+              - generic [ref=f4e281]: ×50
+              - link "Fallen Cross" [ref=f4e282] [cursor=pointer]:
+                - /url: "#/item/632"
+              - generic [ref=f4e285]: best 73%
+            - listitem [ref=f4e286]:
+              - generic [ref=f4e287]: ×150
+              - link "Diseased Seedling" [ref=f4e288] [cursor=pointer]:
+                - /url: "#/item/596"
+              - generic [ref=f4e291]: best 71%
+            - listitem [ref=f4e292]:
+              - generic [ref=f4e293]: ×100
+              - link "Gloom Prophecy" [ref=f4e294] [cursor=pointer]:
+                - /url: "#/item/621"
+              - generic [ref=f4e297]: best 74%
+            - listitem [ref=f4e298]:
+              - generic [ref=f4e299]: ×50
+              - link "Seedling of Calamity" [ref=f4e300] [cursor=pointer]:
+                - /url: "#/item/634"
+              - generic [ref=f4e303]: best 58%
+            - listitem [ref=f4e304]:
+              - generic [ref=f4e305]: ×200
+              - link "Sinister Bones" [ref=f4e306] [cursor=pointer]:
+                - /url: "#/item/2244"
+              - generic [ref=f4e309]: best 100%
+            - listitem [ref=f4e310]:
+              - generic [ref=f4e311]: ×50
+              - link "Large Skull" [ref=f4e312] [cursor=pointer]:
+                - /url: "#/item/2245"
+              - generic [ref=f4e315]: best 6.3%
+            - listitem [ref=f4e316]:
+              - generic [ref=f4e317]: ×200
+              - link "Ornate Handle" [ref=f4e318] [cursor=pointer]:
+                - /url: "#/item/346"
+              - generic [ref=f4e321]: best 100%
+            - listitem [ref=f4e322]:
+              - generic [ref=f4e323]: ×50
+              - link "Peerless Crest" [ref=f4e324] [cursor=pointer]:
+                - /url: "#/item/347"
+              - generic [ref=f4e327]: best 6.3%
+            - listitem [ref=f4e328]:
+              - generic [ref=f4e329]: ×200
+              - link "Crest Fragment" [ref=f4e330] [cursor=pointer]:
+                - /url: "#/item/2323"
+              - generic [ref=f4e333]: best 100%
+            - listitem [ref=f4e334]:
+              - generic [ref=f4e335]: ×70
+              - link "Rotted Helm" [ref=f4e336] [cursor=pointer]:
+                - /url: "#/item/2324"
+              - generic [ref=f4e339]: best 6.3%
+            - listitem [ref=f4e340]:
+              - generic [ref=f4e341]: ×50
+              - link "Bloodied Face Guard" [ref=f4e342] [cursor=pointer]:
+                - /url: "#/item/348"
+              - generic [ref=f4e345]: best 2.1%
+            - listitem [ref=f4e346]:
+              - generic [ref=f4e347]: ×200
+              - link "Fletching" [ref=f4e348] [cursor=pointer]:
+                - /url: "#/item/293"
+              - generic [ref=f4e351]: best 100%
+            - listitem [ref=f4e352]:
+              - generic [ref=f4e353]: ×50
+              - link "Silk Bag" [ref=f4e354] [cursor=pointer]:
+                - /url: "#/item/294"
+              - generic [ref=f4e357]: best 11%
+            - listitem [ref=f4e358]:
+              - generic [ref=f4e359]: ×200
+              - link "Damp Gunpowder" [ref=f4e360] [cursor=pointer]:
+                - /url: "#/item/1291"
+              - generic [ref=f4e363]: best 100%
+            - listitem [ref=f4e364]:
+              - generic [ref=f4e365]: ×50
+              - link "Sparkler Fireworks" [ref=f4e366] [cursor=pointer]:
+                - /url: "#/item/1292"
+              - generic [ref=f4e369]: best 11%
+            - listitem [ref=f4e370]:
+              - generic [ref=f4e371]: ×300
+              - link "Cutting Stone" [ref=f4e372] [cursor=pointer]:
+                - /url: "#/item/190"
+              - generic [ref=f4e375]: best 66%
+            - listitem [ref=f4e376]:
+              - generic [ref=f4e377]: ×300
+              - link "Fortitude Stone" [ref=f4e378] [cursor=pointer]:
+                - /url: "#/item/183"
+              - generic [ref=f4e381]: best 11%
+            - listitem [ref=f4e382]:
+              - generic [ref=f4e383]: ×300
+              - link "Miracle Stone" [ref=f4e384] [cursor=pointer]:
+                - /url: "#/item/184"
+              - generic [ref=f4e387]: best 66%
+            - listitem [ref=f4e388]:
+              - generic [ref=f4e389]: ×200
+              - link "Aidama" [ref=f4e390] [cursor=pointer]:
+                - /url: "#/item/163"
+              - generic [ref=f4e393]: best 99%
+            - listitem [ref=f4e394]:
+              - generic [ref=f4e395]: ×100
+              - link "Inferno Stone" [ref=f4e396] [cursor=pointer]:
+                - /url: "#/item/185"
+              - generic [ref=f4e399]: best 66%
+            - listitem [ref=f4e400]:
+              - generic [ref=f4e401]: ×100
+              - link "Ice Stone" [ref=f4e402] [cursor=pointer]:
+                - /url: "#/item/186"
+              - generic [ref=f4e405]: best 66%
+            - listitem [ref=f4e406]:
+              - generic [ref=f4e407]: ×100
+              - link "Thunder Stone" [ref=f4e408] [cursor=pointer]:
+                - /url: "#/item/187"
+              - generic [ref=f4e411]: best 66%
+            - listitem [ref=f4e412]:
+              - generic [ref=f4e413]: ×100
+              - link "Light Stone" [ref=f4e414] [cursor=pointer]:
+                - /url: "#/item/188"
+              - generic [ref=f4e417]: best 66%
+            - listitem [ref=f4e418]:
+              - generic [ref=f4e419]: ×100
+              - link "Dark Stone" [ref=f4e420] [cursor=pointer]:
+                - /url: "#/item/189"
+              - generic [ref=f4e423]: best 66%
+            - listitem [ref=f4e424]:
+              - generic [ref=f4e425]: ×150
+              - link "Ivory Gem" [ref=f4e426] [cursor=pointer]:
+                - /url: "#/item/265"
+              - generic [ref=f4e429]: best 21%
+            - listitem [ref=f4e430]:
+              - generic [ref=f4e431]: ×150
+              - link "Obsidian Gem" [ref=f4e432] [cursor=pointer]:
+                - /url: "#/item/266"
+              - generic [ref=f4e435]: best 13%
+        - navigation [ref=f4e436]:
+          - link "Dungeons0" [ref=f4e437] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters"
+        - generic [ref=f4e439]:
+          - link "All" [ref=f4e440] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters&d=-1"
+          - link "Normal" [ref=f4e441] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters&d=0"
+          - link "Hard" [ref=f4e442] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters&d=1"
+          - link "Hell" [ref=f4e443] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters&d=2"
+          - link "Oni" [ref=f4e444] [cursor=pointer]:
+            - /url: "#/item/5173?tab=monsters&d=3"
+        - generic [ref=f4e445]: No monster drops this

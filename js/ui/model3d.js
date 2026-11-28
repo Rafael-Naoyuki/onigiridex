@@ -11,7 +11,7 @@
    - node extras.efx: an effect mesh from the weapon's .kfx {t0, t1, speed, fin, fout, per, fx}
    - scene extras.ptc: particle systems from .pt2 files {t0, t1, speed, per, m (4x4), mats, emit} */
 const modelOf = i => (window.WEAPON_MODELS || {})[D.wid?.[i]];
-const M3D = load("od2-m3d", {spin: true, anim: true});
+const M3D = load("od2-m3d", {spin: true, anim: false});
 let _three = null;
 function loadThree(){
   if (_three) return _three;
@@ -22,7 +22,7 @@ const m3dBtn = (k, label, on, tip) => `<button type="button" class="btn sm m3d-t
 const modelPanel = i => modelOf(i) ? `<div class="m3d" id="m3d" data-model="${modelOf(i)}">
   <div class="m3d-stage"><div class="m3d-load">Loading 3D model…</div></div>
   <div class="m3d-bar"><span class="m3d-hint">Drag to rotate · scroll to zoom</span><span class="sp"></span>
-    ${m3dBtn("spin", "Rotate", M3D.spin, "Turn the weapon around by itself")}
+    ${m3dBtn("spin", "Rotate", M3D.spin, "Turn the weapon around by itself")}${m3dBtn("anim", "Effects", M3D.anim, "Glow and effects from the game (loads more data)")}
     <button type="button" class="btn sm" data-m3d="reset" title="Back to the starting view">Reset</button></div></div>` : "";
 
 // additive glow that leaves the canvas alpha alone: the canvas is transparent, so adding to alpha would paint dark halos
@@ -95,7 +95,7 @@ function makeParticles(T, def, scene){
       vertexShader: "attribute float size; attribute vec4 color; varying vec4 vC; uniform float uScale; void main(){ vC = color; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = size * uScale / max(-mv.z, 0.01); gl_Position = projectionMatrix * mv; }",
       fragmentShader: "uniform sampler2D map; uniform float uHas; varying vec4 vC; void main(){ vec4 t = uHas > 0.5 ? texture2D(map, gl_PointCoord) : vec4(1.0, 1.0, 1.0, 1.0 - smoothstep(0.3, 0.5, length(gl_PointCoord - 0.5))); vec4 c = t * vC; if (c.a < 0.01) discard; gl_FragColor = c; }",
       transparent: true, depthWrite: false, blending: T.NormalBlending});
-    if (add) addBlend(T, mat);
+    addBlend(T, mat);   // weapon effects only add light
     if (m.tex) new T.TextureLoader().load(`models/ptc/${m.tex}`, t => { mat.uniforms.map.value = t; mat.uniforms.uHas.value = 1; });
     const pts = new T.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
     return {m, mat, pts, geo, pos, col, size, live: []};
@@ -155,58 +155,76 @@ function mountModel(){
     const ctl = new T.OrbitControls(cam, r.domElement); ctl.enableDamping = true; ctl.autoRotate = M3D.spin; ctl.autoRotateSpeed = 2;
     let home = null, alive = true, groups = [], systems = [], period = 0, clock = 0, last = performance.now(), root = null;
     const pxScale = () => r.getPixelRatio() * h() / (2 * Math.tan(cam.fov * Math.PI / 360));
-    new T.GLTFLoader().load(`models/${box.dataset.model}.glb`, g => {
+    const loader = new T.GLTFLoader(), assets = {}, mdl = box.dataset.model;
+    const hasFx = (window.WEAPON_FX || []).includes(mdl);
+    // one group per script: the weapon itself, then each effect
+    const mk = (obj, fx, tl) => {
+      const modes = {};
+      for (const e of (fx?.init || []).concat(fx?.ev || [])) if (["add", "unlit", "nodepth"].includes(e[1])) (modes[e[2]] = modes[e[2]] || {})[e[1]] = 1;
+      const gr = {obj, fx, tl, mats: [], base: {pos: obj.position.clone(), quat: obj.quaternion.clone(), scale: obj.scale.clone()}, spin: new T.Euler()};
+      obj.traverse(o => {
+        if (!o.isMesh) return;
+        let mt = o.material; const x = Object.assign({}, mt.userData || {}, modes[mt.name] || {}, modes["*"] || {});
+        if (x.unlit || x.add || tl){
+          const b = new T.MeshBasicMaterial({map: mt.map, color: mt.color.clone(), side: T.DoubleSide, transparent: true, alphaTest: mt.alphaTest});
+          b.name = mt.name; mt = b;
+        }
+        // effect meshes: the additive ones are the glows seen in game; the normal-blend ones (dark auras, smoke) are left out
+        if (tl && !x.add){ o.visible = false; o.userData.skip = 1; return; }
+        // in the game the weapon effects only add light (no dark smoke or shadows), so every effect mesh is additive
+        if (x.add || tl) addBlend(T, mt);
+        if (tl && x.tex) mt.map = fxTex(x.tex);   // effect textures are shared files, loaded once
+        if (mt.map && (fx || tl)){ mt.map = mt.map.clone(); mt.map.wrapS = mt.map.wrapT = T.RepeatWrapping; mt.map.needsUpdate = true; }
+        if (mt.emissive && !mt.emissiveMap) mt.emissive.setRGB(0, 0, 0);
+        if (tl) o.renderOrder = 2;
+        o.material = mt;
+        gr.mats.push({mt, name: mt.name, base: mt.color.clone(), add: !!(x.add || tl)});
+      });
+      groups.push(gr); return gr;
+    };
+    const texCache = {};
+    const fxTex = n => { if (!texCache[n]){ const t = texCache[n] = new T.TextureLoader().load(`models/fx/tex/${n}`); t.flipY = false; t.encoding = T.sRGBEncoding; } return texCache[n]; };
+    const asset = src => assets[src] || (assets[src] = src.endsWith(".json")
+      ? fetch(`models/fx/${src}`).then(r => r.json())
+      : fetch(`models/fx/${src}`).then(r => r.arrayBuffer()).then(ab => new Promise((ok, no) => new T.GLTFLoader().parse(ab, "models/fx/", ok, no))));
+    let fxOn = false, fxObjs = [];
+    async function loadFx(){
+      if (fxOn || !hasFx || !root) return; fxOn = true;
+      const man = await fetch(`models/${mdl}.fx.json`).then(r => r.json()).catch(() => null);
+      if (!man || !fxOn || !alive) return;
+      groups[0].fx = man.fx || null;
+      await Promise.all((man.e || []).map(async e => {
+        const tl = {t0: e.t0, t1: e.t1, speed: e.speed, fin: e.fin, fout: e.fout, per: e.per};
+        const a = await asset(e.src).catch(() => null);
+        if (!a || !fxOn || !alive) return;
+        if (e.src.endsWith(".json")){ systems.push(makeParticles(T, Object.assign({}, a, tl, {m: e.m}), scene)); return; }
+        const obj = new T.Group(); obj.applyMatrix4(new T.Matrix4().fromArray(e.m));
+        const c = a.scene.clone(true); obj.add(c); root.add(obj); fxObjs.push(obj);
+        let fx = null; c.traverse(o => { if (!fx && o.userData?.fx) fx = o.userData.fx; });
+        mk(obj, fx, tl);
+      }));
+      period = Math.max(1, ...groups.map(g => g.tl?.per || 0), ...systems.map(p => p.def.per || 0), groups[0].fx?.loop?.[1] || groups[0].fx?.len || 0);
+      clock = 0;
+    }
+    function unloadFx(){
+      fxOn = false;
+      for (const o of fxObjs) o.parent?.remove(o);
+      for (const ps of systems) for (const g of ps.groups){ scene.remove(g.pts); g.geo.dispose(); g.mat.dispose(); }
+      fxObjs = []; systems = []; groups = groups.slice(0, 1);
+      const w0 = groups[0]; if (w0){ w0.fx = null; for (const m of w0.mats){ m.mt.color.copy(m.base); if (m.mt.emissive && !m.mt.emissiveMap) m.mt.emissive.setRGB(0, 0, 0); } }
+    }
+    loader.load(`models/${mdl}.glb`, g => {
       if (!alive) return;
       const m = root = g.scene; m.rotation.x = Math.PI / 2;               // the game's long axis is Z; stand it up
-      const sx = m.userData || {};
-      // one group per script: the weapon itself, then each effect mesh
-      const mk = (obj, fx, tl) => {
-        const modes = {};
-        for (const e of (fx?.init || []).concat(fx?.ev || [])) if (["add", "unlit", "nodepth"].includes(e[1])) (modes[e[2]] = modes[e[2]] || {})[e[1]] = 1;
-        const gr = {obj, fx, tl, mats: [], base: {pos: obj.position.clone(), quat: obj.quaternion.clone(), scale: obj.scale.clone()}, spin: new T.Euler()};
-        obj.traverse(o => {
-          if (!o.isMesh) return;
-          if (!tl && owned.has(o)) return;
-          let mt = o.material; const x = Object.assign({}, mt.userData || {}, modes[mt.name] || {}, modes["*"] || {});
-          if (x.unlit || x.add || tl){
-            const b = new T.MeshBasicMaterial({map: mt.map, color: mt.color, side: T.DoubleSide, transparent: mt.transparent || !!tl, alphaTest: mt.alphaTest});
-            b.name = mt.name; mt = b;
-          }
-          if (x.add) addBlend(T, mt);
-          if (x.nodepth || tl) mt.depthWrite = false;
-          if (mt.map && fx){ mt.map = mt.map.clone(); mt.map.wrapS = mt.map.wrapT = T.RepeatWrapping; mt.map.needsUpdate = true; }
-          if (mt.emissive && !mt.emissiveMap) mt.emissive.setRGB(0, 0, 0);
-          if (tl) o.renderOrder = 2;
-          o.material = mt;
-          gr.mats.push({mt, name: mt.name, base: mt.color.clone(), add: !!x.add});
-        });
-        groups.push(gr); return gr;
-      };
-      const effects = [];
-      m.traverse(o => { if (o.userData?.efx) effects.push(o); });
-      const owned = new Set(); for (const o of effects) o.traverse(x => owned.add(x));
-      mk(m, sx.fx || null, null);
-      for (const o of effects) mk(o, o.userData.efx.fx, o.userData.efx);
-      period = Math.max(1, ...effects.map(o => o.userData.efx.per || 0), ...(sx.ptc || []).map(p => p.per || 0), sx.fx?.loop?.[1] || sx.fx?.len || 0);
-      // size the view on the weapon only (effects can be much bigger)
-      for (const o of effects) o.visible = false;
+      mk(m, null, null);
       const b = new T.Box3().setFromObject(m), c = b.getCenter(new T.Vector3()), s = b.getSize(new T.Vector3());
       m.position.sub(c); scene.add(m); m.updateMatrixWorld(true);
-      for (const p of sx.ptc || []) systems.push(makeParticles(T, p, scene));
       const d = Math.max(s.x, s.y, s.z) / (2 * Math.tan(cam.fov * Math.PI / 360)) * 1.15;
       home = new T.Vector3(d * 0.55, d * 0.15, d * 0.85); cam.position.copy(home); cam.near = d / 100; cam.far = d * 20; cam.updateProjectionMatrix();
       ctl.target.set(0, 0, 0); ctl.update();
-      const any = sx.fx || effects.length || systems.length;
-      // effects off: stand still at the brightest moment (effect meshes on, glow at its peak)
-      let best = 0, bestV = -1;
-      if (any) for (let t = 0; t <= period; t += Math.max(period / 80, 16)){ let v = 0;
-        for (const gr of groups){ const et = gr.tl ? efxTime(gr.tl, t) : {st: t, a: 1}; if (!et) continue; v += gr.tl ? 1 + et.a : 0;
-          if (gr.fx){ const st = fxState(gr.fx, et.st); for (const k in st.d) v += st.d[k] ? (st.d[k][0] + st.d[k][1] + st.d[k][2]) * et.a : 0; for (const k in st.e) v += st.e[k] ? (st.e[k][0] + st.e[k][1] + st.e[k][2]) : 0; } }
-        if (v > bestV){ bestV = v; best = t; } }
-      box.dataset.still = best;
       stage.innerHTML = ""; stage.appendChild(r.domElement);
-      if (M3D.anim) clock = 0; else { clock = best; warm(best); }
-      apply(clock, 0);
+      const fb = box.querySelector('[data-m3d="anim"]'); if (fb) fb.hidden = !hasFx;
+      if (M3D.anim && hasFx) loadFx().catch(() => {});
     }, undefined, () => { stage.innerHTML = `<div class="m3d-load">Could not load the model.</div>`; });
     function apply(t, dt){
       for (const gr of groups){
@@ -260,7 +278,7 @@ function mountModel(){
       if (!alive) return;
       if (!box.isConnected){ _m3dStop && _m3dStop(); _m3dStop = null; return; }
       const dt = Math.min((now - last) / 1000, 0.1); last = now;
-      if (M3D.anim && groups.length){ clock += dt * 1000; apply(clock, dt); }
+      if (fxOn){ clock += dt * 1000; apply(clock, dt); }
       for (const ps of systems) for (const g of ps.groups) g.mat.uniforms.uScale.value = pxScale();
       ctl.update(); r.render(scene, cam); requestAnimationFrame(loop);
     };
@@ -269,7 +287,7 @@ function mountModel(){
     const tog = (k, fn) => { const b = box.querySelector(`[data-m3d="${k}"]`); b.onclick = () => { M3D[k] = !M3D[k]; store("od2-m3d", M3D);
       b.classList.toggle("on", M3D[k]); b.setAttribute("aria-pressed", M3D[k]); fn(M3D[k]); }; };
     tog("spin", on => ctl.autoRotate = on);
-    if (box.querySelector('[data-m3d="anim"]')) tog("anim", on => { if (!groups.length) return; if (on) return; const s = +box.dataset.still || 0; for (const ps of systems) for (const g of ps.groups) g.live = []; clock = s; warm(s); apply(s, 0); });
+    tog("anim", on => on ? loadFx() : unloadFx());
     box.querySelector('[data-m3d="reset"]').onclick = () => { if (home){ cam.position.copy(home); ctl.target.set(0, 0, 0); ctl.update(); } };
     _m3dStop = () => { alive = false; ro.disconnect(); ctl.dispose(); r.dispose(); r.forceContextLoss?.(); };
   }).catch(() => { stage.innerHTML = `<div class="m3d-load">3D viewer not available.</div>`; });
